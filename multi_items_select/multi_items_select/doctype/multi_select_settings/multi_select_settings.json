@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-10-10 16:11:30.125099",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "section_break_2",
+  "fetch_so_reserved_qty",
+  "column_break_2",
+  "disable_original_add_multi",
+  "sellable_qty_action"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "description": "Fetch Sales Order reserved qty in each items table item",
+   "fieldname": "fetch_so_reserved_qty",
+   "fieldtype": "Check",
+   "label": "Fetch SO Reserved Qty"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "if checked the original \"add multi\" button will be removed form SO items table",
+   "fieldname": "disable_original_add_multi",
+   "fieldtype": "Check",
+   "label": "Disable Original Add Multi"
+  },
+  {
+   "default": "1",
+   "description": "if checked this will add custom \"add multi\" to SO items table",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Nothing",
+   "description": "Action to take if the Item (Actual Qty) minus (Reserved Qty) is higher than the inserted Item Qty",
+   "fieldname": "sellable_qty_action",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sellable Qty Validation ",
+   "options": "Nothing\nWarn\nStop",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-10-10 17:19:35.359369",
+ "modified_by": "Administrator",
+ "module": "Multi Items Select",
+ "name": "Multi Select Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

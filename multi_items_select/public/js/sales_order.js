@@ -1,48 +1,151 @@
 
 frappe.ui.form.on("Sales Order", {
     setup: function (frm) {
-        cur_frm.mia_add_item_row = function (item_code) {
-            frappe.prompt(
+        cur_frm.mis_add_item_row = function (item_code, item_name, warehouse, actual_qty, reserved_qty) {
+            const sellable_qty = actual_qty - reserved_qty;
+            let qd = new frappe.ui.Dialog(
                 {
-                    fieldname: "qty",
-                    fieldtype: "Float",
-                    label: "Qty",
-                    default: 1,
-                    reqd: 1,
 
-                },
-                function (data) {
+                    title: __("Select Insert Quantity"),
+                    fields: [
+                        {
+                            fieldname: "qty",
+                            fieldtype: "Float",
+                            label: "Qty",
+                            default: 1,
+                            reqd: 1,
 
-                    let itemsGrid = frm.get_field("items").grid;
-                    let d = null;
-
-                    frappe.run_serially([
-                        () => d = itemsGrid.add_new_row(),
-                        () => frappe.timeout(0.2),
-                        () => {
-                            let args = {};
-                            args["item_code"] = item_code;
-                            args["qty"] = data.qty;
-                            return frappe.model.set_value(d.doctype, d.name, args);
+                        },
+                        {
+                            fieldtype: "Section Break",
+                        },
+                        {
+                            fieldname: "item_code",
+                            fieldtype: "Link",
+                            label: "Item Code",
+                            options: "Item",
+                            read_only: 1,
+                        },
+                        {
+                            fieldtype: "Column Break",
+                        },
+                        {
+                            fieldname: "item_name",
+                            fieldtype: "Data",
+                            label: "Item Name",
+                            read_only: 1,
+                        },
+                        {
+                            fieldtype: "Section Break",
+                        },
+                        {
+                            fieldname: "warehouse",
+                            fieldtype: "Link",
+                            label: "Warehouse",
+                            options: "Warehouse",
+                            read_only: 1,
+                        },
+                        {
+                            fieldtype: "Column Break",
+                        },
+                        {
+                            fieldname: "actual_qty",
+                            fieldtype: "Float",
+                            label: "Actual Qty",
+                            read_only: 1,
+                        },
+                        {
+                            fieldtype: "Section Break",
+                        },
+                        {
+                            fieldname: "reserved_qty",
+                            fieldtype: "Float",
+                            label: "Reserved Qty",
+                            read_only: 1,
+                        },
+                        {
+                            fieldtype: "Column Break",
+                        },
+                        {
+                            fieldname: "sellable_qty",
+                            fieldtype: "Float",
+                            label: "Sellable Qty",
+                            read_only: 1,
                         }
-                    ]);
-                    frappe.show_alert(__("Master Addons: Item Added!"));
+                    ],
+                    primary_action_label: __("Insert Item"),
+                    primary_action: async function (values) {
+                        const itemsGrid = frm.get_field("items").grid;
+                        let d = null;
+                        
+                        // validate sellable qty
+                        let mis_settings = await frappe.call({
+                            method: "multi_items_select.api.get_settings",
+                        });
+                        mis_settings = mis_settings.message;
+                        if(values.qty > sellable_qty) {
+                            switch(mis_settings.sellable_qty_action){
+                                case "Allow":
+                                    break;
+                                case "Warn":
+                                    frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                    break;
+                                case "Stop":
+                                    frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                    return;
+                            }
+                        }
+                        
+                        frappe.run_serially([
+                            () => d = itemsGrid.add_new_row(),
+                            () => frappe.timeout(0.2),
+                            () => {
+                                let args = {};
+                                args["item_code"] = item_code;
+                                args["qty"] = values.qty;
+                                return frappe.model.set_value(d.doctype, d.name, args);
+                            }
+                        ]);
+                        frappe.show_alert(__("Multi Item Select: Item Added!"));
+                        qd.hide();
+                    }
+
+
                 },
-                __("Select Quantity"),
-                __("Insert")
+
             );
+            qd.show();
+            qd.set_value("item_code", item_code);
+            qd.set_value("item_name", item_name);
+            qd.set_value("warehouse", warehouse);
+            qd.set_value("actual_qty", actual_qty);
+            qd.set_value("reserved_qty", reserved_qty);
+            qd.set_value("sellable_qty", actual_qty - reserved_qty);
         }
     },
-    refresh: function (frm) {
-        var mulBtn = frm.fields_dict["items"].grid.grid_buttons.find(".grid-add-multiple-rows");
-        if (mulBtn) {
-            // mulBtn.remove();
+    refresh: async function (frm) {
+        const itemsGrid = frm.get_field("items").grid;
+
+        // get multi items select settings
+        let mis_settings = await frappe.call({
+            method: "multi_items_select.api.get_settings",
+        });
+        mis_settings = mis_settings.message;
+
+        if (mis_settings.enabled == 0 || frm.doc.docstatus === 1) {
+            return;
+        }
+
+        if (mis_settings.disable_original_add_multi) {
+            if (itemsGrid.grid_buttons.find(".grid-add-multiple-rows")) {
+                itemsGrid.grid_buttons.find(".grid-add-multiple-rows").remove();
+            }
         }
 
         frm.fields_dict["items"].grid.add_custom_button(__("Multi Insert"), function () {
 
             var d = new frappe.ui.Dialog({
-                title: __("Master Addons: Multi Insert"),
+                title: __("Multi Item Select: Multi Insert"),
                 type: "large",
                 fields: [
                     {
@@ -65,7 +168,7 @@ frappe.ui.form.on("Sales Order", {
                                         callback: function (r) {
                                             if (r.message) {
                                                 let data_rows = "";
-                                                d.mia_search_data = r.message;
+                                                // d.mis_search_data = r.message;
 
                                                 if (r.message.length > 0) {
                                                     d.set_df_property("search_results", "hidden", false);
@@ -82,7 +185,7 @@ frappe.ui.form.on("Sales Order", {
                                                     data_rows += repl(
                                                         `<tr 
                                                                 class="etms-add-multi__tb_tr"
-                                                                onclick="cur_frm.mia_add_item_row(\`%(item_code)s\`)">
+                                                                onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(item_name)s\`, \`%(warehouse)s\`, \`%(actual_qty)s\`, \`%(reserved_qty)s\`)">
                                                             <td>
                                                                 <div class="etms-add-multi__row">
                                                                     <p>${data.item_code}</p>
@@ -106,7 +209,11 @@ frappe.ui.form.on("Sales Order", {
                                                             </td>
                                                         </tr>`,
                                                         {
-                                                            item_code: data.item_code
+                                                            item_code: data.item_code,
+                                                            item_name: data.item_name,
+                                                            warehouse: data.warehouse,
+                                                            actual_qty: data.actual_qty,
+                                                            reserved_qty: data.reserved_qty,
                                                         }
                                                     );
                                                 }
@@ -206,5 +313,57 @@ frappe.ui.form.on("Sales Order", {
         });
 
 
+    },
+    before_submit: function (frm) {
+        if (!frm.doc.set_warehouse) {
+            return;
+        }
+        let so_items = [];
+
+        for (let i = 0; i < frm.doc.items.length; i++) {
+            so_items.push(frm.doc.items[i].item_code);
+        }
+
+        frappe.call({
+            method: "multi_items_select.api.get_items_reserved_qty",
+            args: { item_codes: so_items, source_warehouse: frm.doc.set_warehouse },
+            callback: function (r) {
+                if (!r.message) {
+                    return;
+                }
+                for (let i = 0; i < r.message.length; i++) {
+                    debugger
+                    // r.message[i].reserved_qty = 45;
+                    if (frm.doc.items[i].item_code == r.message[i].item_code) {
+                        let limit_qty = r.message[i].reserved_qty + frm.doc.items[i].qty;
+                        if (limit_qty > r.message[i].actual_qty) {
+                            setTimeout(() => {
+                                frappe.throw(`Can't submit, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
+                                Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
+                                is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
+                                 Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
+                            `, "Multi Items Select");
+                            }, 2000);
+                            frappe.validated = false;
+                            frappe.model.set_value(
+                                "Sales Order Item",
+                                frm.doc.items[i].name,
+                                "mis_sellable_qty", r.message[i].actual_qty - r.message[i].reserved_qty,
+                                "Float",
+                                true
+                            );
+                            frappe.model.set_value(
+                                "Sales Order Item",
+                                frm.doc.items[i].name,
+                                "mis_reserved_qty", r.message[i].reserved_qty,
+                                "Float",
+                                true
+                            );
+                            // frm.save_or_update();
+                        }
+                    }
+                }
+            }
+        });
     }
 });

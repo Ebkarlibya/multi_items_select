@@ -187,3 +187,15 @@ doctype_js = {
 # auth_hooks = [
 #	"multi_items_select.auth.validate"
 # ]
+
+fixtures = [
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["fieldname", "in", (
+                "mis_sellable_qty",
+                "mis_reserved_qty"
+            )]
+        ]
+    }
+]
