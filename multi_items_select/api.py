@@ -9,8 +9,10 @@ def get_settings():
 
 @frappe.whitelist(allow_guest=False)
 def get_items_reserved_qty():
-    if frappe.db.get_value("Multi Select Settings", None, fieldname="fetch_so_items_reserved_qty") == "0":
-        return False
+    # mis_settings = frappe.db.get_single("Multi Select Settings")
+    # if mis_settings.sellable_qty_action == "Stop" and mis_settings.sellable_bypass_role not in frappe.get_roles():
+        
+    #     return False
 
     source_warehouse = frappe.form_dict.get('source_warehouse')
     raw_codes = frappe.form_dict.get('item_codes')
@@ -44,7 +46,7 @@ def get_multiple_items():
     data = frappe.get_all(
         "Bin",
         fields=["item_code", "warehouse", "reserved_qty",
-                "actual_qty", "projected_qty"],
+                "actual_qty", "projected_qty", "stock_uom"],
         filters=filters_cond,
         order_by="warehouse asc, item_code asc",
         limit=100

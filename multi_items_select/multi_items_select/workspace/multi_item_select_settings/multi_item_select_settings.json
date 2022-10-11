@@ -29,16 +29,16 @@
    "type": "Link"
   }
  ],
- "modified": "2022-10-10 16:16:53.495873",
+ "modified": "2022-10-11 10:38:40.814178",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Item Select Settings",
  "owner": "Administrator",
- "parent_page": "Assets",
+ "parent_page": "",
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 4.0,
+ "sequence_id": 1.0,
  "shortcuts": [],
  "title": "Multi Item Select Settings"
 }
