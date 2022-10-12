@@ -381,11 +381,12 @@ frappe.ui.form.on("Sales Order", {
                                 if (!can_bypass.message) {
                                     frappe.validated = true;
                                     setTimeout(() => {
-                                        frappe.msgprint(`Warning, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
-                                            Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
-                                            is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
-                                            Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
-                                        `, "Multi Items Select");
+                                        frappe.msgprint(`
+                                        <p style="font-size: 12px; line-height: 14px;">
+                                            Warning, Packed Item Qty: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
+                                            is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
+                                        </p>
+                                        `, "Warning");
                                     }, 1500);
 
                                 }
@@ -403,11 +404,12 @@ frappe.ui.form.on("Sales Order", {
                                 if (!can_bypass.message) {
                                     frappe.validated = false;
                                     setTimeout(() => {
-                                        frappe.throw(`Can't submit, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
-                                            Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
-                                            is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
-                                            Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
-                                        `, "Multi Items Select");
+                                        frappe.msgprint(`
+                                        <p style="font-size: 12px; line-height: 14px;">
+                                            Can't submit, Item Qty: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
+                                            is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
+                                        </p>
+                                        `, "Warning");
                                     }, 1500);
 
                                 }
@@ -458,11 +460,12 @@ frappe.ui.form.on("Sales Order", {
                             if (!can_bypass.message) {
                                 frappe.validated = true;
                                 setTimeout(() => {
-                                    frappe.msgprint(`Warning, Packed Item: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
-                                        Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.packed_items[i].qty}) 
-                                        is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
-                                        Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
-                                    `, "Multi Items Select");
+                                    frappe.msgprint(`
+                                    <p style="font-size: 12px; line-height: 14px;">
+                                        Warning, Packed Item Qty: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
+                                        is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
+                                    </p>
+                                    `, "Warning");
                                 }, 1500);
     
                             }
@@ -479,11 +482,12 @@ frappe.ui.form.on("Sales Order", {
                             if (!can_bypass.message) {
                                 frappe.validated = false;
                                 setTimeout(() => {
-                                    frappe.throw(`Can't submit, Packed Item: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
-                                        Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.packed_items[i].qty}) 
-                                        is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
-                                        Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
-                                    `, "Multi Items Select");
+                                    frappe.msgprint(`
+                                    <p style="font-size: 12px; line-height: 14px;">
+                                        Can't submit, Packed Item Qty: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
+                                        is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
+                                    </p>
+                                    `, "Warning");
                                 }, 1500);
     
                             }
