@@ -342,18 +342,18 @@ frappe.ui.form.on("Sales Order", {
             method: "multi_items_select.api.get_settings",
         });
         mis_settings = mis_settings.message;
-        
+
         let can_bypass = await frappe.call({
             method: "multi_items_select.api.get_can_bypass",
             freeze: true,
         });
 
         let so_items = [];
-        
+
         for (let i = 0; i < frm.doc.items.length; i++) {
             so_items.push(frm.doc.items[i].item_code);
         }
-        
+
 
         // so items
         frappe.call({
@@ -367,43 +367,68 @@ frappe.ui.form.on("Sales Order", {
                     // r.message[i].reserved_qty = 45;
                     if (frm.doc.items[i].item_code == r.message[i].item_code) {
                         let limit_qty = r.message[i].reserved_qty + frm.doc.items[i].qty;
-                        if (limit_qty > r.message[i].actual_qty && mis_settings.sellable_qty_action == "Stop") {
-                            frappe.model.set_value(
-                                "Sales Order Item",
-                                frm.doc.items[i].name,
-                                {
-                                    mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
-                                    mis_reserved_qty: r.message[i].reserved_qty
+                        if (limit_qty > r.message[i].actual_qty) {
+                            if (mis_settings.sellable_qty_action == "Warn") {
+                                frappe.model.set_value(
+                                    "Sales Order Item",
+                                    frm.doc.items[i].name,
+                                    {
+                                        mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
+                                        mis_reserved_qty: r.message[i].reserved_qty
+                                    }
+                                );
+
+                                if (!can_bypass.message) {
+                                    frappe.validated = true;
+                                    setTimeout(() => {
+                                        frappe.msgprint(`Warning, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
+                                            Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
+                                            is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
+                                            Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
+                                        `, "Multi Items Select");
+                                    }, 1500);
+
                                 }
-                            );
-    
-                            if (!can_bypass.message) {
-                                frappe.validated = false;
-                                setTimeout(() => {
-                                    frappe.throw(`Can't submit, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
-                                        Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
-                                        is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
-                                        Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
-                                    `, "Multi Items Select");
-                                }, 1500);
-    
                             }
+                            else if (mis_settings.sellable_qty_action == "Stop") {
+                                frappe.model.set_value(
+                                    "Sales Order Item",
+                                    frm.doc.items[i].name,
+                                    {
+                                        mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
+                                        mis_reserved_qty: r.message[i].reserved_qty
+                                    }
+                                );
+
+                                if (!can_bypass.message) {
+                                    frappe.validated = false;
+                                    setTimeout(() => {
+                                        frappe.throw(`Can't submit, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
+                                            Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
+                                            is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
+                                            Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
+                                        `, "Multi Items Select");
+                                    }, 1500);
+
+                                }
+                            }
+
                         }
                     }
                 }
             }
         });
 
-        
-        
+
+
         // so packed items
-        if(frm.doc.packed_items) {
+        if (frm.doc.packed_items) {
             let so_packages = [];
-            
+
             for (let i = 0; i < frm.doc.packed_items.length; i++) {
                 so_packages.push(frm.doc.packed_items[i].item_code);
             }
-            
+
             let r = await frappe.call({
                 method: "multi_items_select.api.get_items_reserved_qty",
                 args: { item_codes: so_packages, source_warehouse: frm.doc.set_warehouse },
@@ -418,27 +443,53 @@ frappe.ui.form.on("Sales Order", {
                 // r.message[i].reserved_qty = 45;
                 if (frm.doc.packed_items[i].item_code == r.message[i].item_code) {
                     let limit_qty = r.message[i].reserved_qty + frm.doc.packed_items[i].qty;
-                    if (limit_qty > r.message[i].actual_qty && mis_settings.sellable_qty_action == "Stop") {
-                        frappe.model.set_value(
-                            "Packed Item",
-                            frm.doc.packed_items[i].name,
-                            {
-                                mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
-                                mis_reserved_qty: r.message[i].reserved_qty
+                    if (limit_qty > r.message[i].actual_qty) {
+
+                        if(mis_settings.sellable_qty_action == "Warn") {
+                            frappe.model.set_value(
+                                "Packed Item",
+                                frm.doc.packed_items[i].name,
+                                {
+                                    mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
+                                    mis_reserved_qty: r.message[i].reserved_qty
+                                }
+                            );
+    
+                            if (!can_bypass.message) {
+                                frappe.validated = true;
+                                setTimeout(() => {
+                                    frappe.msgprint(`Warning, Packed Item: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
+                                        Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.packed_items[i].qty}) 
+                                        is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
+                                        Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
+                                    `, "Multi Items Select");
+                                }, 1500);
+    
                             }
-                        );
-
-                        if (!can_bypass.message) {
-                            frappe.validated = false;
-                            setTimeout(() => {
-                                frappe.throw(`Can't submit, Packed Item: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
-                                    Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.packed_items[i].qty}) 
-                                    is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
-                                    Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
-                                `, "Multi Items Select");
-                            }, 1500);
-
+                        } else if (mis_settings.sellable_qty_action == "Stop") {
+                            frappe.model.set_value(
+                                "Packed Item",
+                                frm.doc.packed_items[i].name,
+                                {
+                                    mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
+                                    mis_reserved_qty: r.message[i].reserved_qty
+                                }
+                            );
+    
+                            if (!can_bypass.message) {
+                                frappe.validated = false;
+                                setTimeout(() => {
+                                    frappe.throw(`Can't submit, Packed Item: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
+                                        Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.packed_items[i].qty}) 
+                                        is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
+                                        Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
+                                    `, "Multi Items Select");
+                                }, 1500);
+    
+                            }
                         }
+
+
                     }
                 }
             }
