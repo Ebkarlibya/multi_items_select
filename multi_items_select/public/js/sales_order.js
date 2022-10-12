@@ -77,31 +77,36 @@ frappe.ui.form.on("Sales Order", {
                     primary_action: async function (values) {
                         const itemsGrid = frm.get_field("items").grid;
                         let d = null;
-                        
+
                         // validate sellable qty
                         let mis_settings = await frappe.call({
                             method: "multi_items_select.api.get_settings",
                         });
                         mis_settings = mis_settings.message;
-                        if(values.qty > sellable_qty) {
-                            debugger
-                            switch(mis_settings.sellable_qty_action){
+
+                        let can_bypass = await frappe.call({
+                            method: "multi_items_select.api.get_can_bypass",
+                        });
+                        can_bypass = can_bypass.message;
+
+                        if (values.qty > sellable_qty) {
+                            switch (mis_settings.sellable_qty_action) {
                                 case "Nothing":
                                     break;
                                 case "Warn":
                                     frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
                                     break;
                                 case "Stop":
-                                    if(frappe.user.has_role(mis_settings.sellable_bypass_role)) {
+                                    if (can_bypass) {
                                         frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
                                         break;
+                                    } else {
+                                        frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                        return;
                                     }
-                                case "Stop":
-                                    frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
-                                    return;
                             }
                         }
-                        
+
                         frappe.run_serially([
                             () => d = itemsGrid.add_new_row(),
                             () => frappe.timeout(0.2),
@@ -157,112 +162,7 @@ frappe.ui.form.on("Sales Order", {
                     {
                         fieldtype: "Data",
                         fieldname: "search_term",
-                        label: __("Search Items"),
-                        onchange: function () {
-                            d.set_df_property("search_results", "hidden", true);
-                            d.set_df_property("no_data", "hidden", true);
-                            d.set_df_property("query_loading", "hidden", false);
-                            setTimeout(() => {
-                                frappe.call(
-                                    {
-                                        method: "multi_items_select.api.get_multiple_items",
-                                        args: {
-                                            source_warehouse: frm.doc.set_warehouse,
-                                            search_term: d.get_value("search_term")
-                                        },
-                                        freeze: true,
-                                        callback: function (r) {
-                                            if (r.message) {
-                                                let data_rows = "";
-                                                // d.mis_search_data = r.message;
-
-                                                if (r.message.length > 0) {
-                                                    d.set_df_property("search_results", "hidden", false);
-                                                    d.set_df_property("query_loading", "hidden", true);
-                                                    d.set_df_property("no_data", "hidden", true);
-                                                } else {
-                                                    d.set_df_property("search_results", "hidden", true);
-                                                    d.set_df_property("query_loading", "hidden", true);
-                                                    d.set_df_property("no_data", "hidden", false);
-                                                }
-
-                                                for (let i = 0; i < r.message.length; i++) {
-                                                    let data = r.message[i];
-                                                    data_rows += repl(
-                                                        `<tr 
-                                                                class="etms-add-multi__tb_tr"
-                                                                onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(item_name)s\`, \`%(warehouse)s\`, \`%(actual_qty)s\`, \`%(reserved_qty)s\`)">
-                                                            <td>
-                                                                <div class="etms-add-multi__row">
-                                                                    <p>${data.item_code}</p>
-                                                                </div>
-                                                                <p class="etms-multi__subtitle1">${data.item_name}</p>
-                                                            </td>
-                                                            <td>
-                                                                <div class="etms-add-multi__row">
-                                                                    <p>${data.warehouse}</p>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div class="etms-add-multi__row">
-                                                                    <p>${data.actual_qty}</p>
-                                                                <div>
-                                                                <p class="etms-multi__subtitle1">${data.stock_uom}</p>
-                                                            </td>
-                                                            <td>
-                                                                <div class="etms-add-multi__row">
-                                                                    <p>${data.reserved_qty}</p>
-                                                                <div>
-                                                            </td>
-                                                        </tr>`,
-                                                        {
-                                                            item_code: data.item_code,
-                                                            item_name: data.item_name,
-                                                            warehouse: data.warehouse,
-                                                            actual_qty: data.actual_qty,
-                                                            reserved_qty: data.reserved_qty,
-                                                        }
-                                                    );
-                                                }
-                                                let html = `
-                                                <table class="table table-striped">
-                                                    <thead>
-                                                        <tr class="etms-add-multi__th_tr">
-                                                            <th scope="col">Item Code</th>
-                                                            <th scope="col">Warehouse</th>
-                                                            <th scope="col">Actual Qty</th>
-                                                            <th scope="col">Reserved Qty</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        ${data_rows}
-                                                    </tbody>
-                                                    </table>
-                                                    <style>
-                                                        .etms-add-multi__row {
-                                                            cursor: pointer;
-                                                        }
-                                                        .etms-multi__subtitle1 {
-                                                            font-size: 11px;
-                                                            color: gray;
-                                                        }
-                                                        .etms-add-multi__th_tr {
-                                                            white-space: nowrap;
-                                                        }
-                                                        .etms-add-etms-add-multi__tb_tr td {
-                                                            padding-top: 3px;
-                                                            padding-bottom: 0px;
-                                                       
-                                                        }
-                                                    </style>
-                                                `;
-                                                d.set_df_property("search_results", "options", html);
-                                            }
-                                        }
-                                    }
-                                )
-                            }, 200);
-                        }
+                        label: __("Search Items")
                     },
                     {
                         fieldname: "query_loading",
@@ -316,7 +216,119 @@ frappe.ui.form.on("Sales Order", {
                 },
             });
             d.show();
-            d.set_value("search_term", "");
+
+            let timeout = null;
+
+            d.get_field("search_term").input.oninput = function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    d.set_df_property("search_results", "hidden", true);
+                    d.set_df_property("no_data", "hidden", true);
+                    d.set_df_property("query_loading", "hidden", false);
+                    setTimeout(() => {
+                        frappe.call(
+                            {
+                                method: "multi_items_select.api.get_multiple_items",
+                                args: {
+                                    source_warehouse: frm.doc.set_warehouse,
+                                    search_term: d.get_value("search_term")
+                                },
+                                freeze: true,
+                                callback: function (r) {
+                                    if (r.message) {
+                                        let data_rows = "";
+                                        // d.mis_search_data = r.message;
+
+                                        if (r.message.length > 0) {
+                                            d.set_df_property("search_results", "hidden", false);
+                                            d.set_df_property("query_loading", "hidden", true);
+                                            d.set_df_property("no_data", "hidden", true);
+                                        } else {
+                                            d.set_df_property("search_results", "hidden", true);
+                                            d.set_df_property("query_loading", "hidden", true);
+                                            d.set_df_property("no_data", "hidden", false);
+                                        }
+
+                                        for (let i = 0; i < r.message.length; i++) {
+                                            let data = r.message[i];
+                                            data_rows += repl(
+                                                `<tr 
+                                                                class="etms-add-multi__tb_tr"
+                                                                onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(item_name)s\`, \`%(warehouse)s\`, \`%(actual_qty)s\`, \`%(reserved_qty)s\`)">
+                                                                <td>
+                                                                <div class="etms-add-multi__row">
+                                                                    <p>${data.item_code}</p>
+                                                                    <p class="etms-multi__subtitle1">${data.item_name}</p>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="etms-add-multi__row">
+                                                                    <p>${data.warehouse}</p>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="etms-add-multi__row">
+                                                                    <p>${data.actual_qty}</p>
+                                                                <div>
+                                                                <p class="etms-multi__subtitle1">${data.stock_uom}</p>
+                                                            </td>
+                                                            <td>
+                                                                <div class="etms-add-multi__row">
+                                                                    <p>${data.reserved_qty}</p>
+                                                                <div>
+                                                            </td>
+                                                        </tr>`,
+                                                {
+                                                    item_code: data.item_code,
+                                                    item_name: data.item_name,
+                                                    warehouse: data.warehouse,
+                                                    actual_qty: data.actual_qty,
+                                                    reserved_qty: data.reserved_qty,
+                                                }
+                                            );
+                                        }
+                                        let html = `
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                        <tr class="etms-add-multi__th_tr">
+                                                            <th scope="col">Item Code</th>
+                                                            <th scope="col">Warehouse</th>
+                                                            <th scope="col">Actual Qty</th>
+                                                            <th scope="col">Reserved Qty</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${data_rows}
+                                                    </tbody>
+                                                    </table>
+                                                    <style>
+                                                        .etms-add-multi__row {
+                                                            cursor: pointer;
+                                                        }
+                                                        .etms-multi__subtitle1 {
+                                                            font-size: 11px;
+                                                            color: gray;
+                                                        }
+                                                        .etms-add-multi__th_tr {
+                                                            white-space: nowrap;
+                                                        }
+                                                        .etms-add-etms-add-multi__tb_tr td {
+                                                            padding-top: 3px;
+                                                            padding-bottom: 0px;
+                                                       
+                                                        }
+                                                    </style>
+                                                `;
+                                        d.set_df_property("search_results", "options", html);
+                                    }
+                                }
+                            }
+                        )
+                    }, 200);
+                }, 700);
+            }
+            d.get_field("search_term").input.dispatchEvent(new Event('input'));
+            // d.set_value("search_term", "");
         });
         cbtn.addClass("btn-primary");
     },
@@ -330,54 +342,122 @@ frappe.ui.form.on("Sales Order", {
             method: "multi_items_select.api.get_settings",
         });
         mis_settings = mis_settings.message;
-        
+
 
         let so_items = [];
-
+        
         for (let i = 0; i < frm.doc.items.length; i++) {
             so_items.push(frm.doc.items[i].item_code);
         }
+        
 
+        // so items
         frappe.call({
             method: "multi_items_select.api.get_items_reserved_qty",
             args: { item_codes: so_items, source_warehouse: frm.doc.set_warehouse },
-            callback: function (r) {
+            callback: async function (r) {
                 if (!r.message) {
                     return;
                 }
                 for (let i = 0; i < r.message.length; i++) {
-                    debugger
                     // r.message[i].reserved_qty = 45;
                     if (frm.doc.items[i].item_code == r.message[i].item_code) {
                         let limit_qty = r.message[i].reserved_qty + frm.doc.items[i].qty;
                         if (limit_qty > r.message[i].actual_qty && mis_settings.sellable_qty_action == "Stop") {
-                            setTimeout(() => {
-                                frappe.throw(`Can't submit, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
-                                Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
-                                is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
-                                 Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
-                            `, "Multi Items Select");
-                            }, 2000);
                             frappe.validated = false;
+                            let can_bypass = await frappe.call({
+                                method: "multi_items_select.api.get_can_bypass",
+                                freeze: true,
+                            });
+                            can_bypass = can_bypass.message;
+                            
+                            if (can_bypass) {
+                                frappe.validated = true;
+                            } {
+                                setTimeout(() => {
+                                    frappe.throw(`Can't submit, Item: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
+                                    Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.items[i].qty}) 
+                                    is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
+                                    Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
+                                `, "Multi Items Select");
+                                }, 1500);
+
+                            }
+
                             frappe.model.set_value(
                                 "Sales Order Item",
                                 frm.doc.items[i].name,
-                                "mis_sellable_qty", r.message[i].actual_qty - r.message[i].reserved_qty,
-                                "Float",
-                                true
+                                {
+                                    mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
+                                    mis_reserved_qty: r.message[i].reserved_qty
+                                }
                             );
-                            frappe.model.set_value(
-                                "Sales Order Item",
-                                frm.doc.items[i].name,
-                                "mis_reserved_qty", r.message[i].reserved_qty,
-                                "Float",
-                                true
-                            );
-                            // frm.save_or_update();
+                            frm.save_or_update();
                         }
                     }
                 }
             }
         });
+
+        
+        
+        // so packed items
+        if(frm.doc.packed_items) {
+            let so_packages = [];
+    
+            for (let i = 0; i < frm.doc.packed_items.length; i++) {
+                so_packages.push(frm.doc.packed_items[i].item_code);
+            }
+            
+            frappe.call({
+                method: "multi_items_select.api.get_items_reserved_qty",
+                args: { item_codes: so_packages, source_warehouse: frm.doc.set_warehouse },
+                callback: async function (r) {
+                    
+
+                    if (!r.message) {
+                        return;
+                    }
+                    for (let i = 0; i < r.message.length; i++) {
+                        // r.message[i].reserved_qty = 45;
+                        if (frm.doc.packed_items[i].item_code == r.message[i].item_code) {
+                            let limit_qty = r.message[i].reserved_qty + frm.doc.packed_items[i].qty;
+                            if (limit_qty > r.message[i].actual_qty && mis_settings.sellable_qty_action == "Stop") {
+                                // frappe.validated = false;
+                                let can_bypass = await frappe.call({
+                                    method: "multi_items_select.api.get_can_bypass",
+                                    freeze: true,
+                                });
+                                can_bypass = can_bypass.message;
+                                debugger
+                                if (can_bypass) {
+                                    // frappe.validated = true;
+                                } else {
+                                    frappe.throw("STOP");
+                                    setTimeout(() => {
+                                        frappe.throw(`Can't submit, Packed Item: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
+                                        Reserved Qty (${r.message[i].reserved_qty}) + Item Qty (${frm.doc.packed_items[i].qty}) 
+                                        is higher than Actual Qty (${r.message[i].actual_qty}) in warehouse: (${frm.doc.set_warehouse}).<br>
+                                        Avaliable Qty for sell is: (${r.message[i].actual_qty - r.message[i].reserved_qty})
+                                    `, "Multi Items Select");
+                                    }, 1500);
+
+                                }
+
+                                // frappe.model.set_value(
+                                //     "Packed Item",
+                                //     frm.doc.packed_items[i].name,
+                                //     {
+                                //         mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
+                                //         mis_reserved_qty: r.message[i].reserved_qty
+                                //     }
+                                // );
+                                // frm.save_or_update();
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 });

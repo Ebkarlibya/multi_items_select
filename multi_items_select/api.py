@@ -57,3 +57,11 @@ def get_multiple_items():
             "Item", item.item_code, "item_name")
 
     return data
+
+@frappe.whitelist(allow_guest=False)
+def get_can_bypass():
+    mis_settings = frappe.get_single("Multi Select Settings")
+    roles = frappe.get_roles(username=frappe.session.user)
+    if mis_settings.sellable_bypass_role not in roles:
+        return False
+    return True

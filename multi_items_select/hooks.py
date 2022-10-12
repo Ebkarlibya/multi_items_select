@@ -193,6 +193,7 @@ fixtures = [
         "dt": "Custom Field",
         "filters": [
             ["fieldname", "in", (
+                # Sales Order Item & Packed Item
                 "mis_sellable_qty",
                 "mis_reserved_qty"
             )]
