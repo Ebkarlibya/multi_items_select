@@ -327,7 +327,9 @@ frappe.ui.form.on("Sales Order", {
                     }, 200);
                 }, 700);
             }
-            d.get_field("search_term").input.dispatchEvent(new Event('input'));
+            let searchTerm = d.get_field("search_term")
+            searchTerm.input.dispatchEvent(new Event('input'));
+            searchTerm.input.placeholder = "Item Name";
             // d.set_value("search_term", "");
         });
         cbtn.addClass("btn-primary");
