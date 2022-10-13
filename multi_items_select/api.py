@@ -39,17 +39,13 @@ def get_multiple_items():
     sql_item_name_cond = ""
     sql_warehouse_cond = ""
 
-    # filters_cond = {
-    #     "item_code": ("like", f"%{search_term}%"),
-    # }
-
     if search_term:
         escaped_input = frappe.db.escape(f"%{search_term}%")
-        sql_item_name_cond = f"and i.item_code LIKE {escaped_input} or i.item_name LIKE {escaped_input}"
+        sql_item_name_cond = f"where i.item_code LIKE {escaped_input} or i.item_name LIKE {escaped_input}"
 
     if source_warehouse:
         escaped_input = frappe.db.escape(source_warehouse)
-        sql_warehouse_cond = f"AND b.warehouse = {escaped_input}"
+        sql_warehouse_cond = f"and b.warehouse = {escaped_input}"
 
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, b.warehouse,
@@ -61,11 +57,41 @@ def get_multiple_items():
         {sql_item_name_cond}
         {sql_warehouse_cond}
 
-        order by b.warehouse asc, i.item_code asc
+        order by warehouse asc, item_code asc
         limit 100;
     """, as_dict=True)
 
     return data
+
+
+# @frappe.whitelist(allow_guest=False)
+# def get_multiple_items():
+
+#     source_warehouse = frappe.form_dict.get('source_warehouse')
+#     search_term = frappe.form_dict.get("search_term")
+
+#     filters_cond = {
+#         "item_code": ("like", f"%{search_term}%"),
+#     }
+
+#     if source_warehouse:
+#         filters_cond["warehouse"] = source_warehouse
+
+#     data = frappe.get_all(
+#         "Bin",
+#         fields=["item_code", "warehouse", "reserved_qty",
+#                 "actual_qty", "projected_qty", "stock_uom"],
+#         filters=filters_cond,
+#         order_by="warehouse asc, item_code asc",
+#         limit=100
+#     )
+
+#     for item in data:
+#         item["item_name"] = frappe.db.get_value(
+#             "Item", item.item_code, "item_name")
+
+#     return data
+
 
 @frappe.whitelist(allow_guest=False)
 def get_can_bypass():
