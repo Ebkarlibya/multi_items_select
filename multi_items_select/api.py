@@ -83,7 +83,6 @@ def get_multiple_items():
                 "actual_qty", "projected_qty", "stock_uom"],
         filters=filters_cond,
         order_by="warehouse asc, item_code asc",
-        limit=100
     )
 
     data = []
