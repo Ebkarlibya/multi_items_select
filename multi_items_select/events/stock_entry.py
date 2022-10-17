@@ -20,6 +20,6 @@ def on_update(doc, method):
                 if item.qty > transferable_qty:
                     frappe.msgprint(
                         f"Item <string>{item.item_code}</strong> Qty ({item.qty}) is higher than the Transferable Qty ({transferable_qty}) at row {item.idx}",
-                        "Multi Item Select",
+                        "Message",
                         raise_exception=True
                     )
