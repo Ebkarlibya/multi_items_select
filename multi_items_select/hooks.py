@@ -194,7 +194,7 @@ fixtures = [
             ["fieldname", "in", (
                 # Sales Order
                 "mia_outstanding_amount",
-                "mia_total_outstanding_amount"
+                "mia_total_outstanding_amount",
                 # Sales Order Item & Packed Item
                 "mis_sellable_qty",
                 "mis_reserved_qty"
