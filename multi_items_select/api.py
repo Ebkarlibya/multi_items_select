@@ -1,5 +1,5 @@
-from this import d
 import frappe
+from erpnext.accounts.utils import get_balance_on
 
 @frappe.whitelist(allow_guest=False)
 def get_settings():
@@ -110,3 +110,22 @@ def get_can_bypass():
     if mis_settings.sellable_bypass_role not in roles:
         return False
     return True
+
+
+@frappe.whitelist(allow_guest=False)
+def get_customer_outstandings():
+
+    customer = frappe.form_dict.get('customer')
+
+    outstanding_amount = get_balance_on(party=customer, party_type="Customer", date=frappe.utils.nowdate())
+
+    data = frappe.db.sql("""
+        SELECT sum(outstanding_amount) as total_outstanding_amount
+        FROM `tabSales Invoice`
+        WHERE customer = %s
+        and status = 'Overdue'
+    """, (customer), as_dict=True)[0]
+
+    data["outstanding_amount"] = outstanding_amount
+
+    return data
