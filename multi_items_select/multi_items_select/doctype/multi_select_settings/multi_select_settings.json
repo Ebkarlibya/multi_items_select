@@ -21,14 +21,14 @@
   },
   {
    "default": "0",
-   "description": "if checked the original \"add multi\" button will be removed form SO items table",
+   "description": "if checked the original \"add multi\" button will be removed form SO/SE items table",
    "fieldname": "disable_original_add_multi",
    "fieldtype": "Check",
    "label": "Disable Original Add Multi"
   },
   {
    "default": "1",
-   "description": "if checked this will add custom \"add multi\" to SO items table",
+   "description": "if checked this will add custom \"add multi\" to SO/SE items table",
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Enabled"
@@ -64,7 +64,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-10-11 16:21:22.298641",
+ "modified": "2022-10-22 12:33:42.570120",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

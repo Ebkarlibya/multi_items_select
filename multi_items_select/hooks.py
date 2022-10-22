@@ -31,8 +31,10 @@ app_license = "MIT"
 # include js in doctype views
 doctype_js = {
     "Sales Order": "public/js/sales_order.js",
-    # "Stock Entry": "public/js/stock_entry.js",
+    "Sales Invoice": "public/js/sales_invoice.js",
+    "Stock Entry": "public/js/stock_entry.js",
 }
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -192,7 +194,7 @@ fixtures = [
         "dt": "Custom Field",
         "filters": [
             ["fieldname", "in", (
-                # Sales Order
+                # Sales Order & Sales Invoice
                 "mia_outstanding_amount",
                 "mia_total_outstanding_amount",
                 # Sales Order Item & Packed Item
