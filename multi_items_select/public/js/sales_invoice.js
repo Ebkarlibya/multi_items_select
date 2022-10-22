@@ -1,7 +1,6 @@
 frappe.ui.form.on("Sales Invoice", {
-    refresh: function(frm) {
-        console.log("ASDADASDDASD");
-    },
+    // refresh: function(frm) {
+    // },
     customer: function(frm) {
         if (frm.doc.customer) {
             frappe.call({
