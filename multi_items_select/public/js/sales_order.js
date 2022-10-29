@@ -356,12 +356,11 @@ frappe.ui.form.on("Sales Order", {
             so_items.push(frm.doc.items[i].item_code);
         }
 
-
         // so items
         frappe.call({
             method: "multi_items_select.api.get_items_reserved_qty",
             args: { item_codes: so_items, source_warehouse: frm.doc.set_warehouse },
-            callback: async function (r) {
+            callback: async function (r) {z
                 if (!r.message) {
                     return;
                 }
