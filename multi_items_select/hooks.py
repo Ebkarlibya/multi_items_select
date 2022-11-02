@@ -110,7 +110,10 @@ doctype_js = {
 doc_events = {
 	"Stock Entry": {
 		"on_update": "multi_items_select.events.stock_entry.on_update",
-	}
+	},
+    "Sales Order": {
+        "on_update": "multi_items_select.events.sales_order.on_update"
+    }
 }
 
 # Scheduled Tasks

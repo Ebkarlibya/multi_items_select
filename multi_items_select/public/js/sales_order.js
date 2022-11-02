@@ -135,6 +135,8 @@ frappe.ui.form.on("Sales Order", {
         }
     },
     refresh: async function (frm) {
+        console.log('##################################refres');
+
         const itemsGrid = frm.get_field("items").grid;
 
         // get multi items select settings
@@ -335,167 +337,92 @@ frappe.ui.form.on("Sales Order", {
         cbtn.addClass("btn-primary");
     },
     before_submit: async function (frm) {
-        if (!frm.doc.set_warehouse) {
-            return;
-        }
-
+        debugger
         // get multi items select settings
         let mis_settings = await frappe.call({
             method: "multi_items_select.api.get_settings",
         });
         mis_settings = mis_settings.message;
-
+        
         let can_bypass = await frappe.call({
             method: "multi_items_select.api.get_can_bypass",
             freeze: true,
         });
-
-        let so_items = [];
-
-        for (let i = 0; i < frm.doc.items.length; i++) {
-            so_items.push(frm.doc.items[i].item_code);
-        }
-
+        
         // so items
-        frappe.call({
-            method: "multi_items_select.api.get_items_reserved_qty",
-            args: { item_codes: so_items, source_warehouse: frm.doc.set_warehouse },
-            callback: async function (r) {
-                if (!r.message) {
-                    return;
-                }
-                for (let i = 0; i < r.message.length; i++) {
-                    // r.message[i].reserved_qty = 45;
-                    if (frm.doc.items[i].item_code == r.message[i].item_code) {
-                        let limit_qty = r.message[i].reserved_qty + frm.doc.items[i].qty;
-                        if (limit_qty > r.message[i].actual_qty) {
-                            if (mis_settings.sellable_qty_action == "Warn") {
-                                frappe.model.set_value(
-                                    "Sales Order Item",
-                                    frm.doc.items[i].name,
-                                    {
-                                        mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
-                                        mis_reserved_qty: r.message[i].reserved_qty
-                                    }
-                                );
+        for (let i = 0; i < frm.doc.items.length; i++) {
+            let row = frm.doc.items[i];
 
-                                if (!can_bypass.message) {
-                                    frappe.validated = true;
-                                    setTimeout(() => {
-                                        frappe.msgprint(`
-                                        <p style="font-size: 12px; line-height: 14px;">
-                                            Warning, Packed Item Qty: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
-                                            is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
-                                        </p>
-                                        `, "Warning");
-                                    }, 1500);
+            if (row.qty > row.mis_sellable_qty) {
+                if (mis_settings.sellable_qty_action == "Warn") {
+                    if (!can_bypass.message) {
+                        frappe.validated = true;
+                        setTimeout(() => {
+                            frappe.msgprint(`
+                            <p style="font-size: 12px; line-height: 14px;">
+                                Warning, Item: ${row.item_code} in row: (${row.idx}) Qty (${row.qty})
+                                is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+                            </p>
+                            `, "Warning");
+                        }, 1500);
 
-                                }
-                            }
-                            else if (mis_settings.sellable_qty_action == "Stop") {
-                                frappe.model.set_value(
-                                    "Sales Order Item",
-                                    frm.doc.items[i].name,
-                                    {
-                                        mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
-                                        mis_reserved_qty: r.message[i].reserved_qty
-                                    }
-                                );
-
-                                if (!can_bypass.message) {
-                                    frappe.validated = false;
-                                    setTimeout(() => {
-                                        frappe.msgprint(`
-                                        <p style="font-size: 12px; line-height: 14px;">
-                                            Can't submit, Item Qty: ${r.message[i].item_code} in row: (${frm.doc.items[i].idx})  
-                                            is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
-                                        </p>
-                                        `, "Warning");
-                                    }, 1500);
-
-                                }
-                            }
-
-                        }
                     }
                 }
+                else if (mis_settings.sellable_qty_action == "Stop") {
+                    if (!can_bypass.message) {
+                        frappe.validated = false;
+                        setTimeout(() => {
+                            frappe.msgprint(`
+                            <p style="font-size: 12px; line-height: 14px;">
+                                Can't submit, Item ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+                                is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+                            </p>
+                            `, "Warning");
+                        }, 1500);
+
+                    }
+                }
+
+                
             }
-        });
-
-
+        }
 
         // so packed items
         if (frm.doc.packed_items) {
-            let so_packages = [];
-
             for (let i = 0; i < frm.doc.packed_items.length; i++) {
-                so_packages.push(frm.doc.packed_items[i].item_code);
-            }
-
-            let r = await frappe.call({
-                method: "multi_items_select.api.get_items_reserved_qty",
-                args: { item_codes: so_packages, source_warehouse: frm.doc.set_warehouse },
-                freeze: true
-            });
-
-            if (!r.message) {
-                return;
-            }
-
-            for (let i = 0; i < r.message.length; i++) {
-                // r.message[i].reserved_qty = 45;
-                if (frm.doc.packed_items[i].item_code == r.message[i].item_code) {
-                    let limit_qty = r.message[i].reserved_qty + frm.doc.packed_items[i].qty;
-                    if (limit_qty > r.message[i].actual_qty) {
-
-                        if(mis_settings.sellable_qty_action == "Warn") {
-                            frappe.model.set_value(
-                                "Packed Item",
-                                frm.doc.packed_items[i].name,
-                                {
-                                    mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
-                                    mis_reserved_qty: r.message[i].reserved_qty
-                                }
-                            );
+                let row = frm.doc.packed_items[i];
     
-                            if (!can_bypass.message) {
-                                frappe.validated = true;
-                                setTimeout(() => {
-                                    frappe.msgprint(`
-                                    <p style="font-size: 12px; line-height: 14px;">
-                                        Warning, Packed Item Qty: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
-                                        is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
-                                    </p>
-                                    `, "Warning");
-                                }, 1500);
+                if (row.qty > row.mis_sellable_qty) {
+                    if (mis_settings.sellable_qty_action == "Warn") {
+                        if (!can_bypass.message) {
+                            frappe.validated = true;
+                            setTimeout(() => {
+                                frappe.msgprint(`
+                                <p style="font-size: 12px; line-height: 14px;">
+                                    Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+                                    is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+                                </p>
+                                `, "Warning");
+                            }, 1500);
     
-                            }
-                        } else if (mis_settings.sellable_qty_action == "Stop") {
-                            frappe.model.set_value(
-                                "Packed Item",
-                                frm.doc.packed_items[i].name,
-                                {
-                                    mis_sellable_qty: r.message[i].actual_qty - r.message[i].reserved_qty,
-                                    mis_reserved_qty: r.message[i].reserved_qty
-                                }
-                            );
-    
-                            if (!can_bypass.message) {
-                                frappe.validated = false;
-                                setTimeout(() => {
-                                    frappe.msgprint(`
-                                    <p style="font-size: 12px; line-height: 14px;">
-                                        Can't submit, Packed Item Qty: ${r.message[i].item_code} in row: (${frm.doc.packed_items[i].idx})  
-                                        is higher than Sellable Qty (${r.message[i].actual_qty - r.message[i].reserved_qty }) in warehouse: (${frm.doc.set_warehouse})
-                                    </p>
-                                    `, "Warning");
-                                }, 1500);
-    
-                            }
                         }
-
-
                     }
+                    else if (mis_settings.sellable_qty_action == "Stop") {
+                        if (!can_bypass.message) {
+                            frappe.validated = false;
+                            setTimeout(() => {
+                                frappe.msgprint(`
+                                <p style="font-size: 12px; line-height: 14px;">
+                                    Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+                                    is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+                                </p>
+                                `, "Warning");
+                            }, 1500);
+    
+                        }
+                    }
+    
+                    
                 }
             }
         }

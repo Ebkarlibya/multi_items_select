@@ -18,17 +18,19 @@ def get_items_reserved_qty():
     raw_codes = frappe.form_dict.get('item_codes')
     item_codes = frappe.parse_json(raw_codes)
 
-    data = None
+    result = []
 
-    data = frappe.get_all(
-        "Bin",
-        fields=["item_code", "warehouse", "reserved_qty", "actual_qty"],
-        filters={
-            "warehouse": source_warehouse,
-            "item_code": ("in", item_codes),
-        })
+    for item in item_codes:
+        data = frappe.get_all(
+            "Bin",
+            fields=["item_code", "warehouse", "reserved_qty", "actual_qty"],
+            filters={
+                "warehouse": item.get("warehouse"),
+                "item_code": item.get("item_code"),
+            })
+        result.append(data)
 
-    return data
+    return result
 
 # @frappe.whitelist(allow_guest=False)
 # def get_multiple_items():
