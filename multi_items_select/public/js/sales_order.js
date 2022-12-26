@@ -135,8 +135,6 @@ frappe.ui.form.on("Sales Order", {
         }
     },
     refresh: async function (frm) {
-        console.log('##################################refres');
-
         const itemsGrid = frm.get_field("items").grid;
 
         // get multi items select settings
@@ -336,96 +334,163 @@ frappe.ui.form.on("Sales Order", {
         });
         cbtn.addClass("btn-primary");
     },
-    before_submit: async function (frm) {
-        debugger
-        // get multi items select settings
-        let mis_settings = await frappe.call({
-            method: "multi_items_select.api.get_settings",
-        });
-        mis_settings = mis_settings.message;
-        
-        let can_bypass = await frappe.call({
-            method: "multi_items_select.api.get_can_bypass",
-            freeze: true,
-        });
-        
-        // so items
-        for (let i = 0; i < frm.doc.items.length; i++) {
-            let row = frm.doc.items[i];
-
-            if (row.qty > row.mis_sellable_qty) {
-                if (mis_settings.sellable_qty_action == "Warn") {
-                    if (!can_bypass.message) {
-                        frappe.validated = true;
-                        setTimeout(() => {
-                            frappe.msgprint(`
-                            <p style="font-size: 12px; line-height: 14px;">
-                                Warning, Item: ${row.item_code} in row: (${row.idx}) Qty (${row.qty})
-                                is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-                            </p>
-                            `, "Warning");
-                        }, 1500);
-
-                    }
-                }
-                else if (mis_settings.sellable_qty_action == "Stop") {
-                    if (!can_bypass.message) {
-                        frappe.validated = false;
-                        setTimeout(() => {
-                            frappe.msgprint(`
-                            <p style="font-size: 12px; line-height: 14px;">
-                                Can't submit, Item ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-                                is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-                            </p>
-                            `, "Warning");
-                        }, 1500);
-
-                    }
-                }
+    validated: function (frm) {
+        console.log('disabled!');
+        // // so items
+        // for (let i = 0; i < frm.doc.items.length; i++) {
+        //     let row = frm.doc.items[i];
+        //     debugger
+        //     if (row.qty > row.mis_sellable_qty) {
+        //         if (mis_settings.sellable_qty_action == "Warn") {
+        //             console.log("Warn");
+        //         }
+        //         else if (mis_settings.sellable_qty_action == "Stop") {
+        //             console.log("Stop");
+        //         }
 
                 
-            }
-        }
+        //     }
+        // }
 
-        // so packed items
-        if (frm.doc.packed_items) {
-            for (let i = 0; i < frm.doc.packed_items.length; i++) {
-                let row = frm.doc.packed_items[i];
+        // // so packed items
+        // if (frm.doc.packed_items) {
+        //     for (let i = 0; i < frm.doc.packed_items.length; i++) {
+        //         let row = frm.doc.packed_items[i];
     
-                if (row.qty > row.mis_sellable_qty) {
-                    if (mis_settings.sellable_qty_action == "Warn") {
-                        if (!can_bypass.message) {
-                            frappe.validated = true;
-                            setTimeout(() => {
-                                frappe.msgprint(`
-                                <p style="font-size: 12px; line-height: 14px;">
-                                    Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-                                    is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-                                </p>
-                                `, "Warning");
-                            }, 1500);
+        //         if (row.qty > row.mis_sellable_qty) {
+        //             if (mis_settings.sellable_qty_action == "Warn") {
+        //                 if (!can_bypass.message) {
+        //                     frappe.validated = true;
+        //                     setTimeout(() => {
+        //                         frappe.msgprint(`
+        //                         <p style="font-size: 12px; line-height: 14px;">
+        //                             Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+        //                         </p>
+        //                         `, "Warning");
+        //                     }, 1500);
     
-                        }
-                    }
-                    else if (mis_settings.sellable_qty_action == "Stop") {
-                        if (!can_bypass.message) {
-                            frappe.validated = false;
-                            setTimeout(() => {
-                                frappe.msgprint(`
-                                <p style="font-size: 12px; line-height: 14px;">
-                                    Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-                                    is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-                                </p>
-                                `, "Warning");
-                            }, 1500);
+        //                 }
+        //             }
+        //             else if (mis_settings.sellable_qty_action == "Stop") {
+        //                 if (!can_bypass.message) {
+        //                     frappe.validated = false;
+        //                     setTimeout(() => {
+        //                         frappe.msgprint(`
+        //                         <p style="font-size: 12px; line-height: 14px;">
+        //                             Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+        //                         </p>
+        //                         `, "Warning");
+        //                     }, 1500);
     
-                        }
-                    }
+        //                 }
+        //             }
     
                     
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
+    },
+    before_submit: async function (frm) {
+        console.log('disabled!2');
+
+        // // get multi items select settings
+        // let mis_settings = await frappe.call({
+        //     method: "multi_items_select.api.get_settings",
+        // });
+        // mis_settings = mis_settings.message;
+        
+        // let can_bypass = await frappe.call({
+        //     method: "multi_items_select.api.get_can_bypass",
+        //     freeze: true,
+        // });
+        
+        // // so items
+        // for (let i = 0; i < frm.doc.items.length; i++) {
+        //     let row = frm.doc.items[i];
+            
+        //     // if(row.item_group == "Opration Item"){
+        //     //     continue;
+        //     // }
+
+        //     if (row.qty > row.mis_sellable_qty) {
+        //         if (mis_settings.sellable_qty_action == "Warn") {
+        //             if (!can_bypass.message) {
+        //                 frappe.validated = true;
+        //                 setTimeout(() => {
+        //                     frappe.msgprint(`
+        //                     <p style="font-size: 12px; line-height: 14px;">
+        //                         Warning, Item: ${row.item_code} in row: (${row.idx}) Qty (${row.qty})
+        //                         is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+        //                     </p>
+        //                     `, "Warning");
+        //                 }, 1500);
+
+        //             }
+        //         }
+        //         else if (mis_settings.sellable_qty_action == "Stop") {
+        //             if (!can_bypass.message) {
+        //                 frappe.validated = false;
+        //                 setTimeout(() => {
+        //                     frappe.msgprint(`
+        //                     <p style="font-size: 12px; line-height: 14px;">
+        //                         Can't submit, Item ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+        //                         is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+        //                     </p>
+        //                     `, "Warning");
+        //                 }, 1500);
+
+        //             }
+        //         }
+
+                
+        //     }
+        // }
+
+        // // so packed items
+        // if (frm.doc.packed_items) {
+        //     for (let i = 0; i < frm.doc.packed_items.length; i++) {
+        //         let row = frm.doc.packed_items[i];
+
+        //         if(row.item_group == "Opration Item"){
+        //             continue;
+        //         }
+    
+        //         if (row.qty > row.mis_sellable_qty) {
+        //             if (mis_settings.sellable_qty_action == "Warn") {
+        //                 if (!can_bypass.message) {
+        //                     frappe.validated = true;
+        //                     setTimeout(() => {
+        //                         frappe.msgprint(`
+        //                         <p style="font-size: 12px; line-height: 14px;">
+        //                             Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+        //                         </p>
+        //                         `, "Warning");
+        //                     }, 1500);
+    
+        //                 }
+        //             }
+        //             else if (mis_settings.sellable_qty_action == "Stop") {
+        //                 if (!can_bypass.message) {
+        //                     frappe.validated = false;
+        //                     setTimeout(() => {
+        //                         frappe.msgprint(`
+        //                         <p style="font-size: 12px; line-height: 14px;">
+        //                             Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
+        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
+        //                         </p>
+        //                         `, "Warning");
+        //                     }, 1500);
+    
+        //                 }
+        //             }
+    
+                    
+        //         }
+        //     }
+        // }
     },
     customer: function(frm) {
         if (frm.doc.customer) {

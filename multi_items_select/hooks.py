@@ -112,7 +112,9 @@ doc_events = {
 		"on_update": "multi_items_select.events.stock_entry.on_update",
 	},
     "Sales Order": {
-        "on_update": "multi_items_select.events.sales_order.on_update"
+        "before_save": "multi_items_select.events.sales_order.on_update",
+        "before_submit": "multi_items_select.events.sales_order.before_submit",
+
     }
 }
 
