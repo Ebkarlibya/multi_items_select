@@ -30,10 +30,10 @@ def before_submit(doc, method):
                 "item_code": item.get("item_code"),
                 "warehouse": item.get("warehouse"),
             })
-        
+
         if len(data) > 0:
             item.mis_reserved_qty = data[0].get("reserved_qty")
-            item.mis_sellable_qty = data[0].actual_qty - data[0].reserved_qty - 4
+            item.mis_sellable_qty = data[0].actual_qty - data[0].reserved_qty
 
             if item.qty > item.mis_sellable_qty:
                 if (mis_settings.sellable_qty_action == "Warn"):
@@ -53,7 +53,7 @@ def before_submit(doc, method):
                             is higher than Sellable Qty ({item.mis_sellable_qty}) in warehouse: ({item.warehouse})
                         </p>
                         """, "Warning", raise_exception=True)
-
+            pass
     #  so packed items
     if doc.packed_items:
         for item in doc.packed_items:
@@ -87,3 +87,4 @@ def before_submit(doc, method):
                                 is higher than Sellable Qty ({item.mis_sellable_qty}) in warehouse: ({item.warehouse})
                             </p>
                             """, "Warning", raise_exception=True)
+                pass
