@@ -199,9 +199,15 @@ fixtures = [
         "dt": "Custom Field",
         "filters": [
             ["fieldname", "in", (
+                # Item
+                "mia_item_desc_col_break_4123",
+                "mia_item_sub_category",
+                "mia_item_option",
+
                 # Sales Order & Sales Invoice
                 "mia_outstanding_amount",
                 "mia_total_outstanding_amount",
+                
                 # Sales Order Item & Packed Item
                 "mis_sellable_qty",
                 "mis_reserved_qty"

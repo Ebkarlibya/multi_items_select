@@ -255,6 +255,61 @@ frappe.ui.form.on("Stock Entry", {
                         `
                     },
                     {
+                        label: __("Extra Filters"),
+                        fieldname: "extra_filters",
+                        fieldtype: "Section Break",
+                        collapsible: 1
+                    },
+                    {
+                        label: __(mis_settings.item_group_label ? mis_settings.item_group_label : "Item Group"),
+                        fieldname: "item_group",
+                        fieldtype: "Link",
+                        options: "Item Group",
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    { fieldtype: "Column Break" },
+                    {
+                        label: __(mis_settings.brand_label ? mis_settings.brand_label : "Brand"),
+                        fieldname: "brand",
+                        fieldtype: "Link",
+                        options: "Brand",
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    { fieldtype: "Column Break" },
+                    {
+                        label: __(mis_settings.item_option_label ? mis_settings.item_option_label : "Item Option"),
+                        fieldname: "item_option",
+                        fieldtype: "Link",
+                        options: "Item Option",
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    { fieldtype: "Column Break" },
+                    {
+                        label: __(mis_settings.item_sub_category_label ? mis_settings.item_sub_category_label : "Item Sub-Category"),
+                        fieldname: "item_sub_category",
+                        fieldtype: "Link",
+                        options: "Item Sub-Category",
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    { fieldtype: "Section Break" },
+                    {
+                        label: __("Search Results"),
+                        fieldname: "search_results",
+                        fieldtype: "Section Break"
+                    },
+                    {
                         fieldtype: "HTML",
                         fieldname: "no_data",
                         options: `
@@ -298,7 +353,11 @@ frappe.ui.form.on("Stock Entry", {
                                 method: "multi_items_select.api.get_multiple_items",
                                 args: {
                                     source_warehouse: frm.doc.from_warehouse,
-                                    search_term: d.get_value("search_term")
+                                    search_term: d.get_value("search_term"),
+                                    item_group: d.get_value("item_group"),
+                                    brand: d.get_value("brand"),
+                                    item_option: d.get_value("item_option"),
+                                    item_sub_category: d.get_value("item_sub_category"),
                                 },
                                 freeze: true,
                                 callback: function (r) {
@@ -355,7 +414,7 @@ frappe.ui.form.on("Stock Entry", {
                                             );
                                         }
                                         let html = `
-                                                <table class="table table-striped">
+                                                <table class="table table-striped" style="margin: 0px;">
                                                     <thead>
                                                         <tr class="etms-add-multi__th_tr">
                                                             <th scope="col">Item Code</th>

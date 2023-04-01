@@ -71,6 +71,10 @@ def get_multiple_items():
 
     source_warehouse = frappe.form_dict.get('source_warehouse')
     search_term = frappe.form_dict.get("search_term")
+    item_group = frappe.form_dict.get("item_group")
+    brand = frappe.form_dict.get("brand")
+    item_option = frappe.form_dict.get("item_option")
+    item_sub_category = frappe.form_dict.get("item_sub_category")
 
     filters_cond = {
         # "item_code": ("like", f"%{search_term}%"),
@@ -93,7 +97,25 @@ def get_multiple_items():
 
         item["item_name"] = frappe.db.get_value(
             "Item", item.item_code, "item_name")
+        item["item_group"] = frappe.db.get_value(
+            "Item", item.item_code, "item_group")
+        item["brand"] = frappe.db.get_value(
+            "Item", item.item_code, "brand")
+        item["item_option"] = frappe.db.get_value(
+            "Item", item.item_code, "item_option")
+        item["item_sub_category"] = frappe.db.get_value(
+            "Item", item.item_code, "item_sub_category")
         
+        
+        if item_group and item_group != item["item_group"]:
+            continue
+        if brand and brand != item["brand"]:
+            continue
+        if item_option and item_option != item["item_option"]:
+            continue
+        if item_sub_category and item_sub_category != item["item_sub_category"]:
+            continue
+
         if search_term:
             if search_term.lower() in item.item_name.lower():
                 data.append(item)

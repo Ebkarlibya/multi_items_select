@@ -12,7 +12,15 @@
   "section_break_2",
   "sellable_qty_action",
   "column_break_6",
-  "sellable_bypass_role"
+  "sellable_bypass_role",
+  "extra_filters_lablels_section",
+  "item_group_label",
+  "column_break_dydjy",
+  "brand_label",
+  "column_break_h0sxf",
+  "item_option_label",
+  "column_break_scwyl",
+  "item_sub_category_label"
  ],
  "fields": [
   {
@@ -59,12 +67,49 @@
   {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "extra_filters_lablels_section",
+   "fieldtype": "Section Break",
+   "label": "Extra filters Lablels"
+  },
+  {
+   "fieldname": "item_group_label",
+   "fieldtype": "Data",
+   "label": "Item Group Label"
+  },
+  {
+   "fieldname": "brand_label",
+   "fieldtype": "Data",
+   "label": "Brand Label"
+  },
+  {
+   "fieldname": "column_break_dydjy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_h0sxf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_scwyl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_option_label",
+   "fieldtype": "Data",
+   "label": "Item Option Label"
+  },
+  {
+   "fieldname": "item_sub_category_label",
+   "fieldtype": "Data",
+   "label": "Item Sub Category Label"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-10-22 12:33:42.570120",
+ "modified": "2023-04-01 14:04:09.564286",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",
