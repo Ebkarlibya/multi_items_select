@@ -102,9 +102,9 @@ def get_multiple_items():
         item["brand"] = frappe.db.get_value(
             "Item", item.item_code, "brand")
         item["item_option"] = frappe.db.get_value(
-            "Item", item.item_code, "item_option")
+            "Item", item.item_code, "mia_item_option")
         item["item_sub_category"] = frappe.db.get_value(
-            "Item", item.item_code, "item_sub_category")
+            "Item", item.item_code, "mia_item_sub_category")
         
         
         if item_group and item_group != item["item_group"]:
