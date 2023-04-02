@@ -232,29 +232,6 @@ frappe.ui.form.on("Stock Entry", {
                         label: __("Search Items")
                     },
                     {
-                        fieldname: "query_loading",
-                        fieldtype: "HTML",
-                        label: __("Query Loading"),
-                        hidden: 1,
-                        options: `
-                            <div class="etms-multi__query_loading">
-                                <div class="spinner-border" role="status">
-                                    <span class="sr-only">Loading...</span>
-                                </div><br>
-                                <p>${frappe._('No Items Found...')}</p>
-                            <div>
-                            <style>
-                                .etms-multi__query_loading {
-                                    display: flex;
-                                    flex-direction: column;
-                                    justify-content: center;
-                                    align-items: center;
-
-                                }
-                            </style>
-                        `
-                    },
-                    {
                         label: __("Extra Filters"),
                         fieldname: "extra_filters",
                         fieldtype: "Section Break",
@@ -308,6 +285,29 @@ frappe.ui.form.on("Stock Entry", {
                         label: __("Search Results"),
                         fieldname: "search_results",
                         fieldtype: "Section Break"
+                    },
+                    {
+                        fieldname: "query_loading",
+                        fieldtype: "HTML",
+                        label: __("Query Loading"),
+                        hidden: 1,
+                        options: `
+                            <div class="etms-multi__query_loading">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div><br>
+                                <p>${frappe._('No Items Found...')}</p>
+                            <div>
+                            <style>
+                                .etms-multi__query_loading {
+                                    display: flex;
+                                    flex-direction: column;
+                                    justify-content: center;
+                                    align-items: center;
+
+                                }
+                            </style>
+                        `
                     },
                     {
                         fieldtype: "HTML",
@@ -450,8 +450,8 @@ frappe.ui.form.on("Stock Entry", {
                                 }
                             }
                         )
-                    }, 200);
-                }, 700);
+                    }, 100);
+                }, 500);
             }
             let searchTerm = d.get_field("search_term")
             searchTerm.input.dispatchEvent(new Event('input'));
