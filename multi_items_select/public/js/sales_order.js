@@ -154,7 +154,10 @@ frappe.ui.form.on("Sales Order", {
         }
 
         const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("Multi Insert"), function () {
-
+            if(!frm.doc.customer) {
+                frappe.show_alert(__("Multi Item Select: Please select customer first"));
+                return
+            }
             var d = new frappe.ui.Dialog({
                 title: __("Multi Item Select: Multi Insert"),
                 type: "large",
@@ -299,15 +302,18 @@ frappe.ui.form.on("Sales Order", {
                                     if (r.message) {
                                         let data_rows = "";
                                         // d.mis_search_data = r.message;
+                                        let totalLabel = d.get_field("search_results").section.head[0]
 
                                         if (r.message.length > 0) {
                                             d.set_df_property("search_results", "hidden", false);
                                             d.set_df_property("query_loading", "hidden", true);
                                             d.set_df_property("no_data", "hidden", true);
+                                            totalLabel.innerText = `Search Results (${r.message.length})`
                                         } else {
                                             d.set_df_property("search_results", "hidden", true);
                                             d.set_df_property("query_loading", "hidden", true);
                                             d.set_df_property("no_data", "hidden", false);
+                                            totalLabel.innerText = `Search Results (0)`
                                         }
 
                                         for (let i = 0; i < r.message.length; i++) {

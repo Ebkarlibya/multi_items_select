@@ -364,15 +364,18 @@ frappe.ui.form.on("Stock Entry", {
                                     if (r.message) {
                                         let data_rows = "";
                                         // d.mis_search_data = r.message;
+                                        let totalLabel = d.get_field("search_results").section.head[0]
 
                                         if (r.message.length > 0) {
                                             d.set_df_property("search_results", "hidden", false);
                                             d.set_df_property("query_loading", "hidden", true);
                                             d.set_df_property("no_data", "hidden", true);
+                                            totalLabel.innerText = `Search Results (${r.message.length})`
                                         } else {
                                             d.set_df_property("search_results", "hidden", true);
                                             d.set_df_property("query_loading", "hidden", true);
                                             d.set_df_property("no_data", "hidden", false);
+                                            totalLabel.innerText = `Search Results (0)`
                                         }
 
                                         for (let i = 0; i < r.message.length; i++) {

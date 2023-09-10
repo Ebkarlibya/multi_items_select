@@ -69,60 +69,54 @@ def get_items_reserved_qty():
 @frappe.whitelist(allow_guest=False)
 def get_multiple_items():
 
-    source_warehouse = frappe.form_dict.get('source_warehouse')
     search_term = frappe.form_dict.get("search_term")
+    warehouse = frappe.form_dict.get('source_warehouse')
     item_group = frappe.form_dict.get("item_group")
     brand = frappe.form_dict.get("brand")
     item_option = frappe.form_dict.get("item_option")
     item_sub_category = frappe.form_dict.get("item_sub_category")
 
-    filters_cond = {
-        # "item_code": ("like", f"%{search_term}%"),
+    escaped_search_term = frappe.db.escape(search_term)
+    escaped_search_term = "'%" + escaped_search_term[1:len(escaped_search_term) -1] + "%'"
+
+    sql_filters = {
+        "sql_term": f"where (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term})",
     }
 
-    if source_warehouse:
-        filters_cond["warehouse"] = source_warehouse
+    if warehouse:
+        sql_filters["sql_warehouse"] = f"and b.warehouse = {frappe.db.escape(warehouse)}"
 
-    _data = frappe.get_all(
-        "Bin",
-        fields=["item_code", "warehouse", "reserved_qty",
-                "actual_qty", "projected_qty", "stock_uom"],
-        filters=filters_cond,
-        order_by="warehouse asc, item_code asc",
-    )
+    if item_group:
+        sql_filters["sql_item_group"] = f"and i.item_group = {frappe.db.escape(item_group)}"
 
-    data = []
+    if brand:
+        sql_filters["sql_brand"] = f"and i.brand = {frappe.db.escape(brand)}"
 
-    for item in _data:
+    if item_option:
+        sql_filters["sql_item_option"] = f"and i.item_option = {frappe.db.escape(item_option)}"
 
-        item["item_name"] = frappe.db.get_value(
-            "Item", item.item_code, "item_name")
-        item["item_group"] = frappe.db.get_value(
-            "Item", item.item_code, "item_group")
-        item["brand"] = frappe.db.get_value(
-            "Item", item.item_code, "brand")
-        item["item_option"] = frappe.db.get_value(
-            "Item", item.item_code, "mia_item_option")
-        item["item_sub_category"] = frappe.db.get_value(
-            "Item", item.item_code, "mia_item_sub_category")
+    if item_sub_category:
+        sql_filters["sql_item_sub_category"] = f"and i.item_sub_category = {frappe.db.escape(item_sub_category)}"
+
+    data = frappe.db.sql(f"""
+        select i.item_code, i.item_name, i.item_group, i.brand, i.mia_item_option, i.mia_item_sub_category,
+        b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.stock_uom
         
-        
-        if item_group and item_group != item["item_group"]:
-            continue
-        if brand and brand != item["brand"]:
-            continue
-        if item_option and item_option != item["item_option"]:
-            continue
-        if item_sub_category and item_sub_category != item["item_sub_category"]:
-            continue
+        from `tabItem` i inner join `tabBin` b        
+        on i.item_code = b.item_code
 
-        if search_term:
-            if search_term.lower() in item.item_name.lower():
-                data.append(item)
-            else:
-                continue
-        else:
-            data.append(item)
+        {sql_filters.get('sql_term', '')}
+        {sql_filters.get('sql_warehouse', '')}
+        {sql_filters.get('sql_item_group', '')}
+        {sql_filters.get('sql_brand', '')}
+        {sql_filters.get('sql_item_option', '')}
+        {sql_filters.get('sql_item_sub_category', '')}
+
+                         
+        order by b.item_code, b.warehouse
+                          
+        limit {15 if not search_term else 100000000}
+    """, as_dict=True, debug=True)
 
     return data
 
