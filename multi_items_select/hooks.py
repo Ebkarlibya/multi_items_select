@@ -47,7 +47,7 @@ doctype_js = {
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# "Role": "home_page"
 # }
 
 # Generators
@@ -61,8 +61,8 @@ doctype_js = {
 
 # add methods and filters to jinja environment
 # jinja = {
-#	"methods": "multi_items_select.utils.jinja_methods",
-#	"filters": "multi_items_select.utils.jinja_filters"
+# "methods": "multi_items_select.utils.jinja_methods",
+# "filters": "multi_items_select.utils.jinja_filters"
 # }
 
 # Installation
@@ -88,11 +88,11 @@ doctype_js = {
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# "Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-#	"Event": "frappe.desk.doctype.event.event.has_permission",
+# "Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
@@ -100,7 +100,7 @@ doctype_js = {
 # Override standard doctype classes
 
 # override_doctype_class = {
-#	"ToDo": "custom_app.overrides.CustomToDo"
+# "ToDo": "custom_app.overrides.CustomToDo"
 # }
 
 # Document Events
@@ -108,13 +108,16 @@ doctype_js = {
 # Hook on document methods and events
 
 doc_events = {
-	"Stock Entry": {
-		"on_update": "multi_items_select.events.stock_entry.on_update",
-	},
+    "Stock Entry": {
+        "on_update": "multi_items_select.events.stock_entry.on_update",
+    },
     "Sales Order": {
-        "before_save": "multi_items_select.events.sales_order.on_update",
+        "before_save": "multi_items_select.events.sales_order.before_save",
         "before_submit": "multi_items_select.events.sales_order.before_submit",
 
+    },
+    "Sales Invoice": {
+        "before_save": "multi_items_select.events.sales_invoice.before_save",
     }
 }
 
@@ -122,21 +125,21 @@ doc_events = {
 # ---------------
 
 # scheduler_events = {
-#	"all": [
-#		"multi_items_select.tasks.all"
-#	],
-#	"daily": [
-#		"multi_items_select.tasks.daily"
-#	],
-#	"hourly": [
-#		"multi_items_select.tasks.hourly"
-#	],
-#	"weekly": [
-#		"multi_items_select.tasks.weekly"
-#	],
-#	"monthly": [
-#		"multi_items_select.tasks.monthly"
-#	],
+# "all": [
+# "multi_items_select.tasks.all"
+# ],
+# "daily": [
+# "multi_items_select.tasks.daily"
+# ],
+# "hourly": [
+# "multi_items_select.tasks.hourly"
+# ],
+# "weekly": [
+# "multi_items_select.tasks.weekly"
+# ],
+# "monthly": [
+# "multi_items_select.tasks.monthly"
+# ],
 # }
 
 # Testing
@@ -148,14 +151,14 @@ doc_events = {
 # ------------------------------
 #
 # override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "multi_items_select.event.get_events"
+# "frappe.desk.doctype.event.event.get_events": "multi_items_select.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-#	"Task": "multi_items_select.task.get_dashboard_data"
+# "Task": "multi_items_select.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -167,31 +170,31 @@ doc_events = {
 # --------------------
 
 # user_data_fields = [
-#	{
-#		"doctype": "{doctype_1}",
-#		"filter_by": "{filter_by}",
-#		"redact_fields": ["{field_1}", "{field_2}"],
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_2}",
-#		"filter_by": "{filter_by}",
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_3}",
-#		"strict": False,
-#	},
-#	{
-#		"doctype": "{doctype_4}"
-#	}
+# {
+# "doctype": "{doctype_1}",
+# "filter_by": "{filter_by}",
+# "redact_fields": ["{field_1}", "{field_2}"],
+# "partial": 1,
+# },
+# {
+# "doctype": "{doctype_2}",
+# "filter_by": "{filter_by}",
+# "partial": 1,
+# },
+# {
+# "doctype": "{doctype_3}",
+# "strict": False,
+# },
+# {
+# "doctype": "{doctype_4}"
+# }
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-#	"multi_items_select.auth.validate"
+# "multi_items_select.auth.validate"
 # ]
 
 fixtures = [
@@ -207,7 +210,7 @@ fixtures = [
                 # Sales Order & Sales Invoice
                 "mia_outstanding_amount",
                 "mia_total_outstanding_amount",
-                
+
                 # Sales Order Item & Packed Item
                 "mis_sellable_qty",
                 "mis_reserved_qty"
@@ -215,4 +218,3 @@ fixtures = [
         ]
     }
 ]
-

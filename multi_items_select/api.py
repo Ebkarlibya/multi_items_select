@@ -1,9 +1,10 @@
 import frappe
 from erpnext.accounts.utils import get_balance_on
 
+
 @frappe.whitelist(allow_guest=False)
 def get_settings():
-    data =  frappe.get_single("Multi Select Settings")
+    data = frappe.get_single("Multi Select Settings")
     return data
 
 
@@ -11,7 +12,7 @@ def get_settings():
 def get_items_reserved_qty():
     # mis_settings = frappe.db.get_single("Multi Select Settings")
     # if mis_settings.sellable_qty_action == "Stop" and mis_settings.sellable_bypass_role not in frappe.get_roles():
-        
+
     #     return False
 
     source_warehouse = frappe.form_dict.get('source_warehouse')
@@ -77,7 +78,8 @@ def get_multiple_items():
     item_sub_category = frappe.form_dict.get("item_sub_category")
 
     escaped_search_term = frappe.db.escape(search_term)
-    escaped_search_term = "'%" + escaped_search_term[1:len(escaped_search_term) -1] + "%'"
+    escaped_search_term = "'%" + \
+        escaped_search_term[1:len(escaped_search_term) - 1] + "%'"
 
     sql_filters = {
         "sql_term": f"where (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term})",
@@ -96,7 +98,8 @@ def get_multiple_items():
         sql_filters["sql_item_option"] = f"and i.item_option = {frappe.db.escape(item_option)}"
 
     if item_sub_category:
-        sql_filters["sql_item_sub_category"] = f"and i.item_sub_category = {frappe.db.escape(item_sub_category)}"
+        sql_filters[
+            "sql_item_sub_category"] = f"and i.item_sub_category = {frappe.db.escape(item_sub_category)}"
 
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, i.item_group, i.brand, i.mia_item_option, i.mia_item_sub_category,
@@ -131,11 +134,10 @@ def get_can_bypass():
 
 
 @frappe.whitelist(allow_guest=False)
-def get_customer_outstandings():
+def get_customer_outstandings(customer: str):
 
-    customer = frappe.form_dict.get('customer')
-
-    outstanding_amount = get_balance_on(party=customer, party_type="Customer", date=frappe.utils.nowdate())
+    outstanding_amount = get_balance_on(
+        party=customer, party_type="Customer", date=frappe.utils.nowdate())
 
     data = frappe.db.sql("""
         SELECT sum(outstanding_amount) as total_outstanding_amount
