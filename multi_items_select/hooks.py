@@ -118,6 +118,7 @@ doc_events = {
     },
     "Sales Invoice": {
         "before_save": "multi_items_select.events.sales_invoice.before_save",
+        "validate": "multi_items_select.events.sales_invoice.validate",
     }
 }
 

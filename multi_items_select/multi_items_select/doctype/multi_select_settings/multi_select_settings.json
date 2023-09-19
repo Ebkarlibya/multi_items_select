@@ -20,7 +20,9 @@
   "column_break_h0sxf",
   "item_option_label",
   "column_break_scwyl",
-  "item_sub_category_label"
+  "item_sub_category_label",
+  "extra_settings_section",
+  "max_allowed_customer_total_outstanding"
  ],
  "fields": [
   {
@@ -104,12 +106,23 @@
    "fieldname": "item_sub_category_label",
    "fieldtype": "Data",
    "label": "Item Sub Category Label"
+  },
+  {
+   "fieldname": "extra_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Extra Settings"
+  },
+  {
+   "description": "Set to zero to disable this option",
+   "fieldname": "max_allowed_customer_total_outstanding",
+   "fieldtype": "Currency",
+   "label": "Max Allowed Customer Total Outstanding"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-01 14:04:09.564286",
+ "modified": "2023-09-19 09:16:09.099056",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",
