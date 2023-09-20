@@ -11,7 +11,7 @@ def before_save(doc, method):
 
     settings = frappe.get_single("Multi Select Settings")
 
-    if doc.mia_total_outstanding_amount > settings.max_allowed_customer_total_outstanding and settings.max_allowed_customer_total_outstanding > 0:
+    if doc.mia_total_outstanding_amount and doc.mia_total_outstanding_amount > settings.max_allowed_customer_total_outstanding and settings.max_allowed_customer_total_outstanding > 0:
         frappe.throw(f"""
 Total Allowed Outstandings for Customer ({doc.customer}) is over the allowed amount. <br>
 Customer Total Outstandings: ({fmt_money(doc.mia_total_outstanding_amount)}) / Total Allowed: ({fmt_money(settings.max_allowed_customer_total_outstanding)})
