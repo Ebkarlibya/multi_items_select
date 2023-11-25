@@ -13,13 +13,12 @@ def on_update(doc, method):
                     "item_code": item.item_code,
                 },
             )
-
             if len(item_stock_data) > 0:
                 data = item_stock_data[0]
                 transferable_qty = data.actual_qty - data.reserved_qty
-
-                if doc.masm_device_maintenance_card:
-                    continue
+                if hasattr(doc, 'masm_device_maintenance_card'):
+                    if doc.masm_device_maintenance_card:
+                        continue
 
                 if int(item.qty) > transferable_qty:
                     frappe.msgprint(
