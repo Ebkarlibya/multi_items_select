@@ -17,7 +17,11 @@ def on_update(doc, method):
             if len(item_stock_data) > 0:
                 data = item_stock_data[0]
                 transferable_qty = data.actual_qty - data.reserved_qty
-                if int(item.qty) > transferable_qty and not doc.masm_device_maintenance_card:
+
+                if doc.masm_device_maintenance_card:
+                    continue
+
+                if int(item.qty) > transferable_qty:
                     frappe.msgprint(
                         f"Item <string>{item.item_code}</strong> Qty ({item.qty}) is higher than the Transferable Qty ({transferable_qty}) at row {item.idx}",
                         "Message",
