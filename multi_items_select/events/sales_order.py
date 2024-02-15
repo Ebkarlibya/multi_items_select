@@ -60,6 +60,24 @@ def before_submit(doc, method):
                         </p>
                         """, "Warning", raise_exception=True)
             pass
+        else:
+            if (mis_settings.sellable_qty_action == "Warn"):
+                if not can_bypass:
+                    frappe.msgprint(f"""
+                    <p style="font-size: 12px; line-height: 14px;">
+                        Warning, Item: ${item.item_code} in row: ({item.idx}) Qty ({item.qty})
+                       has no Bin entries in warehouse: ({item.warehouse})
+                    </p>
+                    """, "Warning", raise_exception=True)
+
+            elif (mis_settings.sellable_qty_action == "Stop"):
+                if not can_bypass:
+                    frappe.msgprint(f"""
+                    <p style="font-size: 12px; line-height: 14px;">
+                        Can't submit, Item {item.item_code} in row: ({item.idx}) Qty: ({item.qty})  
+                        has no Bin entries in warehouse: ({item.warehouse})
+                    </p>
+                    """, "Warning", raise_exception=True)
     #  so packed items
     if doc.packed_items:
         for item in doc.packed_items:
