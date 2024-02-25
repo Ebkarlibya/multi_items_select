@@ -29,6 +29,18 @@ def before_submit(doc, method):
 
     # so items
     for item in doc.items:
+        is_stock_item = frappe.db.get_value(
+            "Item",
+            filters={
+                "item_code": item.item_code
+            },
+            fieldname="is_stock_item",
+            as_dict=True
+        )
+
+        if is_stock_item.get("is_stock_item") == 0:
+            continue
+        
         data = frappe.get_all(
             "Bin",
             fields=["item_code", "warehouse", "reserved_qty", "actual_qty"],
