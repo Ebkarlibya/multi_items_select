@@ -287,6 +287,19 @@ frappe.ui.form.on("Stock Entry", {
                         fieldtype: "Section Break"
                     },
                     {
+                        fieldtype: "Column Break"
+                    },
+                    {
+                        fieldname: "include_non_stock",
+                        fieldtype: "Check",
+                        label: __("Include Non Maintain Stock"),
+                        default: false,
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    {
                         fieldname: "query_loading",
                         fieldtype: "HTML",
                         label: __("Query Loading"),
@@ -354,6 +367,7 @@ frappe.ui.form.on("Stock Entry", {
                                 args: {
                                     source_warehouse: frm.doc.from_warehouse,
                                     search_term: d.get_value("search_term"),
+                                    include_non_stock: d.get_value("include_non_stock"),
                                     item_group: d.get_value("item_group"),
                                     brand: d.get_value("brand"),
                                     item_option: d.get_value("item_option"),
@@ -380,6 +394,12 @@ frappe.ui.form.on("Stock Entry", {
 
                                         for (let i = 0; i < r.message.length; i++) {
                                             let data = r.message[i];
+                                            data.warehouse = data.warehouse ? data.warehouse : "-"
+                                            data.actual_qty = data.actual_qty ? data.actual_qty : "-"
+                                            data.reserved_qty = data.reserved_qty ? data.reserved_qty : "-"
+                                            data.brand = data.brand ? data.brand : "-"
+                                            data.stock_uom = data.stock_uom ? data.stock_uom : "-"
+                                            
                                             data_rows += repl(
                                                 `<tr 
                                                                 class="etms-add-multi__tb_tr"

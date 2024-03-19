@@ -1,3 +1,4 @@
+import json
 import frappe
 from erpnext.accounts.utils import get_balance_on
 
@@ -71,6 +72,7 @@ def get_items_reserved_qty():
 def get_multiple_items():
 
     search_term = frappe.form_dict.get("search_term")
+    include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
     warehouse = frappe.form_dict.get('source_warehouse')
     item_group = frappe.form_dict.get("item_group")
     brand = frappe.form_dict.get("brand")
@@ -105,10 +107,11 @@ def get_multiple_items():
         select i.item_code, i.item_name, i.item_group, i.brand, i.mia_item_option, i.mia_item_sub_category,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.stock_uom
         
-        from `tabItem` i inner join `tabBin` b        
+        from `tabItem` i { 'left' if include_non_stock else 'inner' } join `tabBin` b        
         on i.item_code = b.item_code
-
+        
         {sql_filters.get('sql_term', '')}
+        {'and i.is_stock_item = 1' if not include_non_stock else '' }
         {sql_filters.get('sql_warehouse', '')}
         {sql_filters.get('sql_item_group', '')}
         {sql_filters.get('sql_brand', '')}
