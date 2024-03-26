@@ -335,6 +335,7 @@ frappe.ui.form.on("Sales Invoice", {
                                             data.warehouse = data.warehouse ? data.warehouse : "-"
                                             data.actual_qty = data.actual_qty ? data.actual_qty : "-"
                                             data.reserved_qty = data.reserved_qty ? data.reserved_qty : "-"
+                                            data.ordered_qty = data.ordered_qty ? data.ordered_qty : "-"
                                             data.brand = data.brand ? data.brand : "-"
                                             data.stock_uom = data.stock_uom ? data.stock_uom : "-"
 
@@ -365,6 +366,11 @@ frappe.ui.form.on("Sales Invoice", {
                                                                     <p>${data.reserved_qty}</p>
                                                                 <div>
                                                             </td>
+                                                            <td>
+                                                                <div class="etms-add-multi__row">
+                                                                    <p>${data.ordered_qty}</p>
+                                                                <div>
+                                                            </td>
                                                         </tr>`,
                                                 {
                                                     item_code: data.item_code,
@@ -383,6 +389,7 @@ frappe.ui.form.on("Sales Invoice", {
                                                             <th scope="col">Warehouse</th>
                                                             <th scope="col">Actual Qty</th>
                                                             <th scope="col">Reserved Qty</th>
+                                                            <th scope="col">Ordered Qty</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
