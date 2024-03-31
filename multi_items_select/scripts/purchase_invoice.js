@@ -117,7 +117,7 @@ frappe.ui.form.on("Purchase Invoice", {
                                 return frappe.model.set_value(d.doctype, d.name, args);
                             }
                         ]);
-                        frappe.show_alert(__("Multi Item Select: Item Added!"));
+                        frappe.show_alert(__("(MIS): Item Added!"));
                         qd.hide();
                     }
 
@@ -154,12 +154,12 @@ frappe.ui.form.on("Purchase Invoice", {
         }
 
         const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("Multi Insert"), function () {
-            if (!frm.doc.customer) {
-                frappe.show_alert(__("Multi Item Select: Please select customer first"));
-                return
-            }
+            // if (!frm.doc.customer) {
+            //     frappe.show_alert(__("(MIS): Please select customer first"));
+            //     return
+            // }
             var d = new frappe.ui.Dialog({
-                title: __("Multi Item Select: Multi Insert"),
+                title: __("(MIS): Multi Insert"),
                 type: "large",
                 fields: [
                     {
@@ -586,18 +586,18 @@ frappe.ui.form.on("Purchase Invoice", {
         //     }
         // }
     },
-    customer: function (frm) {
-        if (frm.doc.customer) {
-            frappe.call({
-                method: "multi_items_select.api.get_customer_outstandings",
-                args: {
-                    customer: frm.doc.customer
-                },
-                callback: function (r) {
-                    frappe.model.set_value(frm.doctype, frm.docname, "mia_outstanding_amount", r.message.outstanding_amount);
-                    frappe.model.set_value(frm.doctype, frm.docname, "mia_total_outstanding_amount", r.message.total_outstanding_amount);
-                }
-            });
-        }
-    }
+    // customer: function (frm) {
+    //     if (frm.doc.customer) {
+    //         frappe.call({
+    //             method: "multi_items_select.api.get_customer_outstandings",
+    //             args: {
+    //                 customer: frm.doc.customer
+    //             },
+    //             callback: function (r) {
+    //                 frappe.model.set_value(frm.doctype, frm.docname, "mia_outstanding_amount", r.message.outstanding_amount);
+    //                 frappe.model.set_value(frm.doctype, frm.docname, "mia_total_outstanding_amount", r.message.total_outstanding_amount);
+    //             }
+    //         });
+    //     }
+    // }
 });

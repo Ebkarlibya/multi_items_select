@@ -121,7 +121,7 @@ def get_multiple_items():
                          
         order by b.item_code, b.warehouse
                           
-        limit {15 if not search_term else 100000000}
+        limit {20 if not search_term else 100000000}
     """, as_dict=True, debug=False)
 
     return data

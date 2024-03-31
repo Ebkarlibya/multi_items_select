@@ -116,7 +116,7 @@ frappe.ui.form.on("Stock Entry", {
                                 return frappe.model.set_value(d.doctype, d.name, args);
                             }
                         ]);
-                        frappe.show_alert(__("Multi Item Select: Item Added!"));
+                        frappe.show_alert(__("(MIS): Item Added!"));
                         qd.hide();
                     }
 
@@ -195,7 +195,7 @@ frappe.ui.form.on("Stock Entry", {
                                 item.qty = item.qty || 0;
                             });
                             frm.refresh_field("items");
-                            frappe.show_alert(__("Multi Item Select: Items Added!"));
+                            frappe.show_alert(__("(MIS): Items Added!"));
                         }
                     });
                 }, __("Get Items"), __("Update"));
@@ -223,7 +223,7 @@ frappe.ui.form.on("Stock Entry", {
         const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("Multi Insert"), function () {
 
             var d = new frappe.ui.Dialog({
-                title: __("Multi Item Select: Multi Insert"),
+                title: __("(MIS): Multi Insert"),
                 type: "large",
                 fields: [
                     {
