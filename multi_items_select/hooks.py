@@ -30,6 +30,9 @@ app_license = "MIT"
 
 # include js in doctype views
 doctype_js = {
+    "Item": "scripts/item.js",
+    "Purchase Order": "scripts/purchase_order.js",
+    "Purchase Invoice": "scripts/purchase_invoice.js",
     "Sales Order": "scripts/sales_order.js",
     "Sales Invoice": "scripts/sales_invoice.js",
     "Stock Entry": "scripts/stock_entry.js",
@@ -204,6 +207,9 @@ fixtures = [
         "filters": [
             ["fieldname", "in", (
                 # Item
+                "mis_has_packed_item",
+                "mis_packed_items_section_58e2k",
+                "mis_packed_items",
                 "mia_item_desc_col_break_4123",
                 "mia_item_sub_category",
                 "mia_item_option",
