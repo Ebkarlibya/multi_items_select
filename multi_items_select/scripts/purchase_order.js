@@ -286,6 +286,7 @@ frappe.ui.form.on("Purchase Order", {
                     d.hide();
                 },
             });
+
             d.show();
 
             let timeout = null;
@@ -342,9 +343,12 @@ frappe.ui.form.on("Purchase Order", {
                                             
                                             data_rows += repl(
                                                 `<tr 
-                                                                class="etms-add-multi__tb_tr"
-                                                                onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(item_name)s\`, \`%(warehouse)s\`, \`%(actual_qty)s\`, \`%(reserved_qty)s\`)">
-                                                                <td>
+                                                    class="etms-add-multi__tb_tr"
+                                                    onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(item_name)s\`, \`%(warehouse)s\`, \`%(actual_qty)s\`, \`%(reserved_qty)s\`)">
+                                                            <td style="vertical-align: middle; padding: 2px">
+                                                                <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                                            </td>
+                                                            <td>
                                                                 <div class="etms-add-multi__row">
                                                                     <p>${data.item_code}</p>
                                                                     <p class="etms-multi__subtitle1">${data.item_name}</p>
@@ -385,6 +389,7 @@ frappe.ui.form.on("Purchase Order", {
                                                 <table class="table table-striped" style="margin: 0px;">
                                                     <thead>
                                                         <tr class="etms-add-multi__th_tr">
+                                                            <th scope="col">Image</th>
                                                             <th scope="col">Item Code</th>
                                                             <th scope="col">Warehouse</th>
                                                             <th scope="col">Actual Qty</th>
@@ -397,6 +402,9 @@ frappe.ui.form.on("Purchase Order", {
                                                     </tbody>
                                                     </table>
                                                     <style>
+                                                        .modal-content {
+                                                            width: fit-content
+                                                        }
                                                         .etms-add-multi__row {
                                                             cursor: pointer;
                                                         }

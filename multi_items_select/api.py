@@ -104,7 +104,8 @@ def get_multiple_items():
             "sql_item_sub_category"] = f"and i.item_sub_category = {frappe.db.escape(item_sub_category)}"
 
     data = frappe.db.sql(f"""
-        select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.mia_item_option, i.mia_item_sub_category,
+        select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, 
+        i.image, i.mia_item_option, i.mia_item_sub_category,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
         
         from `tabItem` i { 'left' if include_non_stock else 'inner' } join `tabBin` b        
