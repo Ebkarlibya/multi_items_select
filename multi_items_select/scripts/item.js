@@ -23,7 +23,7 @@ frappe.ui.form.on("Item", {
             frm.set_df_property("mis_packed_items", "hidden", false)
             frm.set_df_property("mis_packed_items", "reqd", true)
 
-            frm.set_query("item", "mis_packed_items", function(frm, cdt, cdn) {
+            frm.set_query("item_code", "mis_packed_items", function(frm, cdt, cdn) {
                 return {
                     filters: {
                         "mis_has_packed_item": false
@@ -53,7 +53,6 @@ frappe.ui.form.on("Item", {
 //         console.log("add item");
 //     },
 // })
-
 
 
 function highlight_field(frm, fieldname) {

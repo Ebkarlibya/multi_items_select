@@ -127,6 +127,51 @@ def get_multiple_items():
 
     return data
 
+@frappe.whitelist(allow_guest=False)
+def get_packed_items():
+    packed_item_code = frappe.form_dict["packed_item_code"]
+
+    mis_packed_items = frappe.get_list(
+        "MIS Packed Item Table",
+        fields=["item_code"],
+        filters={
+            "parent": packed_item_code,
+            "enabled": True
+        },
+        order_by="idx"
+    )
+
+    packed_items = []
+    # , (select image from `tabItem` where item_code = mpi.item_code) image
+    for packed_item in mis_packed_items:
+        packed_item_data = frappe.db.get_value(
+            "Item",
+            filters={
+                "item_code": packed_item["item_code"]
+            },
+            fieldname=["item_name", "image"],
+            as_dict=True
+        )
+    
+        _packed_items = frappe.db.sql(
+            f"""
+                select mpi.item_code, mpi.qty, mpi.enabled, b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty,
+                (b.actual_qty - b.reserved_qty) sellable_qty, b.stock_uom
+                
+                from `tabMIS Packed Item Table` mpi inner join `tabBin` b
+                on mpi.item_code = b.item_code
+
+                where mpi.item_code = {frappe.db.escape(packed_item["item_code"])}
+
+            """, as_dict=True, debug=False
+        )
+
+        _packed_items[0]["item_name"] = packed_item_data.get("item_name")
+        _packed_items[0]["image"] = packed_item_data.get("image")
+
+        packed_items.append(_packed_items[0])
+
+    return packed_items
 
 @frappe.whitelist(allow_guest=False)
 def get_can_bypass():

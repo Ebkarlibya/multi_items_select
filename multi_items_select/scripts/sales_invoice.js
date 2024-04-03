@@ -1,123 +1,97 @@
 
 frappe.ui.form.on("Sales Invoice", {
     setup: function (frm) {
-        frm.mis_add_item_row = function (item_code, item_name, warehouse, actual_qty, reserved_qty) {
-            const sellable_qty = actual_qty - reserved_qty;
+        frm.mis_add_packed_items = async function (packed_item_code) {
+
+            let mis_settings = await frappe.call({
+                method: "multi_items_select.api.get_settings",
+            });
+            mis_settings = mis_settings.message;
+
+            let can_bypass = await frappe.call({
+                method: "multi_items_select.api.get_can_bypass",
+            });
+            can_bypass = can_bypass.message;
+
             let qd = new frappe.ui.Dialog(
                 {
 
-                    title: __("Select Insert Quantity"),
+                    title: __("Packed Item Details"),
                     fields: [
                         {
-                            fieldname: "qty",
-                            fieldtype: "Float",
-                            label: "Qty",
-                            default: 1,
-                            reqd: 1,
-
-                        },
-                        {
-                            fieldtype: "Section Break",
-                        },
-                        {
-                            fieldname: "item_code",
+                            fieldname: "packed_item",
                             fieldtype: "Link",
-                            label: "Item Code",
-                            options: "Item",
-                            read_only: 1,
+                            label: "Packed Item",
+                            default: packed_item_code,
+                            read_only: 1
                         },
+                        { fieldtype: "Column Break" },
                         {
-                            fieldtype: "Column Break",
-                        },
-                        {
-                            fieldname: "item_name",
+                            fieldname: "packed_item_name",
                             fieldtype: "Data",
-                            label: "Item Name",
-                            read_only: 1,
+                            label: "Packed Item Name",
+
+                            default: packed_item_code,
+                            read_only: 1
                         },
                         {
+                            fieldname: "packed_items_section_5431",
                             fieldtype: "Section Break",
+                            label: "Packed Item Items"
                         },
                         {
-                            fieldname: "warehouse",
-                            fieldtype: "Link",
-                            label: "Warehouse",
-                            options: "Warehouse",
-                            read_only: 1,
+                            fieldtype: "HTML",
+                            fieldname: "packed_items_html",
+                            hidden: 0,
+                            options: "<h4>Loading Packed Item Data, Please Wait .... </h4>"
                         },
-                        {
-                            fieldtype: "Column Break",
-                        },
-                        {
-                            fieldname: "actual_qty",
-                            fieldtype: "Float",
-                            label: "Actual Qty",
-                            read_only: 1,
-                        },
-                        {
-                            fieldtype: "Section Break",
-                        },
-                        {
-                            fieldname: "reserved_qty",
-                            fieldtype: "Float",
-                            label: "Reserved Qty",
-                            read_only: 1,
-                        },
-                        {
-                            fieldtype: "Column Break",
-                        },
-                        {
-                            fieldname: "sellable_qty",
-                            fieldtype: "Float",
-                            label: "Sellable Qty",
-                            read_only: 1,
-                        }
+                        
                     ],
-                    primary_action_label: __("Insert Item"),
+                    primary_action_label: __("Insert Items"),
                     primary_action: async function (values) {
+                        frappe.dom.freeze()
                         const itemsGrid = frm.get_field("items").grid;
-                        let d = null;
+                       // const packedItemsGrid = this.get_field("packed_items").grid;
 
-                        // validate sellable qty
-                        let mis_settings = await frappe.call({
-                            method: "multi_items_select.api.get_settings",
-                        });
-                        mis_settings = mis_settings.message;
+                        for (let i = 0; i < cur_frm.mis_last_packed_items_search_data.length; i++) {
+                            const row = cur_frm.mis_last_packed_items_search_data[i]
 
-                        let can_bypass = await frappe.call({
-                            method: "multi_items_select.api.get_can_bypass",
-                        });
-                        can_bypass = can_bypass.message;
+                            const sellable_qty = row.actual_qty - row.reserved_qty;
 
-                        if (values.qty > sellable_qty) {
-                            switch (mis_settings.sellable_qty_action) {
-                                case "Nothing":
-                                    break;
-                                case "Warn":
-                                    frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
-                                    break;
-                                case "Stop":
-                                    if (can_bypass) {
-                                        frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+
+                            if (row.actual_qty > sellable_qty) {
+                                switch (mis_settings.sellable_qty_action) {
+                                    case "Nothing":
                                         break;
-                                    } else {
-                                        frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
-                                        return;
-                                    }
+                                    case "Warn":
+                                        frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                        break;
+                                    case "Stop":
+                                        if (can_bypass) {
+                                            frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                            break;
+                                        } else {
+                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                            return;
+                                        }
+                                }
                             }
-                        }
 
-                        frappe.run_serially([
-                            () => d = itemsGrid.add_new_row(),
-                            () => frappe.timeout(0.2),
-                            () => {
-                                let args = {};
-                                args["item_code"] = item_code;
-                                args["qty"] = values.qty;
-                                return frappe.model.set_value(d.doctype, d.name, args);
-                            }
-                        ]);
-                        frappe.show_alert(__("(MIS): Item Added!"));
+                            let d = null;
+
+                            frappe.run_serially([
+                                () => d = itemsGrid.add_new_row(),
+                                () => frappe.timeout(0.2),
+                                () => {
+                                    let args = {};
+                                    args["item_code"] = row.item_code;
+                                    args["qty"] = row.qty;
+                                    return frappe.model.set_value(d.doctype, d.name, args);
+                                }
+                            ]);
+                        }
+                        frappe.dom.unfreeze()
+                        frappe.show_alert(__("(MIS): Packed Items Added!"));
                         qd.hide();
                     }
 
@@ -126,13 +100,250 @@ frappe.ui.form.on("Sales Invoice", {
 
             );
             qd.show();
-            qd.set_value("item_code", item_code);
-            qd.set_value("item_name", item_name);
-            qd.set_value("warehouse", warehouse);
-            qd.set_value("actual_qty", actual_qty);
-            qd.set_value("reserved_qty", reserved_qty);
-            qd.set_value("sellable_qty", actual_qty - reserved_qty);
-        }
+
+            // load packed items data
+            await wsleep(1000)
+            frappe.call({
+                method: "multi_items_select.api.get_packed_items",
+                args: { packed_item_code },
+                callback: function (r) {
+                    let data_rows = "";
+
+                    cur_frm.mis_last_packed_items_search_data = r.message
+
+
+                    for (let i = 0; i < r.message.length; i++) {
+                        let data = r.message[i];
+                        data.warehouse = data.warehouse ? data.warehouse : "-"
+                        data.actual_qty = data.actual_qty ? data.actual_qty : "-"
+                        data.reserved_qty = data.reserved_qty ? data.reserved_qty : "-"
+                        data.ordered_qty = data.ordered_qty ? data.ordered_qty : "-"
+                        data.brand = data.brand ? data.brand : "-"
+                        data.stock_uom = data.stock_uom ? data.stock_uom : "-"
+
+
+                        data_rows += repl(
+                            `<tr 
+                                class="etms-add-multi__tb_tr">
+                                        <td style="vertical-align: middle; padding: 2px">
+                                            <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                        </td>
+                                        <td>
+                                            <div class="etms-add-multi__row">
+                                                <p>${data.item_code}</p>
+                                                <p class="etms-multi__subtitle1">${data.item_name}</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="etms-add-multi__row">
+                                                <p>${data.warehouse}</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="etms-add-multi__row">
+                                                <p>${data.actual_qty}</p>
+                                            <div>
+                                            <p class="etms-multi__subtitle1">${data.stock_uom}</p>
+                                        </td>
+                                        <td>
+                                            <div class="etms-add-multi__row">
+                                                <p>${data.reserved_qty}</p>
+                                            <div>
+                                        </td>
+                                        <td>
+                                            <div class="etms-add-multi__row">
+                                                <p>${data.ordered_qty}</p>
+                                            <div>
+                                        </td>
+                                    </tr>`,
+                            {
+                                item_code: data.item_code
+                            }
+                        );
+                    }
+                    let html = `
+                            <table class="table table-striped" style="margin: 0px;">
+                                <thead>
+                                    <tr class="etms-add-multi__th_tr">
+                                        <th scope="col">Image</th>
+                                        <th scope="col">Item Code</th>
+                                        <th scope="col">Warehouse</th>
+                                        <th scope="col">Actual Qty</th>
+                                        <th scope="col">Reserved Qty</th>
+                                        <th scope="col">Ordered Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data_rows}
+                                </tbody>
+                                </table>
+                                <style>
+                                    .modal-content {
+                                        width: fit-content
+                                    }
+                                    /*
+                                    .etms-add-multi__row {
+                                        cursor: pointer;
+                                    }*/
+                                    .etms-multi__subtitle1 {
+                                        font-size: 11px;
+                                        color: gray;
+                                    }
+                                    .etms-add-multi__th_tr {
+                                        white-space: nowrap;
+                                    }
+                                    .etms-add-etms-add-multi__tb_tr td {
+                                        padding-top: 3px;
+                                        padding-bottom: 0px;
+                                   
+                                    }
+                                </style>
+                            `;
+                            cur_dialog.set_df_property("packed_items_html", "options", html);
+                }
+            })
+        },
+            frm.mis_add_item_row = function (item_code) {
+                const selected_item = cur_frm.mis_last_search_data.find(el => el.item_code === item_code)
+
+                const { item_name, warehouse, actual_qty, reserved_qty, mis_has_packed_item } = selected_item
+
+                if (mis_has_packed_item) {
+                    frm.mis_add_packed_items(item_code)
+                    return
+                }
+
+                const sellable_qty = actual_qty - reserved_qty;
+                let qd = new frappe.ui.Dialog(
+                    {
+
+                        title: __("Select Insert Quantity"),
+                        fields: [
+                            {
+                                fieldname: "qty",
+                                fieldtype: "Float",
+                                label: "Qty",
+                                default: 1,
+                                reqd: 1,
+
+                            },
+                            {
+                                fieldtype: "Section Break",
+                            },
+                            {
+                                fieldname: "item_code",
+                                fieldtype: "Link",
+                                label: "Item Code",
+                                options: "Item",
+                                read_only: 1,
+                            },
+                            {
+                                fieldtype: "Column Break",
+                            },
+                            {
+                                fieldname: "item_name",
+                                fieldtype: "Data",
+                                label: "Item Name",
+                                read_only: 1,
+                            },
+                            {
+                                fieldtype: "Section Break",
+                            },
+                            {
+                                fieldname: "warehouse",
+                                fieldtype: "Link",
+                                label: "Warehouse",
+                                options: "Warehouse",
+                                read_only: 1,
+                            },
+                            {
+                                fieldtype: "Column Break",
+                            },
+                            {
+                                fieldname: "actual_qty",
+                                fieldtype: "Float",
+                                label: "Actual Qty",
+                                read_only: 1,
+                            },
+                            {
+                                fieldtype: "Section Break",
+                            },
+                            {
+                                fieldname: "reserved_qty",
+                                fieldtype: "Float",
+                                label: "Reserved Qty",
+                                read_only: 1,
+                            },
+                            {
+                                fieldtype: "Column Break",
+                            },
+                            {
+                                fieldname: "sellable_qty",
+                                fieldtype: "Float",
+                                label: "Sellable Qty",
+                                read_only: 1,
+                            }
+                        ],
+                        primary_action_label: __("Insert Item"),
+                        primary_action: async function (values) {
+                            const itemsGrid = frm.get_field("items").grid;
+                            let d = null;
+
+                            // validate sellable qty
+                            let mis_settings = await frappe.call({
+                                method: "multi_items_select.api.get_settings",
+                            });
+                            mis_settings = mis_settings.message;
+
+                            let can_bypass = await frappe.call({
+                                method: "multi_items_select.api.get_can_bypass",
+                            });
+                            can_bypass = can_bypass.message;
+
+                            if (values.qty > sellable_qty) {
+                                switch (mis_settings.sellable_qty_action) {
+                                    case "Nothing":
+                                        break;
+                                    case "Warn":
+                                        frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                        break;
+                                    case "Stop":
+                                        if (can_bypass) {
+                                            frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                            break;
+                                        } else {
+                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                            return;
+                                        }
+                                }
+                            }
+
+                            frappe.run_serially([
+                                () => d = itemsGrid.add_new_row(),
+                                () => frappe.timeout(0.2),
+                                () => {
+                                    let args = {};
+                                    args["item_code"] = item_code;
+                                    args["qty"] = values.qty;
+                                    return frappe.model.set_value(d.doctype, d.name, args);
+                                }
+                            ]);
+                            frappe.show_alert(__("(MIS): Item Added!"));
+                            qd.hide();
+                        }
+
+
+                    },
+
+                );
+                qd.show();
+                qd.set_value("item_code", item_code);
+                qd.set_value("item_name", item_name);
+                qd.set_value("warehouse", warehouse);
+                qd.set_value("actual_qty", actual_qty);
+                qd.set_value("reserved_qty", reserved_qty);
+                qd.set_value("sellable_qty", actual_qty - reserved_qty);
+            }
     },
     refresh: async function (frm) {
         const itemsGrid = frm.get_field("items").grid;
@@ -154,10 +365,10 @@ frappe.ui.form.on("Sales Invoice", {
         }
 
         const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("Multi Insert"), function () {
-            if (!frm.doc.customer) {
-                frappe.show_alert(__("(MIS): Please select customer first"));
-                return
-            }
+            // if (!frm.doc.customer) {
+            //     frappe.show_alert(__("(MIS): Please select customer first"));
+            //     return
+            // }
             var d = new frappe.ui.Dialog({
                 title: __("(MIS): Multi Insert"),
                 type: "large",
@@ -229,7 +440,7 @@ frappe.ui.form.on("Sales Invoice", {
                         fieldname: "include_non_stock",
                         fieldtype: "Check",
                         label: __("Include Non Maintain Stock"),
-                        default: false,
+                        default: 1,
                         change: function () {
                             let searchTerm = this.layout.get_field("search_term")
                             searchTerm.input.dispatchEvent(new Event('input'));
@@ -286,6 +497,7 @@ frappe.ui.form.on("Sales Invoice", {
                     d.hide();
                 },
             });
+
             d.show();
 
             let timeout = null;
@@ -330,6 +542,8 @@ frappe.ui.form.on("Sales Invoice", {
                                             totalLabel.innerText = `Search Results (0)`
                                         }
 
+                                        cur_frm.mis_last_search_data = r.message
+
                                         for (let i = 0; i < r.message.length; i++) {
                                             let data = r.message[i];
                                             data.warehouse = data.warehouse ? data.warehouse : "-"
@@ -339,11 +553,11 @@ frappe.ui.form.on("Sales Invoice", {
                                             data.brand = data.brand ? data.brand : "-"
                                             data.stock_uom = data.stock_uom ? data.stock_uom : "-"
 
-                                            
+
                                             data_rows += repl(
                                                 `<tr 
                                                     class="etms-add-multi__tb_tr"
-                                                    onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(item_name)s\`, \`%(warehouse)s\`, \`%(actual_qty)s\`, \`%(reserved_qty)s\`)">
+                                                    onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`)">
                                                             <td style="vertical-align: middle; padding: 2px">
                                                                 <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
                                                             </td>
@@ -376,11 +590,7 @@ frappe.ui.form.on("Sales Invoice", {
                                                             </td>
                                                         </tr>`,
                                                 {
-                                                    item_code: data.item_code,
-                                                    item_name: data.item_name,
-                                                    warehouse: data.warehouse,
-                                                    actual_qty: data.actual_qty,
-                                                    reserved_qty: data.reserved_qty,
+                                                    item_code: data.item_code
                                                 }
                                             );
                                         }
@@ -608,3 +818,75 @@ frappe.ui.form.on("Sales Invoice", {
         }
     }
 });
+
+function wsleep(time) {
+    return new Promise(resolve => setTimeout(() => resolve(), time))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// {
+                        //     fieldname: "packed_items",
+                        //     fieldtype: "Table",
+                        //     label: "Items",
+                        //     fields: [
+                        //         {
+                        //             fieldname: "item_code",
+                        //             fieldtype: "Link",
+                        //             label: "Item Code",
+                        //             read_only: 0,
+                        //             in_list_view: 1
+                        //         },
+                        //         {
+                        //             fieldname: "warehouse",
+                        //             fieldtype: "Link",
+                        //             label: "Warehouse",
+                        //             options: "Warehouse",
+                        //             read_only: 1,
+                        //             in_list_view: 1
+                        //         },
+                        //         {
+                        //             fieldname: "actual_qty",
+                        //             fieldtype: "Float",
+                        //             label: "Actual Qty",
+                        //             read_only: 1,
+                        //             in_list_view: 1
+                        //         },
+                        //         {
+                        //             fieldname: "reserved_qty",
+                        //             fieldtype: "Float",
+                        //             label: "Reserved Qty",
+                        //             read_only: 1,
+                        //             in_list_view: 1
+                        //         },
+                        //         {
+                        //             fieldname: "sellable_qty",
+                        //             fieldtype: "Float",
+                        //             label: "Sellable Qty",
+                        //             read_only: 1,
+                        //             in_list_view: 1
+                        //         },
+                        //         {
+                        //             fieldname: "ordered_qty",
+                        //             fieldtype: "Float",
+                        //             label: "Ordered Qty",
+                        //             width: 5,
+                        //             read_only: 1,
+                        //             in_list_view: 1
+                        //         },
+                        //     ],
+                        //     data: [],
+                        //     options: "Item",
+                        //     read_only: 1,
+                        // }
