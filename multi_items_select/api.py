@@ -8,7 +8,6 @@ def get_settings():
     data = frappe.get_single("Multi Select Settings")
     return data
 
-
 @frappe.whitelist(allow_guest=False)
 def get_items_reserved_qty():
     # mis_settings = frappe.db.get_single("Multi Select Settings")
