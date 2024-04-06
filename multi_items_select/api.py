@@ -83,7 +83,7 @@ def get_multiple_items():
         escaped_search_term[1:len(escaped_search_term) - 1] + "%'"
 
     sql_filters = {
-        "sql_term": f"where (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term})",
+        "sql_term": f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term})",
     }
 
     if warehouse:
@@ -109,6 +109,8 @@ def get_multiple_items():
         
         from `tabItem` i { 'left' if include_non_stock else 'inner' } join `tabBin` b        
         on i.item_code = b.item_code
+        
+        where i.disabled = 0
         
         {sql_filters.get('sql_term', '')}
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
@@ -148,9 +150,12 @@ def get_packed_items():
             filters={
                 "item_code": packed_item["item_code"]
             },
-            fieldname=["item_name", "image"],
+            fieldname=["disabled", "item_name", "image"],
             as_dict=True
         )
+
+        if packed_item_data["disabled"]:
+            continue
     
         _packed_items = frappe.db.sql(
             f"""

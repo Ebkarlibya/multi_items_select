@@ -35,7 +35,17 @@ frappe.ui.form.on("Sales Invoice", {
                             read_only: 1
                         },
                         {
-                            fieldname: "packed_items_section_5431",
+                            fieldtype: "Section Break",
+                        },
+                        {
+                            fieldname: "qty",
+                            fieldtype: "Float",
+                            label: "Qty",
+                            default: 1,
+                            reqd: 1,
+
+                        },
+                        {
                             fieldtype: "Section Break",
                             label: "Packed Item Items"
                         },
@@ -85,7 +95,7 @@ frappe.ui.form.on("Sales Invoice", {
                                 () => {
                                     let args = {};
                                     args["item_code"] = row.item_code;
-                                    args["qty"] = row.qty;
+                                    args["qty"] = row.qty * values.qty;
                                     return frappe.model.set_value(d.doctype, d.name, args);
                                 }
                             ]);
@@ -132,7 +142,7 @@ frappe.ui.form.on("Sales Invoice", {
                                         </td>
                                         <td>
                                             <div class="etms-add-multi__row">
-                                                <p>${data.item_code}</p>
+                                                <p>${data.item_code} <span style="font-weight: bold; color: brown;">(${data.qty})</span></p>
                                                 <p class="etms-multi__subtitle1">${data.item_name}</p>
                                             </div>
                                         </td>
@@ -605,7 +615,7 @@ frappe.ui.form.on("Sales Invoice", {
                                                                 <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"': ''}>
                                                                     <div style="display: flex; padding: 2px 2px 2px 2px;">
                                                                         <span>${data.item_code}</span>
-                                                                        ${data.mis_has_packed_item ? `<svg style="padding: 2px; color: brown;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+                                                                        ${data.mis_has_packed_item ? `<svg style="padding: 3px; color: brown;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
                                                                         <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
                                                                         </svg>`: ""}
                                                                     </div>
