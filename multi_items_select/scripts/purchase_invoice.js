@@ -424,8 +424,7 @@ frappe.ui.form.on("Purchase Invoice", {
                     {
                         fieldtype: "Data",
                         fieldname: "search_term",
-                        label: __("Search Items"),
-                        default: "bedroom"
+                        label: __("Search Items")
                     },
                     {
                         label: __("Extra Filters"),
@@ -747,7 +746,7 @@ frappe.ui.form.on("Purchase Invoice", {
                             }
                         )
                     }, 100);
-                }, 500);
+                }, 400);
             }
             let searchTerm = d.get_field("search_term")
             searchTerm.input.dispatchEvent(new Event('input'));
