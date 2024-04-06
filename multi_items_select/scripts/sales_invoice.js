@@ -74,14 +74,14 @@ frappe.ui.form.on("Sales Invoice", {
                                     case "Nothing":
                                         break;
                                     case "Warn":
-                                        frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                        frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                         break;
                                     case "Stop":
                                         if (can_bypass) {
-                                            frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                            frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                             break;
                                         } else {
-                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty})`), "MIS");
                                             return;
                                         }
                                 }
@@ -352,14 +352,14 @@ frappe.ui.form.on("Sales Invoice", {
                                     case "Nothing":
                                         break;
                                     case "Warn":
-                                        frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                        frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                         break;
                                     case "Stop":
                                         if (can_bypass) {
-                                            frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                            frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                             break;
                                         } else {
-                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "MIS");
                                             return;
                                         }
                                 }
@@ -411,13 +411,13 @@ frappe.ui.form.on("Sales Invoice", {
             }
         }
 
-        const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("Multi Insert"), function () {
+        const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("MIS Insert"), function () {
             // if (!frm.doc.customer) {
             //     frappe.show_alert(__("(MIS): Please select customer first"));
             //     return
             // }
             var d = new frappe.ui.Dialog({
-                title: __("(MIS): Multi Insert"),
+                title: __("(MIS): Insert"),
                 type: "large",
                 fields: [
                     {
@@ -795,8 +795,6 @@ frappe.ui.form.on("Sales Invoice", {
         // }
     },
     before_submit: async function (frm) {
-        console.log('disabled!2');
-
         // // get multi items select settings
         // let mis_settings = await frappe.call({
         //     method: "multi_items_select.api.get_settings",

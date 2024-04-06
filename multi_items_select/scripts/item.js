@@ -41,7 +41,7 @@ frappe.ui.form.on("Item", {
     validate: function(frm) {
         if(frm.doc.mis_has_packed_item && frm.doc.is_stock_item) {
             frappe.validated = false
-            frappe.msgprint(__(`Item <strong>${frm.doc.item_code}</strong> Cannot be both maintain stock & packed item.`), "Multi Items Select");
+            frappe.msgprint(__(`Item <strong>${frm.doc.item_code}</strong> Cannot be both maintain stock & packed item.`), "MIS");
 
         }
     }
