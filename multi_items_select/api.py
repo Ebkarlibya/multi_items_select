@@ -72,6 +72,7 @@ def get_multiple_items():
 
     search_term = frappe.form_dict.get("search_term")
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
+    only_mis_packed_items = json.loads(frappe.form_dict.get("only_mis_packed_items"))
     warehouse = frappe.form_dict.get('source_warehouse')
     item_group = frappe.form_dict.get("item_group")
     brand = frappe.form_dict.get("brand")
@@ -113,7 +114,10 @@ def get_multiple_items():
         where i.disabled = 0
         
         {sql_filters.get('sql_term', '')}
+
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
+        {'and i.mis_has_packed_item = 1' if only_mis_packed_items else '' }
+
         {sql_filters.get('sql_warehouse', '')}
         {sql_filters.get('sql_item_group', '')}
         {sql_filters.get('sql_brand', '')}

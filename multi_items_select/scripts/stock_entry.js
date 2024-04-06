@@ -35,7 +35,17 @@ frappe.ui.form.on("Stock Entry", {
                             read_only: 1
                         },
                         {
-                            fieldname: "packed_items_section_5431",
+                            fieldtype: "Section Break",
+                        },
+                        {
+                            fieldname: "qty",
+                            fieldtype: "Float",
+                            label: "Qty",
+                            default: 1,
+                            reqd: 1,
+
+                        },
+                        {
                             fieldtype: "Section Break",
                             label: "Packed Item Items"
                         },
@@ -45,13 +55,13 @@ frappe.ui.form.on("Stock Entry", {
                             hidden: 0,
                             options: "<h4>Loading Packed Item Data, Please Wait .... </h4>"
                         },
-                        
+
                     ],
                     primary_action_label: __("Insert Items"),
                     primary_action: async function (values) {
                         frappe.dom.freeze()
                         const itemsGrid = frm.get_field("items").grid;
-                       // const packedItemsGrid = this.get_field("packed_items").grid;
+                        // const packedItemsGrid = this.get_field("packed_items").grid;
 
                         for (let i = 0; i < cur_frm.mis_last_packed_items_search_data.length; i++) {
                             const row = cur_frm.mis_last_packed_items_search_data[i]
@@ -64,14 +74,14 @@ frappe.ui.form.on("Stock Entry", {
                                     case "Nothing":
                                         break;
                                     case "Warn":
-                                        frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                        frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                         break;
                                     case "Stop":
                                         if (can_bypass) {
-                                            frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                            frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                             break;
                                         } else {
-                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty})`), "MIS");
                                             return;
                                         }
                                 }
@@ -85,7 +95,7 @@ frappe.ui.form.on("Stock Entry", {
                                 () => {
                                     let args = {};
                                     args["item_code"] = row.item_code;
-                                    args["qty"] = row.qty;
+                                    args["qty"] = row.qty * values.qty;
                                     return frappe.model.set_value(d.doctype, d.name, args);
                                 }
                             ]);
@@ -126,11 +136,13 @@ frappe.ui.form.on("Stock Entry", {
                             `<tr 
                                 class="etms-add-multi__tb_tr">
                                         <td style="vertical-align: middle; padding: 2px">
-                                            <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                            <div class="img-hover">
+                                                <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="etms-add-multi__row">
-                                                <p>${data.item_code}</p>
+                                                <p>${data.item_code} <span style="font-weight: bold; color: brown;">(${data.qty})</span></p>
                                                 <p class="etms-multi__subtitle1">${data.item_name}</p>
                                             </div>
                                         </td>
@@ -197,9 +209,45 @@ frappe.ui.form.on("Stock Entry", {
                                         padding-bottom: 0px;
                                    
                                     }
+                                    .img-hover img {
+                                        -webkit-transition: all .3s ease; /* Safari and Chrome */
+                                        -moz-transition: all .3s ease; /* Firefox */
+                                        -o-transition: all .3s ease; /* IE 9 */
+                                        -ms-transition: all .3s ease; /* Opera */
+                                        transition: all .3s ease;
+                                        position:relative;
+                                    }
+                                    .img-hover img:hover {
+                                        cursor: zoom-in;
+                                        z-index: 20;
+                                        -webkit-backface-visibility: hidden;
+                                        backface-visibility: hidden;
+                                        -webkit-transform:translateZ(0) scale(4.20); /* Safari and Chrome */
+                                        -moz-transform:scale(4.20); /* Firefox */
+                                        -ms-transform:scale(4.20); /* IE 9 */
+                                        -o-transform:translatZ(0) scale(4.20); /* Opera */
+                                        transform:translatZ(0) scale(4.20);
+                                    }
+                                      
+                                    .img-hover:hover:after {
+                                        content:"";
+                                        position:absolute;
+                                        top:0;
+                                        left:0;
+                                        z-index:2;
+                                        width:30px;
+                                        height:30px;
+                                        border:1px solid #000;
+                                    }
+                                      
+                                    .grayscale {
+                                      -webkit-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                      -moz-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                      filter: brightness(1.10) grayscale(100%); 
+                                    }
                                 </style>
                             `;
-                            cur_dialog.set_df_property("packed_items_html", "options", html);
+                    cur_dialog.set_df_property("packed_items_html", "options", html);
                 }
             })
         },
@@ -305,14 +353,14 @@ frappe.ui.form.on("Stock Entry", {
                                     case "Nothing":
                                         break;
                                     case "Warn":
-                                        frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                        frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                         break;
                                     case "Stop":
                                         if (can_bypass) {
-                                            frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "Multi Items Select");
+                                            frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                             break;
                                         } else {
-                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "Multi Items Select");
+                                            frappe.msgprint(__(`Cannot Insert: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty})`), "MIS");
                                             return;
                                         }
                                 }
@@ -364,19 +412,20 @@ frappe.ui.form.on("Stock Entry", {
             }
         }
 
-        const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("Multi Insert"), function () {
+        const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("MIS Insert"), function () {
             // if (!frm.doc.customer) {
             //     frappe.show_alert(__("(MIS): Please select customer first"));
             //     return
             // }
             var d = new frappe.ui.Dialog({
-                title: __("(MIS): Multi Insert"),
+                title: __("(MIS): Insert"),
                 type: "large",
                 fields: [
                     {
                         fieldtype: "Data",
                         fieldname: "search_term",
-                        label: __("Search Items")
+                        label: __("Search Items"),
+                        default: "bedroom"
                     },
                     {
                         label: __("Extra Filters"),
@@ -446,6 +495,22 @@ frappe.ui.form.on("Stock Entry", {
                             searchTerm.input.dispatchEvent(new Event('input'));
                         }
                     },
+                    // {
+                    //     fieldtype: "Column Break"
+                    // },
+                    {
+                        fieldname: "only_mis_packed_items",
+                        fieldtype: "Check",
+                        label: __("Only (MIS) Packed Items"),
+                        default: 0,
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    // {
+                    //     fieldtype: "Section Break"
+                    // },
                     {
                         fieldname: "query_loading",
                         fieldtype: "HTML",
@@ -516,6 +581,7 @@ frappe.ui.form.on("Stock Entry", {
                                     source_warehouse: frm.doc.set_warehouse,
                                     search_term: d.get_value("search_term"),
                                     include_non_stock: d.get_value("include_non_stock"),
+                                    only_mis_packed_items: d.get_value("only_mis_packed_items"),
                                     item_group: d.get_value("item_group"),
                                     brand: d.get_value("brand"),
                                     item_option: d.get_value("item_option"),
@@ -559,11 +625,19 @@ frappe.ui.form.on("Stock Entry", {
                                                     class="etms-add-multi__tb_tr"
                                                     onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`)">
                                                             <td style="vertical-align: middle; padding: 2px">
-                                                                <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                                                <div class="img-hover">
+                                                                    <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                                                </div>
                                                             </td>
                                                             <td>
-                                                                <div class="etms-add-multi__row">
-                                                                    <p>${data.item_code}</p>
+                                                                <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"' : ''}>
+                                                                    <div style="display: flex; padding: 2px 2px 2px 2px;">
+                                                                        <span>${data.item_code}</span>
+                                                                        ${data.mis_has_packed_item ? `<svg style="padding: 3px; color: brown;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+                                                                        <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
+                                                                        </svg>`: ""}
+                                                                    </div>
+                                                                    
                                                                     <p class="etms-multi__subtitle1">${data.item_name}</p>
                                                                 </div>
                                                             </td>
@@ -629,6 +703,42 @@ frappe.ui.form.on("Stock Entry", {
                                                             padding-bottom: 0px;
                                                        
                                                         }
+                                                        .img-hover img {
+                                                            -webkit-transition: all .3s ease; /* Safari and Chrome */
+                                                            -moz-transition: all .3s ease; /* Firefox */
+                                                            -o-transition: all .3s ease; /* IE 9 */
+                                                            -ms-transition: all .3s ease; /* Opera */
+                                                            transition: all .3s ease;
+                                                            position:relative;
+                                                        }
+                                                        .img-hover img:hover {
+                                                            cursor: zoom-in;
+                                                            z-index: 20;
+                                                            -webkit-backface-visibility: hidden;
+                                                            backface-visibility: hidden;
+                                                            -webkit-transform:translateZ(0) scale(4.20); /* Safari and Chrome */
+                                                            -moz-transform:scale(4.20); /* Firefox */
+                                                            -ms-transform:scale(4.20); /* IE 9 */
+                                                            -o-transform:translatZ(0) scale(4.20); /* Opera */
+                                                            transform:translatZ(0) scale(4.20);
+                                                        }
+                                                          
+                                                        .img-hover:hover:after {
+                                                            content:"";
+                                                            position:absolute;
+                                                            top:0;
+                                                            left:0;
+                                                            z-index:2;
+                                                            width:30px;
+                                                            height:30px;
+                                                            border:1px solid #000;
+                                                        }
+                                                          
+                                                        .grayscale {
+                                                          -webkit-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                                          -moz-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                                          filter: brightness(1.10) grayscale(100%); 
+                                                        }
                                                     </style>
                                                 `;
                                         d.set_df_property("search_results", "options", html);
@@ -646,247 +756,22 @@ frappe.ui.form.on("Stock Entry", {
         });
         cbtn.addClass("btn-primary");
     },
-    validated: function (frm) {
-        // // so items
-        // for (let i = 0; i < frm.doc.items.length; i++) {
-        //     let row = frm.doc.items[i];
-        //     debugger
-        //     if (row.qty > row.mis_sellable_qty) {
-        //         if (mis_settings.sellable_qty_action == "Warn") {
-        //             console.log("Warn");
-        //         }
-        //         else if (mis_settings.sellable_qty_action == "Stop") {
-        //             console.log("Stop");
-        //         }
-
-
-        //     }
-        // }
-
-        // // so packed items
-        // if (frm.doc.packed_items) {
-        //     for (let i = 0; i < frm.doc.packed_items.length; i++) {
-        //         let row = frm.doc.packed_items[i];
-
-        //         if (row.qty > row.mis_sellable_qty) {
-        //             if (mis_settings.sellable_qty_action == "Warn") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = true;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-        //             else if (mis_settings.sellable_qty_action == "Stop") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = false;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-
-
-        //         }
-        //     }
-        // }
-    },
-    before_submit: async function (frm) {
-        console.log('disabled!2');
-
-        // // get multi items select settings
-        // let mis_settings = await frappe.call({
-        //     method: "multi_items_select.api.get_settings",
-        // });
-        // mis_settings = mis_settings.message;
-
-        // let can_bypass = await frappe.call({
-        //     method: "multi_items_select.api.get_can_bypass",
-        //     freeze: true,
-        // });
-
-        // // so items
-        // for (let i = 0; i < frm.doc.items.length; i++) {
-        //     let row = frm.doc.items[i];
-
-        //     // if(row.item_group == "Opration Item"){
-        //     //     continue;
-        //     // }
-
-        //     if (row.qty > row.mis_sellable_qty) {
-        //         if (mis_settings.sellable_qty_action == "Warn") {
-        //             if (!can_bypass.message) {
-        //                 frappe.validated = true;
-        //                 setTimeout(() => {
-        //                     frappe.msgprint(`
-        //                     <p style="font-size: 12px; line-height: 14px;">
-        //                         Warning, Item: ${row.item_code} in row: (${row.idx}) Qty (${row.qty})
-        //                         is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                     </p>
-        //                     `, "Warning");
-        //                 }, 1500);
-
-        //             }
-        //         }
-        //         else if (mis_settings.sellable_qty_action == "Stop") {
-        //             if (!can_bypass.message) {
-        //                 frappe.validated = false;
-        //                 setTimeout(() => {
-        //                     frappe.msgprint(`
-        //                     <p style="font-size: 12px; line-height: 14px;">
-        //                         Can't submit, Item ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                         is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                     </p>
-        //                     `, "Warning");
-        //                 }, 1500);
-
-        //             }
-        //         }
-
-
-        //     }
-        // }
-
-        // // so packed items
-        // if (frm.doc.packed_items) {
-        //     for (let i = 0; i < frm.doc.packed_items.length; i++) {
-        //         let row = frm.doc.packed_items[i];
-
-        //         if(row.item_group == "Opration Item"){
-        //             continue;
-        //         }
-
-        //         if (row.qty > row.mis_sellable_qty) {
-        //             if (mis_settings.sellable_qty_action == "Warn") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = true;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-        //             else if (mis_settings.sellable_qty_action == "Stop") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = false;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-
-
-        //         }
-        //     }
-        // }
-    },
-    customer: function (frm) {
-        if (frm.doc.customer) {
-            frappe.call({
-                method: "multi_items_select.api.get_customer_outstandings",
-                args: {
-                    customer: frm.doc.customer
-                },
-                callback: function (r) {
-                    frappe.model.set_value(frm.doctype, frm.docname, "mia_outstanding_amount", r.message.outstanding_amount);
-                    frappe.model.set_value(frm.doctype, frm.docname, "mia_total_outstanding_amount", r.message.total_outstanding_amount);
-                }
-            });
-        }
-    }
+    // customer: function (frm) {
+    //     if (frm.doc.customer) {
+    //         frappe.call({
+    //             method: "multi_items_select.api.get_customer_outstandings",
+    //             args: {
+    //                 customer: frm.doc.customer
+    //             },
+    //             callback: function (r) {
+    //                 frappe.model.set_value(frm.doctype, frm.docname, "mia_outstanding_amount", r.message.outstanding_amount);
+    //                 frappe.model.set_value(frm.doctype, frm.docname, "mia_total_outstanding_amount", r.message.total_outstanding_amount);
+    //             }
+    //         });
+    //     }
+    // }
 });
 
 function wsleep(time) {
     return new Promise(resolve => setTimeout(() => resolve(), time))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// {
-                        //     fieldname: "packed_items",
-                        //     fieldtype: "Table",
-                        //     label: "Items",
-                        //     fields: [
-                        //         {
-                        //             fieldname: "item_code",
-                        //             fieldtype: "Link",
-                        //             label: "Item Code",
-                        //             read_only: 0,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "warehouse",
-                        //             fieldtype: "Link",
-                        //             label: "Warehouse",
-                        //             options: "Warehouse",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "actual_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Actual Qty",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "reserved_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Reserved Qty",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "sellable_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Sellable Qty",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "ordered_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Ordered Qty",
-                        //             width: 5,
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //     ],
-                        //     data: [],
-                        //     options: "Item",
-                        //     read_only: 1,
-                        // }

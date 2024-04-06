@@ -55,13 +55,13 @@ frappe.ui.form.on("Sales Invoice", {
                             hidden: 0,
                             options: "<h4>Loading Packed Item Data, Please Wait .... </h4>"
                         },
-                        
+
                     ],
                     primary_action_label: __("Insert Items"),
                     primary_action: async function (values) {
                         frappe.dom.freeze()
                         const itemsGrid = frm.get_field("items").grid;
-                       // const packedItemsGrid = this.get_field("packed_items").grid;
+                        // const packedItemsGrid = this.get_field("packed_items").grid;
 
                         for (let i = 0; i < cur_frm.mis_last_packed_items_search_data.length; i++) {
                             const row = cur_frm.mis_last_packed_items_search_data[i]
@@ -211,13 +211,14 @@ frappe.ui.form.on("Sales Invoice", {
                                     }
                                     .img-hover img {
                                         -webkit-transition: all .3s ease; /* Safari and Chrome */
-                                          -moz-transition: all .3s ease; /* Firefox */
-                                          -o-transition: all .3s ease; /* IE 9 */
-                                          -ms-transition: all .3s ease; /* Opera */
-                                          transition: all .3s ease;
-                                          position:relative;
+                                        -moz-transition: all .3s ease; /* Firefox */
+                                        -o-transition: all .3s ease; /* IE 9 */
+                                        -ms-transition: all .3s ease; /* Opera */
+                                        transition: all .3s ease;
+                                        position:relative;
                                     }
                                     .img-hover img:hover {
+                                        cursor: zoom-in;
                                         z-index: 20;
                                         -webkit-backface-visibility: hidden;
                                         backface-visibility: hidden;
@@ -246,7 +247,7 @@ frappe.ui.form.on("Sales Invoice", {
                                     }
                                 </style>
                             `;
-                            cur_dialog.set_df_property("packed_items_html", "options", html);
+                    cur_dialog.set_df_property("packed_items_html", "options", html);
                 }
             })
         },
@@ -494,6 +495,22 @@ frappe.ui.form.on("Sales Invoice", {
                             searchTerm.input.dispatchEvent(new Event('input'));
                         }
                     },
+                    // {
+                    //     fieldtype: "Column Break"
+                    // },
+                    {
+                        fieldname: "only_mis_packed_items",
+                        fieldtype: "Check",
+                        label: __("Only (MIS) Packed Items"),
+                        default: 0,
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    // {
+                    //     fieldtype: "Section Break"
+                    // },
                     {
                         fieldname: "query_loading",
                         fieldtype: "HTML",
@@ -564,6 +581,7 @@ frappe.ui.form.on("Sales Invoice", {
                                     source_warehouse: frm.doc.set_warehouse,
                                     search_term: d.get_value("search_term"),
                                     include_non_stock: d.get_value("include_non_stock"),
+                                    only_mis_packed_items: d.get_value("only_mis_packed_items"),
                                     item_group: d.get_value("item_group"),
                                     brand: d.get_value("brand"),
                                     item_option: d.get_value("item_option"),
@@ -612,7 +630,7 @@ frappe.ui.form.on("Sales Invoice", {
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"': ''}>
+                                                                <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"' : ''}>
                                                                     <div style="display: flex; padding: 2px 2px 2px 2px;">
                                                                         <span>${data.item_code}</span>
                                                                         ${data.mis_has_packed_item ? `<svg style="padding: 3px; color: brown;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
@@ -687,13 +705,14 @@ frappe.ui.form.on("Sales Invoice", {
                                                         }
                                                         .img-hover img {
                                                             -webkit-transition: all .3s ease; /* Safari and Chrome */
-                                                              -moz-transition: all .3s ease; /* Firefox */
-                                                              -o-transition: all .3s ease; /* IE 9 */
-                                                              -ms-transition: all .3s ease; /* Opera */
-                                                              transition: all .3s ease;
-                                                              position:relative;
+                                                            -moz-transition: all .3s ease; /* Firefox */
+                                                            -o-transition: all .3s ease; /* IE 9 */
+                                                            -ms-transition: all .3s ease; /* Opera */
+                                                            transition: all .3s ease;
+                                                            position:relative;
                                                         }
                                                         .img-hover img:hover {
+                                                            cursor: zoom-in;
                                                             z-index: 20;
                                                             -webkit-backface-visibility: hidden;
                                                             backface-visibility: hidden;
@@ -737,161 +756,6 @@ frappe.ui.form.on("Sales Invoice", {
         });
         cbtn.addClass("btn-primary");
     },
-    validated: function (frm) {
-        // // so items
-        // for (let i = 0; i < frm.doc.items.length; i++) {
-        //     let row = frm.doc.items[i];
-        //     debugger
-        //     if (row.qty > row.mis_sellable_qty) {
-        //         if (mis_settings.sellable_qty_action == "Warn") {
-        //             console.log("Warn");
-        //         }
-        //         else if (mis_settings.sellable_qty_action == "Stop") {
-        //             console.log("Stop");
-        //         }
-
-
-        //     }
-        // }
-
-        // // so packed items
-        // if (frm.doc.packed_items) {
-        //     for (let i = 0; i < frm.doc.packed_items.length; i++) {
-        //         let row = frm.doc.packed_items[i];
-
-        //         if (row.qty > row.mis_sellable_qty) {
-        //             if (mis_settings.sellable_qty_action == "Warn") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = true;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-        //             else if (mis_settings.sellable_qty_action == "Stop") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = false;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-
-
-        //         }
-        //     }
-        // }
-    },
-    before_submit: async function (frm) {
-        // // get multi items select settings
-        // let mis_settings = await frappe.call({
-        //     method: "multi_items_select.api.get_settings",
-        // });
-        // mis_settings = mis_settings.message;
-
-        // let can_bypass = await frappe.call({
-        //     method: "multi_items_select.api.get_can_bypass",
-        //     freeze: true,
-        // });
-
-        // // so items
-        // for (let i = 0; i < frm.doc.items.length; i++) {
-        //     let row = frm.doc.items[i];
-
-        //     // if(row.item_group == "Opration Item"){
-        //     //     continue;
-        //     // }
-
-        //     if (row.qty > row.mis_sellable_qty) {
-        //         if (mis_settings.sellable_qty_action == "Warn") {
-        //             if (!can_bypass.message) {
-        //                 frappe.validated = true;
-        //                 setTimeout(() => {
-        //                     frappe.msgprint(`
-        //                     <p style="font-size: 12px; line-height: 14px;">
-        //                         Warning, Item: ${row.item_code} in row: (${row.idx}) Qty (${row.qty})
-        //                         is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                     </p>
-        //                     `, "Warning");
-        //                 }, 1500);
-
-        //             }
-        //         }
-        //         else if (mis_settings.sellable_qty_action == "Stop") {
-        //             if (!can_bypass.message) {
-        //                 frappe.validated = false;
-        //                 setTimeout(() => {
-        //                     frappe.msgprint(`
-        //                     <p style="font-size: 12px; line-height: 14px;">
-        //                         Can't submit, Item ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                         is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                     </p>
-        //                     `, "Warning");
-        //                 }, 1500);
-
-        //             }
-        //         }
-
-
-        //     }
-        // }
-
-        // // so packed items
-        // if (frm.doc.packed_items) {
-        //     for (let i = 0; i < frm.doc.packed_items.length; i++) {
-        //         let row = frm.doc.packed_items[i];
-
-        //         if(row.item_group == "Opration Item"){
-        //             continue;
-        //         }
-
-        //         if (row.qty > row.mis_sellable_qty) {
-        //             if (mis_settings.sellable_qty_action == "Warn") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = true;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Warning, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-        //             else if (mis_settings.sellable_qty_action == "Stop") {
-        //                 if (!can_bypass.message) {
-        //                     frappe.validated = false;
-        //                     setTimeout(() => {
-        //                         frappe.msgprint(`
-        //                         <p style="font-size: 12px; line-height: 14px;">
-        //                             Can't submit, Packed Item: ${row.item_code} in row: (${row.idx}) Qty: (${row.qty})  
-        //                             is higher than Sellable Qty (${row.mis_sellable_qty}) in warehouse: (${row.warehouse})
-        //                         </p>
-        //                         `, "Warning");
-        //                     }, 1500);
-
-        //                 }
-        //             }
-
-
-        //         }
-        //     }
-        // }
-    },
     customer: function (frm) {
         if (frm.doc.customer) {
             frappe.call({
@@ -911,71 +775,3 @@ frappe.ui.form.on("Sales Invoice", {
 function wsleep(time) {
     return new Promise(resolve => setTimeout(() => resolve(), time))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// {
-                        //     fieldname: "packed_items",
-                        //     fieldtype: "Table",
-                        //     label: "Items",
-                        //     fields: [
-                        //         {
-                        //             fieldname: "item_code",
-                        //             fieldtype: "Link",
-                        //             label: "Item Code",
-                        //             read_only: 0,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "warehouse",
-                        //             fieldtype: "Link",
-                        //             label: "Warehouse",
-                        //             options: "Warehouse",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "actual_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Actual Qty",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "reserved_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Reserved Qty",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "sellable_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Sellable Qty",
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //         {
-                        //             fieldname: "ordered_qty",
-                        //             fieldtype: "Float",
-                        //             label: "Ordered Qty",
-                        //             width: 5,
-                        //             read_only: 1,
-                        //             in_list_view: 1
-                        //         },
-                        //     ],
-                        //     data: [],
-                        //     options: "Item",
-                        //     read_only: 1,
-                        // }
