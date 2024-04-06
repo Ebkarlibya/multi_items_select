@@ -126,7 +126,9 @@ frappe.ui.form.on("Sales Invoice", {
                             `<tr 
                                 class="etms-add-multi__tb_tr">
                                         <td style="vertical-align: middle; padding: 2px">
-                                            <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                            <div class="img-hover">
+                                                <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="etms-add-multi__row">
@@ -196,6 +198,41 @@ frappe.ui.form.on("Sales Invoice", {
                                         padding-top: 3px;
                                         padding-bottom: 0px;
                                    
+                                    }
+                                    .img-hover img {
+                                        -webkit-transition: all .3s ease; /* Safari and Chrome */
+                                          -moz-transition: all .3s ease; /* Firefox */
+                                          -o-transition: all .3s ease; /* IE 9 */
+                                          -ms-transition: all .3s ease; /* Opera */
+                                          transition: all .3s ease;
+                                          position:relative;
+                                    }
+                                    .img-hover img:hover {
+                                        z-index: 20;
+                                        -webkit-backface-visibility: hidden;
+                                        backface-visibility: hidden;
+                                        -webkit-transform:translateZ(0) scale(4.20); /* Safari and Chrome */
+                                        -moz-transform:scale(4.20); /* Firefox */
+                                        -ms-transform:scale(4.20); /* IE 9 */
+                                        -o-transform:translatZ(0) scale(4.20); /* Opera */
+                                        transform:translatZ(0) scale(4.20);
+                                    }
+                                      
+                                    .img-hover:hover:after {
+                                        content:"";
+                                        position:absolute;
+                                        top:0;
+                                        left:0;
+                                        z-index:2;
+                                        width:30px;
+                                        height:30px;
+                                        border:1px solid #000;
+                                    }
+                                      
+                                    .grayscale {
+                                      -webkit-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                      -moz-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                      filter: brightness(1.10) grayscale(100%); 
                                     }
                                 </style>
                             `;
@@ -376,7 +413,8 @@ frappe.ui.form.on("Sales Invoice", {
                     {
                         fieldtype: "Data",
                         fieldname: "search_term",
-                        label: __("Search Items")
+                        label: __("Search Items"),
+                        default: "bedroom"
                     },
                     {
                         label: __("Extra Filters"),
@@ -559,11 +597,19 @@ frappe.ui.form.on("Sales Invoice", {
                                                     class="etms-add-multi__tb_tr"
                                                     onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`)">
                                                             <td style="vertical-align: middle; padding: 2px">
-                                                                <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                                                <div class="img-hover">
+                                                                    <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                                                </div>
                                                             </td>
                                                             <td>
-                                                                <div class="etms-add-multi__row">
-                                                                    <p>${data.item_code}</p>
+                                                                <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"': ''}>
+                                                                    <div style="display: flex; padding: 2px 2px 2px 2px;">
+                                                                        <span>${data.item_code}</span>
+                                                                        ${data.mis_has_packed_item ? `<svg style="padding: 2px; color: brown;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+                                                                        <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
+                                                                        </svg>`: ""}
+                                                                    </div>
+                                                                    
                                                                     <p class="etms-multi__subtitle1">${data.item_name}</p>
                                                                 </div>
                                                             </td>
@@ -628,6 +674,41 @@ frappe.ui.form.on("Sales Invoice", {
                                                             padding-top: 3px;
                                                             padding-bottom: 0px;
                                                        
+                                                        }
+                                                        .img-hover img {
+                                                            -webkit-transition: all .3s ease; /* Safari and Chrome */
+                                                              -moz-transition: all .3s ease; /* Firefox */
+                                                              -o-transition: all .3s ease; /* IE 9 */
+                                                              -ms-transition: all .3s ease; /* Opera */
+                                                              transition: all .3s ease;
+                                                              position:relative;
+                                                        }
+                                                        .img-hover img:hover {
+                                                            z-index: 20;
+                                                            -webkit-backface-visibility: hidden;
+                                                            backface-visibility: hidden;
+                                                            -webkit-transform:translateZ(0) scale(4.20); /* Safari and Chrome */
+                                                            -moz-transform:scale(4.20); /* Firefox */
+                                                            -ms-transform:scale(4.20); /* IE 9 */
+                                                            -o-transform:translatZ(0) scale(4.20); /* Opera */
+                                                            transform:translatZ(0) scale(4.20);
+                                                        }
+                                                          
+                                                        .img-hover:hover:after {
+                                                            content:"";
+                                                            position:absolute;
+                                                            top:0;
+                                                            left:0;
+                                                            z-index:2;
+                                                            width:30px;
+                                                            height:30px;
+                                                            border:1px solid #000;
+                                                        }
+                                                          
+                                                        .grayscale {
+                                                          -webkit-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                                          -moz-filter: brightness(1.10) grayscale(100%) contrast(90%);
+                                                          filter: brightness(1.10) grayscale(100%); 
                                                         }
                                                     </style>
                                                 `;
