@@ -136,7 +136,7 @@ def get_multiple_items():
 def get_packed_items():
     packed_item_code = frappe.form_dict["packed_item_code"]
 
-    mis_packed_items = frappe.get_list(
+    mis_packed_items = frappe.get_all(
         "MIS Packed Item Table",
         fields=["item_code"],
         filters={
@@ -166,7 +166,7 @@ def get_packed_items():
                 select mpi.item_code, mpi.qty, mpi.enabled, b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty,
                 (b.actual_qty - b.reserved_qty) sellable_qty, b.stock_uom
                 
-                from `tabMIS Packed Item Table` mpi inner join `tabBin` b
+                from `tabMIS Packed Item Table` mpi left join `tabBin` b
                 on mpi.item_code = b.item_code
 
                 where mpi.item_code = {frappe.db.escape(packed_item["item_code"])}
