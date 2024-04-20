@@ -84,7 +84,7 @@ def get_multiple_items():
         escaped_search_term[1:len(escaped_search_term) - 1] + "%'"
 
     sql_filters = {
-        "sql_term": f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term})",
+        "sql_term": f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term} or ibc.barcode like {escaped_search_term})",
     }
 
     if warehouse:
@@ -108,11 +108,15 @@ def get_multiple_items():
         i.image, i.mia_item_option, i.mia_item_sub_category,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
         
-        from `tabItem` i { 'left' if include_non_stock else 'inner' } join `tabBin` b        
-        on i.item_code = b.item_code
-        
+        from `tabItem` i 
+            { 'left' if include_non_stock else 'inner' } join `tabBin` b   
+                on i.item_code = b.item_code
+            left join `tabItem Barcode` ibc
+                on i.item_code = ibc.parent
+                
         where i.disabled = 0
-        
+
+
         {sql_filters.get('sql_term', '')}
 
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
@@ -128,7 +132,7 @@ def get_multiple_items():
         order by b.item_code, b.warehouse
                           
         limit {20 if not search_term else 100000000}
-    """, as_dict=True, debug=False)
+    """, as_dict=True, debug=True)
 
     return data
 

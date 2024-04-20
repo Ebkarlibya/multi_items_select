@@ -750,7 +750,7 @@ frappe.ui.form.on("Stock Entry", {
             }
             let searchTerm = d.get_field("search_term")
             searchTerm.input.dispatchEvent(new Event('input'));
-            searchTerm.input.placeholder = "Item Name";
+            searchTerm.input.placeholder = "Search by Item Code, Name or Barcode";
 
         });
         cbtn.addClass("btn-primary");

@@ -750,25 +750,25 @@ frappe.ui.form.on("Sales Invoice", {
             }
             let searchTerm = d.get_field("search_term")
             searchTerm.input.dispatchEvent(new Event('input'));
-            searchTerm.input.placeholder = "Item Name";
+            searchTerm.input.placeholder = "Search by Item Code, Name or Barcode";
 
         });
         cbtn.addClass("btn-primary");
     },
-    customer: function (frm) {
-        if (frm.doc.customer) {
-            frappe.call({
-                method: "multi_items_select.api.get_customer_outstandings",
-                args: {
-                    customer: frm.doc.customer
-                },
-                callback: function (r) {
-                    frappe.model.set_value(frm.doctype, frm.docname, "mia_outstanding_amount", r.message.outstanding_amount);
-                    frappe.model.set_value(frm.doctype, frm.docname, "mia_total_outstanding_amount", r.message.total_outstanding_amount);
-                }
-            });
-        }
-    }
+    // customer: function (frm) {
+    //     if (frm.doc.customer) {
+    //         frappe.call({
+    //             method: "multi_items_select.api.get_customer_outstandings",
+    //             args: {
+    //                 customer: frm.doc.customer
+    //             },
+    //             callback: function (r) {
+    //                 frappe.model.set_value(frm.doctype, frm.docname, "mia_outstanding_amount", r.message.outstanding_amount);
+    //                 frappe.model.set_value(frm.doctype, frm.docname, "mia_total_outstanding_amount", r.message.total_outstanding_amount);
+    //             }
+    //         });
+    //     }
+    // }
 });
 
 function wsleep(time) {
