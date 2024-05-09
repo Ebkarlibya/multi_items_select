@@ -430,7 +430,7 @@ frappe.ui.form.on("Sales Order", {
                         label: __("Extra Filters"),
                         fieldname: "extra_filters",
                         fieldtype: "Section Break",
-                        collapsible: 1
+                        collapsible: mis_settings.extra_filters_section_collapsed
                     },
                     {
                         label: __(mis_settings.item_group_label ? mis_settings.item_group_label : "Item Group"),
@@ -448,6 +448,17 @@ frappe.ui.form.on("Sales Order", {
                         fieldname: "brand",
                         fieldtype: "Link",
                         options: "Brand",
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    { fieldtype: "Column Break" },
+                    {
+                        label: __(mis_settings.warehouse_label ? mis_settings.warehouse_label : "Warehouse"),
+                        fieldname: "warehouse",
+                        fieldtype: "Link",
+                        options: "Warehouse",
                         change: function () {
                             let searchTerm = this.layout.get_field("search_term")
                             searchTerm.input.dispatchEvent(new Event('input'));
@@ -488,28 +499,44 @@ frappe.ui.form.on("Sales Order", {
                         fieldname: "include_non_stock",
                         fieldtype: "Check",
                         label: __("Include Non Maintain Stock"),
-                        default: 1,
+                        default: mis_settings.include_non_maintain_stock,
                         change: function () {
                             let searchTerm = this.layout.get_field("search_term")
                             searchTerm.input.dispatchEvent(new Event('input'));
                         }
                     },
-                    // {
-                    //     fieldtype: "Column Break"
-                    // },
+                    {
+                        fieldtype: "Column Break"
+                    },
+                    {
+                        fieldname: "exclude_out_of_stock_items",
+                        fieldtype: "Check",
+                        label: __("Exclude Out of Stock Items"),
+                        default: mis_settings.exclude_out_of_stock_items,
+                        change: function () {
+                            let searchTerm = this.layout.get_field("search_term")
+                            searchTerm.input.dispatchEvent(new Event('input'));
+                        }
+                    },
+                    {
+                        label: "",
+                        hide_border: 1,
+                        fieldtype: "Section Break"
+                    },
                     {
                         fieldname: "only_mis_packed_items",
                         fieldtype: "Check",
                         label: __("Only (MIS) Packed Items"),
-                        default: 0,
+                        default: mis_settings.only_mis_packed_items,
                         change: function () {
                             let searchTerm = this.layout.get_field("search_term")
                             searchTerm.input.dispatchEvent(new Event('input'));
                         }
                     },
-                    // {
-                    //     fieldtype: "Section Break"
-                    // },
+                    {
+                        label: "Search Result",
+                        fieldtype: "Section Break"
+                    },
                     {
                         fieldname: "query_loading",
                         fieldtype: "HTML",
@@ -580,9 +607,11 @@ frappe.ui.form.on("Sales Order", {
                                     source_warehouse: frm.doc.set_warehouse,
                                     search_term: d.get_value("search_term"),
                                     include_non_stock: d.get_value("include_non_stock"),
+                                    exclude_out_of_stock_items: d.get_value("exclude_out_of_stock_items"),
                                     only_mis_packed_items: d.get_value("only_mis_packed_items"),
                                     item_group: d.get_value("item_group"),
                                     brand: d.get_value("brand"),
+                                    warehouse: d.get_value("warehouse"),
                                     item_option: d.get_value("item_option"),
                                     item_sub_category: d.get_value("item_sub_category"),
 
@@ -611,7 +640,7 @@ frappe.ui.form.on("Sales Order", {
 
                                         for (let i = 0; i < r.message.length; i++) {
                                             let data = r.message[i];
-                                            data.warehouse = data.warehouse ? data.warehouse : "-"
+                                            data.warehouse = data.is_stock_item ? data.warehouse ? data.warehouse : "-" : "*Non Stock*" 
                                             data.actual_qty = data.actual_qty ? data.actual_qty : "-"
                                             data.reserved_qty = data.reserved_qty ? data.reserved_qty : "-"
                                             data.ordered_qty = data.ordered_qty ? data.ordered_qty : "-"
@@ -623,11 +652,11 @@ frappe.ui.form.on("Sales Order", {
                                                 `<tr 
                                                     class="etms-add-multi__tb_tr"
                                                     onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`)">
-                                                            <td style="vertical-align: middle; padding: 2px">
+                                                            ${mis_settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px">
                                                                 <div class="img-hover">
-                                                                    <img class="mis-img img-fluid img-thumbnail round" src="${data.image}" />
+                                                                    <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" />
                                                                 </div>
-                                                            </td>
+                                                            </td>`:''}
                                                             <td>
                                                                 <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"' : ''}>
                                                                     <div style="display: flex; padding: 2px 2px 2px 2px;">
@@ -642,7 +671,7 @@ frappe.ui.form.on("Sales Order", {
                                                             </td>
                                                             <td>
                                                                 <div class="etms-add-multi__row">
-                                                                    <p>${data.warehouse}</p>
+                                                                    <p style="white-space: nowrap; color: ${data.is_stock_item ? '': 'brown'};">${data.warehouse}</p>
                                                                 </div>
                                                             </td>
                                                             <td>
@@ -671,7 +700,7 @@ frappe.ui.form.on("Sales Order", {
                                                 <table class="table table-striped" style="margin: 0px;">
                                                     <thead>
                                                         <tr class="etms-add-multi__th_tr">
-                                                            <th scope="col">Image</th>
+                                                            ${mis_settings.show_item_image ? `<th scope="col">Image</th>`: ''}
                                                             <th scope="col">Item Code</th>
                                                             <th scope="col">Warehouse</th>
                                                             <th scope="col">Actual Qty</th>
