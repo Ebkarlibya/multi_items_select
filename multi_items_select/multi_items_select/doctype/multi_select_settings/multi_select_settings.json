@@ -13,10 +13,19 @@
   "sellable_qty_action",
   "column_break_6",
   "sellable_bypass_role",
+  "general_config_section",
+  "include_non_maintain_stock",
+  "only_mis_packed_items",
+  "exclude_out_of_stock_items",
+  "column_break_s69rr",
+  "extra_filters_section_collapsed",
+  "show_item_image",
   "extra_filters_lablels_section",
   "item_group_label",
   "column_break_dydjy",
   "brand_label",
+  "column_break_hpkoo",
+  "warehouse_label",
   "column_break_h0sxf",
   "item_option_label",
   "column_break_scwyl",
@@ -117,12 +126,61 @@
    "fieldname": "max_allowed_customer_total_outstanding",
    "fieldtype": "Currency",
    "label": "Max Allowed Customer Total Outstanding"
+  },
+  {
+   "fieldname": "general_config_section",
+   "fieldtype": "Section Break",
+   "label": "MIS Dialog Config"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_non_maintain_stock",
+   "fieldtype": "Check",
+   "label": "(Default) Include Non Maintain Stock"
+  },
+  {
+   "default": "0",
+   "fieldname": "only_mis_packed_items",
+   "fieldtype": "Check",
+   "label": "(Default) Only (MIS) Packed Items"
+  },
+  {
+   "fieldname": "column_break_hpkoo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse_label",
+   "fieldtype": "Data",
+   "label": "Warehouse Label"
+  },
+  {
+   "fieldname": "column_break_s69rr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "extra_filters_section_collapsed",
+   "fieldtype": "Check",
+   "label": "Extra Filters Section Collapsed"
+  },
+  {
+   "default": "1",
+   "description": "If Item has no image, it will display placeholder image",
+   "fieldname": "show_item_image",
+   "fieldtype": "Check",
+   "label": "Show Item Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "exclude_out_of_stock_items",
+   "fieldtype": "Check",
+   "label": "(Default) Exclude Out of Stock Items"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-19 09:16:09.099056",
+ "modified": "2024-05-09 13:34:45.630288",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

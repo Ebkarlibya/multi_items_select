@@ -72,8 +72,9 @@ def get_multiple_items():
 
     search_term = frappe.form_dict.get("search_term")
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
+    exclude_out_of_stock_items = json.loads(frappe.form_dict.get("exclude_out_of_stock_items"))
     only_mis_packed_items = json.loads(frappe.form_dict.get("only_mis_packed_items"))
-    warehouse = frappe.form_dict.get('source_warehouse')
+    warehouse = frappe.form_dict.get('warehouse')
     item_group = frappe.form_dict.get("item_group")
     brand = frappe.form_dict.get("brand")
     item_option = frappe.form_dict.get("item_option")
@@ -104,7 +105,7 @@ def get_multiple_items():
             "sql_item_sub_category"] = f"and i.item_sub_category = {frappe.db.escape(item_sub_category)}"
 
     data = frappe.db.sql(f"""
-        select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, 
+        select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
         i.image, i.mia_item_option, i.mia_item_sub_category,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
         
@@ -119,6 +120,7 @@ def get_multiple_items():
 
         {sql_filters.get('sql_term', '')}
 
+        {'and if(i.is_stock_item, b.warehouse <> "", 1)' if exclude_out_of_stock_items else '' }
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
         {'and i.mis_has_packed_item = 1' if only_mis_packed_items else '' }
 
@@ -128,7 +130,7 @@ def get_multiple_items():
         {sql_filters.get('sql_item_option', '')}
         {sql_filters.get('sql_item_sub_category', '')}
 
-                         
+
         order by b.item_code, b.warehouse
                           
         limit {20 if not search_term else 100000000}
