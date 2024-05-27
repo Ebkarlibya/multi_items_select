@@ -130,6 +130,7 @@ def get_multiple_items():
         {sql_filters.get('sql_item_option', '')}
         {sql_filters.get('sql_item_sub_category', '')}
 
+        group by b.warehouse
 
         order by b.item_code, b.warehouse
                           
