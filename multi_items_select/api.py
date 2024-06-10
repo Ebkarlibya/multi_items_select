@@ -8,6 +8,7 @@ def get_settings():
     data = frappe.get_single("Multi Select Settings")
     return data
 
+
 @frappe.whitelist(allow_guest=False)
 def get_items_reserved_qty():
     # mis_settings = frappe.db.get_single("Multi Select Settings")
@@ -72,8 +73,10 @@ def get_multiple_items():
 
     search_term = frappe.form_dict.get("search_term")
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
-    exclude_out_of_stock_items = json.loads(frappe.form_dict.get("exclude_out_of_stock_items"))
-    only_mis_packed_items = json.loads(frappe.form_dict.get("only_mis_packed_items"))
+    exclude_out_of_stock_items = json.loads(
+        frappe.form_dict.get("exclude_out_of_stock_items"))
+    only_mis_packed_items = json.loads(
+        frappe.form_dict.get("only_mis_packed_items"))
     warehouse = frappe.form_dict.get('warehouse')
     item_group = frappe.form_dict.get("item_group")
     brand = frappe.form_dict.get("brand")
@@ -98,11 +101,12 @@ def get_multiple_items():
         sql_filters["sql_brand"] = f"and i.brand = {frappe.db.escape(brand)}"
 
     if item_option:
-        sql_filters["sql_item_option"] = f"and i.item_option = {frappe.db.escape(item_option)}"
+        sql_filters[
+            "sql_item_option"] = f"and i.mia_item_option = {frappe.db.escape(item_option)}"
 
     if item_sub_category:
         sql_filters[
-            "sql_item_sub_category"] = f"and i.item_sub_category = {frappe.db.escape(item_sub_category)}"
+            "sql_item_sub_category"] = f"and i.mia_item_sub_category = {frappe.db.escape(item_sub_category)}"
 
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
@@ -139,6 +143,7 @@ def get_multiple_items():
 
     return data
 
+
 @frappe.whitelist(allow_guest=False)
 def get_packed_items():
     packed_item_code = frappe.form_dict["packed_item_code"]
@@ -167,7 +172,7 @@ def get_packed_items():
 
         if packed_item_data["disabled"]:
             continue
-    
+
         _packed_items = frappe.db.sql(
             f"""
                 select mpi.item_code, mpi.qty, mpi.enabled, b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty,
@@ -187,6 +192,7 @@ def get_packed_items():
         packed_items.append(_packed_items[0])
 
     return packed_items
+
 
 @frappe.whitelist(allow_guest=False)
 def get_can_bypass():
