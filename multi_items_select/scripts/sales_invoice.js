@@ -640,7 +640,7 @@ frappe.ui.form.on("Sales Invoice", {
 
                                         for (let i = 0; i < r.message.length; i++) {
                                             let data = r.message[i];
-                                            data.warehouse = data.is_stock_item ? data.warehouse ? data.warehouse : "-" : "*Non Stock*" 
+                                            data.warehouse = data.is_stock_item ? data.warehouse ? data.warehouse : "-" : "*Non Stock*"
                                             data.actual_qty = data.actual_qty ? data.actual_qty : "-"
                                             data.reserved_qty = data.reserved_qty ? data.reserved_qty : "-"
                                             data.ordered_qty = data.ordered_qty ? data.ordered_qty : "-"
@@ -656,7 +656,7 @@ frappe.ui.form.on("Sales Invoice", {
                                                                 <div class="img-hover">
                                                                     <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" />
                                                                 </div>
-                                                            </td>`:''}
+                                                            </td>`: ''}
                                                             <td>
                                                                 <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"' : ''}>
                                                                     <div style="display: flex; padding: 2px 2px 2px 2px;">
@@ -671,7 +671,7 @@ frappe.ui.form.on("Sales Invoice", {
                                                             </td>
                                                             <td>
                                                                 <div class="etms-add-multi__row">
-                                                                    <p style="white-space: nowrap; color: ${data.is_stock_item ? '': 'brown'};">${data.warehouse}</p>
+                                                                    <p style="white-space: nowrap; color: ${data.is_stock_item ? '' : 'brown'};">${data.warehouse}</p>
                                                                 </div>
                                                             </td>
                                                             <td>
@@ -700,7 +700,7 @@ frappe.ui.form.on("Sales Invoice", {
                                                 <table class="table table-striped" style="margin: 0px;">
                                                     <thead>
                                                         <tr class="etms-add-multi__th_tr">
-                                                            ${mis_settings.show_item_image ? `<th scope="col">Image</th>`: ''}
+                                                            ${mis_settings.show_item_image ? `<th scope="col">Image</th>` : ''}
                                                             <th scope="col">Item Code</th>
                                                             <th scope="col">Warehouse</th>
                                                             <th scope="col">Actual Qty</th>
@@ -767,6 +767,21 @@ frappe.ui.form.on("Sales Invoice", {
                                                           -moz-filter: brightness(1.10) grayscale(100%) contrast(90%);
                                                           filter: brightness(1.10) grayscale(100%); 
                                                         }
+                                                        input[data-fieldname="search_term"] {
+                                                            height: 50px
+                                                        }
+                                                        .qrcode-icon {
+                                                            position: absolute;
+                                                            top: 31px;
+                                                            right: 10px;
+                                                            font-size: 30px;
+                                                            border: 2px solid black;
+                                                            border-radius: 4px;
+                                                            padding-top: 3px;
+                                                            padding-right: 5px;
+                                                            padding-bottom: 2px;
+                                                            padding-left: 5px;
+                                                        }
                                                     </style>
                                                 `;
                                         d.set_df_property("search_results", "options", html);
@@ -778,8 +793,17 @@ frappe.ui.form.on("Sales Invoice", {
                 }, 400);
             }
             let searchTerm = d.get_field("search_term")
+            let searchTermControlInput = searchTerm.wrapper.querySelector(".control-input")
+            let searchTermInput = searchTermControlInput.querySelector(`input[data-fieldname="search_term"]`)
+
+            searchTerm.wrapper.insertAdjacentHTML("beforeEnd", `
+                <div onclick="cur_frm.misOpenScanner(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`
+            )
+
             searchTerm.input.dispatchEvent(new Event('input'));
             searchTerm.input.placeholder = "Search by Item Code, Name or Barcode";
+
+            // searchTermInput.style.height = '50px'
 
         });
         cbtn.addClass("btn-primary");
@@ -800,6 +824,65 @@ frappe.ui.form.on("Sales Invoice", {
     // }
 });
 
+cur_frm.misOpenScanner = async function (searchDialog) {
+    let areaID = `qr-code-full-region-${Math.round(Math.random() * 1000)}`
+    let scanner = undefined
+    let d = new frappe.ui.Dialog({
+        title: __("(MIS): Scan Barcode / QRCode"),
+        type: "large",
+        fields: [{
+            fieldname: "qr-code-barcode",
+            fieldtype: "HTML",
+            options: `
+                <div id="${areaID}">Loading....</div>
+
+                <style>
+                    .modal-content {
+                        width: fit-content
+                    }
+                </style>
+            `
+        },],
+        primary_action_label: __("Stop Scanning"),
+        primary_action: async function () {
+            await scanner.clear()
+            scanner = undefined
+            d.hide();
+        },
+    });
+
+    d.show();
+
+    var config = {
+        fps: 60,
+
+        qrbox: {
+            width: 500,
+            height: 300
+        },
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+    };
+
+    setTimeout(() => {
+        scanner = new Html5QrcodeScanner(areaID, config, false);
+        scanner.render(async (barcode) => {
+            console.log('success', barcode);
+            searchDialog.set_value("search_term", barcode)
+            searchDialog.get_field("search_term").wrapper.querySelector("input").dispatchEvent(new Event('input'))
+            await scanner.clear()
+            scanner = undefined
+            d.hide();
+            frappe.utils.play_sound("submit")
+            // beep.volume = 1
+            // beep.play()
+        }
+            , (d1, d2) => {// console.log('error', d1, d2);
+            }
+        );
+    }
+        , 1000)
+
+}
 function wsleep(time) {
     return new Promise(resolve => setTimeout(() => resolve(), time))
 }
