@@ -40,14 +40,14 @@
   },
   {
    "default": "0",
-   "description": "if checked the original \"add multi\" button will be removed form SO/SE items table",
+   "description": "if checked the original \"add multi\" button will be removed forms tables",
    "fieldname": "disable_original_add_multi",
    "fieldtype": "Check",
    "label": "Disable Original Add Multi"
   },
   {
    "default": "1",
-   "description": "if checked this will add custom \"add multi\" to SO/SE items table",
+   "description": "Fully Enable the App",
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Enabled"
@@ -180,7 +180,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-05-09 13:34:45.630288",
+ "modified": "2024-08-14 11:43:54.673026",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

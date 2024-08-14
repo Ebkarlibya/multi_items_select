@@ -1,13 +1,14 @@
 
 frappe.ui.form.on("Sales Order", {
-    setup: function (frm) {
+    setup: async function (frm) {
+        let mis_settings = await frappe.call({
+            method: "multi_items_select.api.get_settings",
+        });
+        mis_settings = mis_settings.message;
+
+        if(!mis_settings.enabled) return
+        
         frm.mis_add_packed_items = async function (packed_item_code) {
-
-            let mis_settings = await frappe.call({
-                method: "multi_items_select.api.get_settings",
-            });
-            mis_settings = mis_settings.message;
-
             let can_bypass = await frappe.call({
                 method: "multi_items_select.api.get_can_bypass",
             });
@@ -393,14 +394,15 @@ frappe.ui.form.on("Sales Order", {
                 qd.set_value("sellable_qty", actual_qty - reserved_qty);
             }
     },
-    refresh: async function (frm) {
-        const itemsGrid = frm.get_field("items").grid;
-
-        // get multi items select settings
+    refresh: async function (frm) {        
         let mis_settings = await frappe.call({
             method: "multi_items_select.api.get_settings",
         });
         mis_settings = mis_settings.message;
+        
+        if(!mis_settings.enabled) return
+        
+        const itemsGrid = frm.get_field("items").grid;
 
         if (mis_settings.enabled == 0 || frm.doc.docstatus === 1) {
             return;

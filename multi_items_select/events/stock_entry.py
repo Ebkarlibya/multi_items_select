@@ -2,7 +2,8 @@ import frappe
 
 
 def on_update(doc, method):
-
+    mis_settings = frappe.get_single("Multi Select Settings")
+    if not mis_settings.enabled: return
     if doc.stock_entry_type == "Material Transfer":
         for item in doc.items:
             item_stock_data = frappe.get_all(

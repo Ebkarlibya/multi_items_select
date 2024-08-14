@@ -3,6 +3,8 @@ from multi_items_select.api import get_can_bypass, get_customer_outstandings
 
 
 def before_save(doc, method):
+    mis_settings = frappe.get_single("Multi Select Settings")
+    if not mis_settings.enabled: return
     if doc.customer:
         data = get_customer_outstandings(doc.customer)
         doc.mia_outstanding_amount = data["outstanding_amount"]
@@ -25,6 +27,7 @@ def before_save(doc, method):
 
 def before_submit(doc, method):
     mis_settings = frappe.get_single("Multi Select Settings")
+    if not mis_settings.enabled: return
     can_bypass = get_can_bypass()
 
     # so items
