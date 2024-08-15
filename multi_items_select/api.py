@@ -87,9 +87,10 @@ def get_multiple_items():
     escaped_search_term = "'%" + \
         escaped_search_term[1:len(escaped_search_term) - 1] + "%'"
 
-    sql_filters = {
-        "sql_term": f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term} or ibc.barcode like {escaped_search_term})",
-    }
+    sql_filters = {}
+
+    if search_term:
+        sql_filters["sql_term"] = f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term} or ibc.barcode like {escaped_search_term})"
 
     if warehouse:
         sql_filters["sql_warehouse"] = f"and b.warehouse = {frappe.db.escape(warehouse)}"
@@ -124,7 +125,7 @@ def get_multiple_items():
 
         {sql_filters.get('sql_term', '')}
 
-        {'and if(i.is_stock_item, b.warehouse <> "", 1)' if exclude_out_of_stock_items else '' }
+        {'and if(i.is_stock_item, (b.warehouse <> "" and b.actual_qty > 0), 1)' if exclude_out_of_stock_items else '' }
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
         {'and i.mis_has_packed_item = 1' if only_mis_packed_items else '' }
 
@@ -134,12 +135,12 @@ def get_multiple_items():
         {sql_filters.get('sql_item_option', '')}
         {sql_filters.get('sql_item_sub_category', '')}
 
-        group by b.warehouse
+        -- group by b.warehouse
 
-        order by b.item_code, b.warehouse
+        order by i.item_code, i.item_name, b.warehouse
                           
         limit {20 if not search_term else 100000000}
-    """, as_dict=True, debug=False)
+    """, as_dict=True, debug=True)
 
     return data
 
