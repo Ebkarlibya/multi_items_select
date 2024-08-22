@@ -97,7 +97,15 @@ frappe.ui.form.on("Sales Order", {
                                     let args = {};
                                     args["item_code"] = row.item_code;
                                     args["qty"] = row.qty * values.qty;
-                                    return frappe.model.set_value(d.doctype, d.name, args);
+                                    args["warehouse"] = values.warehouse;
+
+                                    let model = frappe.model.set_value(d.doctype, d.name, args); 
+                                    
+                                    setTimeout(() => {
+                                        d.warehouse = warehouse;
+                                        frm.trigger("warehouse", d.doctype, d.name)
+                                    }, 1000)
+                                    return model;
                                 }
                             ]);
                         }
@@ -252,10 +260,10 @@ frappe.ui.form.on("Sales Order", {
                 }
             })
         },
-            frm.mis_add_item_row = function (item_code) {
+            frm.mis_add_item_row = function (item_code, warehouse) {
                 const selected_item = cur_frm.mis_last_search_data.find(el => el.item_code === item_code)
 
-                const { item_name, warehouse, actual_qty, reserved_qty, mis_has_packed_item } = selected_item
+                const { item_name, actual_qty, reserved_qty, mis_has_packed_item } = selected_item
 
                 if (mis_has_packed_item) {
                     frm.mis_add_packed_items(item_code)
@@ -369,12 +377,20 @@ frappe.ui.form.on("Sales Order", {
 
                             frappe.run_serially([
                                 () => d = itemsGrid.add_new_row(),
-                                () => frappe.timeout(0.2),
-                                () => {
+                                () => frappe.timeout(1.0),
+                                async () => {
                                     let args = {};
                                     args["item_code"] = item_code;
                                     args["qty"] = values.qty;
-                                    return frappe.model.set_value(d.doctype, d.name, args);
+                                    args["warehouse"] = values.warehouse;
+
+                                    let model = frappe.model.set_value(d.doctype, d.name, args); 
+                                    
+                                    setTimeout(() => {
+                                        d.warehouse = warehouse;
+                                        frm.trigger("warehouse", d.doctype, d.name)
+                                    }, 1000)
+                                    return model;
                                 }
                             ]);
                             frappe.show_alert(__("(MIS): Item Added!"));
@@ -653,7 +669,7 @@ frappe.ui.form.on("Sales Order", {
                                             data_rows += repl(
                                                 `<tr 
                                                     class="etms-add-multi__tb_tr"
-                                                    onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`)">
+                                                    onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(warehouse)s\`)">
                                                             ${mis_settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px">
                                                                 <div class="img-hover">
                                                                     <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" />
@@ -694,7 +710,8 @@ frappe.ui.form.on("Sales Order", {
                                                             </td>
                                                         </tr>`,
                                                 {
-                                                    item_code: data.item_code
+                                                    item_code: data.item_code,
+                                                    warehouse: data.warehouse
                                                 }
                                             );
                                         }
