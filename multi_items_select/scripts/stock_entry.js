@@ -97,12 +97,12 @@ frappe.ui.form.on("Stock Entry", {
                                     let args = {};
                                     args["item_code"] = row.item_code;
                                     args["qty"] = row.qty * values.qty;
-                                    args["warehouse"] = values.warehouse;
+                                    args["s_warehouse"] = values.warehouse;
 
                                     let model = frappe.model.set_value(d.doctype, d.name, args); 
                                     
                                     setTimeout(() => {
-                                        d.warehouse = warehouse;
+                                        d.s_warehouse = warehouse;
                                         frm.trigger("s_warehouse", d.doctype, d.name)
                                     }, 1000)
                                     return model;
@@ -380,12 +380,12 @@ frappe.ui.form.on("Stock Entry", {
                                     let args = {};
                                     args["item_code"] = item_code;
                                     args["qty"] = values.qty;
-                                    args["warehouse"] = values.warehouse;
+                                    args["s_warehouse"] = values.warehouse;
 
                                     let model = frappe.model.set_value(d.doctype, d.name, args); 
                                     
                                     setTimeout(() => {
-                                        d.warehouse = warehouse;
+                                        d.s_warehouse = warehouse;
                                         frm.trigger("s_warehouse", d.doctype, d.name)
                                     }, 1000)
                                     return model;
