@@ -6,8 +6,8 @@ frappe.ui.form.on("Sales Order", {
         });
         mis_settings = mis_settings.message;
 
-        if(!mis_settings.enabled) return
-        
+        if (!mis_settings.enabled) return
+
         frm.mis_add_packed_items = async function (packed_item_code) {
             let can_bypass = await frappe.call({
                 method: "multi_items_select.api.get_can_bypass",
@@ -99,8 +99,8 @@ frappe.ui.form.on("Sales Order", {
                                     args["qty"] = row.qty * values.qty;
                                     args["warehouse"] = values.warehouse;
 
-                                    let model = frappe.model.set_value(d.doctype, d.name, args); 
-                                    
+                                    let model = frappe.model.set_value(d.doctype, d.name, args);
+
                                     setTimeout(() => {
                                         d.warehouse = warehouse;
                                         frm.trigger("warehouse", d.doctype, d.name)
@@ -384,8 +384,8 @@ frappe.ui.form.on("Sales Order", {
                                     args["qty"] = values.qty;
                                     args["warehouse"] = values.warehouse;
 
-                                    let model = frappe.model.set_value(d.doctype, d.name, args); 
-                                    
+                                    let model = frappe.model.set_value(d.doctype, d.name, args);
+
                                     setTimeout(() => {
                                         d.warehouse = warehouse;
                                         frm.trigger("warehouse", d.doctype, d.name)
@@ -410,14 +410,14 @@ frappe.ui.form.on("Sales Order", {
                 qd.set_value("sellable_qty", actual_qty - reserved_qty);
             }
     },
-    refresh: async function (frm) {        
+    refresh: async function (frm) {
         let mis_settings = await frappe.call({
             method: "multi_items_select.api.get_settings",
         });
         mis_settings = mis_settings.message;
-        
-        if(!mis_settings.enabled) return
-        
+
+        if (!mis_settings.enabled) return
+
         const itemsGrid = frm.get_field("items").grid;
 
         if (mis_settings.enabled == 0 || frm.doc.docstatus === 1) {
@@ -670,7 +670,7 @@ frappe.ui.form.on("Sales Order", {
                                                 `<tr 
                                                     class="etms-add-multi__tb_tr"
                                                     onclick="cur_frm.mis_add_item_row(\`%(item_code)s\`, \`%(warehouse)s\`)">
-                                                            ${mis_settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px">
+                                                            ${mis_settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 20%">
                                                                 <div class="img-hover">
                                                                     <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" />
                                                                 </div>
@@ -682,14 +682,18 @@ frappe.ui.form.on("Sales Order", {
                                                                         ${data.mis_has_packed_item ? `<svg style="padding: 3px; color: brown;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
                                                                         <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
                                                                         </svg>`: ""}
-                                                                    </div>
-                                                                    
+                                                                    </div> 
                                                                     <p class="etms-multi__subtitle1">${data.item_name}</p>
+                                                                    
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div class="etms-add-multi__row">
                                                                     <p style="white-space: nowrap; color: ${data.is_stock_item ? '' : 'brown'};">${data.warehouse}</p>
+                                                                    ${mis_settings.item_price_listing ? `<div>
+                                                                        <p class="etms-multi__subtitle1">${format_currency(data.price_list_rate, data.currency)}</p>
+                                                                        <p class="etms-multi__subtitle1">(${data.price_list})</p>
+                                                                    </div>` : ''}
                                                                 </div>
                                                             </td>
                                                             <td>
@@ -763,11 +767,11 @@ frappe.ui.form.on("Sales Order", {
                                                             z-index: 20;
                                                             -webkit-backface-visibility: hidden;
                                                             backface-visibility: hidden;
-                                                            -webkit-transform:translateZ(0) scale(4.20); /* Safari and Chrome */
-                                                            -moz-transform:scale(4.20); /* Firefox */
-                                                            -ms-transform:scale(4.20); /* IE 9 */
-                                                            -o-transform:translatZ(0) scale(4.20); /* Opera */
-                                                            transform:translatZ(0) scale(4.20);
+                                                            -webkit-transform:translateZ(0) scale(2.20); /* Safari and Chrome */
+                                                            -moz-transform:scale(2.20); /* Firefox */
+                                                            -ms-transform:scale(2.20); /* IE 9 */
+                                                            -o-transform:translatZ(0) scale(2.20); /* Opera */
+                                                            transform:translatZ(0) scale(2.20);
                                                         }
                                                           
                                                         .img-hover:hover:after {
@@ -822,8 +826,14 @@ frappe.ui.form.on("Sales Order", {
             searchTerm.input.dispatchEvent(new Event('input'));
             searchTerm.input.placeholder = "Search by Item Code, Name or Barcode";
 
-            // searchTermInput.style.height = '50px'
-
+            if ($(document).width() > (mis_settings.wide_dialog_enable_on_screen_size ? mis_settings.wide_dialog_enable_on_screen_size : 1500)) {
+                d.$wrapper.find('.modal-content').css({
+                    'width': '200%',
+                    'margin': '0 auto',
+                    'left': '50%',
+                    'transform': 'translateX(-50%)'
+                });
+            }
         });
         cbtn.addClass("btn-primary");
     },
@@ -854,7 +864,6 @@ cur_frm.misOpenScanner = async function (searchDialog) {
             fieldtype: "HTML",
             options: `
                 <div id="${areaID}">Loading....</div>
-
                 <style>
                     .modal-content {
                         width: fit-content

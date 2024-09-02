@@ -20,6 +20,8 @@
   "column_break_s69rr",
   "extra_filters_section_collapsed",
   "show_item_image",
+  "item_price_listing",
+  "wide_dialog_enable_on_screen_size",
   "extra_filters_lablels_section",
   "item_group_label",
   "column_break_dydjy",
@@ -175,12 +177,26 @@
    "fieldname": "exclude_out_of_stock_items",
    "fieldtype": "Check",
    "label": "(Default) Exclude Out of Stock Items"
+  },
+  {
+   "description": "If Empty Item Price listing is disabled",
+   "fieldname": "item_price_listing",
+   "fieldtype": "Link",
+   "label": "Item Price Listing",
+   "options": "Price List"
+  },
+  {
+   "default": "1500",
+   "description": "Screens Width higher than this will have Wide Dialog mode Enabled. example value: 1500",
+   "fieldname": "wide_dialog_enable_on_screen_size",
+   "fieldtype": "Int",
+   "label": "Wide Dialog Enable on Screen Size"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-08-14 11:43:54.673026",
+ "modified": "2024-09-02 09:21:46.256170",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

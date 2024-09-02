@@ -70,6 +70,7 @@ def get_items_reserved_qty():
 
 @frappe.whitelist(allow_guest=False)
 def get_multiple_items():
+    mis_settings = frappe.get_single("Multi Select Settings")
 
     search_term = frappe.form_dict.get("search_term")
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
@@ -113,13 +114,19 @@ def get_multiple_items():
         select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
         i.image, i.mia_item_option, i.mia_item_sub_category,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
-        
+        {', ipc.price_list, ipc.price_list_rate, ipc.currency' if mis_settings.item_price_listing else '' }
         from `tabItem` i 
             { 'left' if include_non_stock else 'inner' } join `tabBin` b   
                 on i.item_code = b.item_code
             left join `tabItem Barcode` ibc
                 on i.item_code = ibc.parent
-                
+            {
+                '''
+                    left join `tabItem Price` ipc
+                        on i.item_code = ipc.item_code
+                ''' if mis_settings.item_price_listing else ''
+            }
+
         where i.disabled = 0
 
 
@@ -128,6 +135,7 @@ def get_multiple_items():
         {'and if(i.is_stock_item, (b.warehouse <> "" and b.actual_qty > 0), 1)' if exclude_out_of_stock_items else '' }
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
         {'and i.mis_has_packed_item = 1' if only_mis_packed_items else '' }
+        {'and ipc.price_list = "' + mis_settings.item_price_listing + '"' if mis_settings.item_price_listing else '' }
 
         {sql_filters.get('sql_warehouse', '')}
         {sql_filters.get('sql_item_group', '')}
