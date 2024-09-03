@@ -504,6 +504,21 @@ frappe.ui.form.on("Sales Order", {
                             searchTerm.input.dispatchEvent(new Event('input'));
                         }
                     },
+                    ...(
+                        mis_settings.enable_tag_filter ?[
+                            { fieldtype: "Column Break" },
+                            {
+                                label: __("Multi Select Tag"),
+                                fieldname: "tag",
+                                fieldtype: "Link",
+                                options: "Multi Select Tag",
+                                change: function () {
+                                    let searchTerm = this.layout.get_field("search_term")
+                                    searchTerm.input.dispatchEvent(new Event('input'));
+                                }
+                            },
+                        ]:[]
+                    ),
                     { fieldtype: "Section Break" },
                     {
                         label: __("Search Results"),
@@ -632,8 +647,7 @@ frappe.ui.form.on("Sales Order", {
                                     warehouse: d.get_value("warehouse"),
                                     item_option: d.get_value("item_option"),
                                     item_sub_category: d.get_value("item_sub_category"),
-
-
+                                    tag: d.get_value("tag")
                                 },
                                 freeze: true,
                                 callback: function (r) {
@@ -829,7 +843,7 @@ frappe.ui.form.on("Sales Order", {
             if ($(document).width() > (mis_settings.wide_dialog_enable_on_screen_size ? mis_settings.wide_dialog_enable_on_screen_size : 1500)) {
                 d.$wrapper.find('.modal-content').css({
                     'width': '200%',
-                    'margin': '0 auto',
+                    'margin': '0 auto',     
                     'left': '50%',
                     'transform': 'translateX(-50%)'
                 });

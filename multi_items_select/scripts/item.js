@@ -17,7 +17,15 @@ frappe.ui.form.on("Item", {
 
         }
     },
-    refresh: function(frm) {
+    refresh: async function(frm) {
+        let mis_settings = await frappe.call({
+            method: "multi_items_select.api.get_settings",
+        });
+        mis_settings = mis_settings.message;
+        if(!mis_settings.enable_tag_filter) {
+            frm.set_df_property("mis_multi_select_tag", "hidden", 1)
+        }
+
         if(frm.doc.mis_has_packed_item) {
             frm.set_df_property("mis_packed_items_section_58e2k", "hidden", false)
             frm.set_df_property("mis_packed_items", "hidden", false)

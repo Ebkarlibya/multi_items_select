@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Multi Item Select Settings\",\"col\":4}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}}]",
+ "content": "[{\"id\":\"AXGZX4nl7m\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"rd674-GuI8\",\"type\":\"card\",\"data\":{\"card_name\":\"MIS Links\",\"col\":4}},{\"id\":\"AkfjN34v2g\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"Y2FaqOZE9y\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"ZlUR5v7Wnp\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}}]",
  "creation": "2022-10-10 16:12:54.508411",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,8 +15,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Multi Item Select Settings",
-   "link_count": 1,
+   "label": "MIS Links",
+   "link_count": 2,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -29,9 +30,19 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Multi Select Tag",
+   "link_count": 0,
+   "link_to": "Multi Select Tag",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2024-08-28 12:54:40.032807",
+ "modified": "2024-09-02 09:58:09.974828",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Item Select Settings",

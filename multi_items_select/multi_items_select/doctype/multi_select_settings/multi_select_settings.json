@@ -17,6 +17,7 @@
   "include_non_maintain_stock",
   "only_mis_packed_items",
   "exclude_out_of_stock_items",
+  "enable_tag_filter",
   "column_break_s69rr",
   "extra_filters_section_collapsed",
   "show_item_image",
@@ -191,12 +192,18 @@
    "fieldname": "wide_dialog_enable_on_screen_size",
    "fieldtype": "Int",
    "label": "Wide Dialog Enable on Screen Size"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_tag_filter",
+   "fieldtype": "Check",
+   "label": "Enable Tag Filter"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-02 09:21:46.256170",
+ "modified": "2024-09-02 10:04:47.361177",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

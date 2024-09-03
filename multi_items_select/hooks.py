@@ -208,6 +208,7 @@ fixtures = [
             ["fieldname", "in", (
                 # Item
                 "mis_has_packed_item",
+                "mis_multi_select_tag",
                 "mis_packed_items_section_58e2k",
                 "mis_packed_items",
                 "mia_item_desc_col_break_4123",

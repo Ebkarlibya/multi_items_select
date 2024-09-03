@@ -83,6 +83,7 @@ def get_multiple_items():
     brand = frappe.form_dict.get("brand")
     item_option = frappe.form_dict.get("item_option")
     item_sub_category = frappe.form_dict.get("item_sub_category")
+    tag = frappe.form_dict.get("tag")
 
     escaped_search_term = frappe.db.escape(search_term)
     escaped_search_term = "'%" + \
@@ -110,22 +111,29 @@ def get_multiple_items():
         sql_filters[
             "sql_item_sub_category"] = f"and i.mia_item_sub_category = {frappe.db.escape(item_sub_category)}"
 
+    if tag:
+        sql_filters[
+            "sql_mis_tag"] = f"and misTag.tag = {frappe.db.escape(tag)}"
+
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
         i.image, i.mia_item_option, i.mia_item_sub_category,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
         {', ipc.price_list, ipc.price_list_rate, ipc.currency' if mis_settings.item_price_listing else '' }
+        {', misTag.tag' if mis_settings.enable_tag_filter else '' }
         from `tabItem` i 
             { 'left' if include_non_stock else 'inner' } join `tabBin` b   
                 on i.item_code = b.item_code
             left join `tabItem Barcode` ibc
                 on i.item_code = ibc.parent
-            {
-                '''
-                    left join `tabItem Price` ipc
-                        on i.item_code = ipc.item_code
-                ''' if mis_settings.item_price_listing else ''
-            }
+            {'''
+            left join `tabItem Price` ipc
+                on i.item_code = ipc.item_code
+            ''' if mis_settings.item_price_listing else ''}
+            {'''
+            left join `tabMulti Select Tag Item Table` misTag
+                on i.item_code = misTag.parent
+            ''' if mis_settings.enable_tag_filter else ''}
 
         where i.disabled = 0
 
@@ -142,11 +150,12 @@ def get_multiple_items():
         {sql_filters.get('sql_brand', '')}
         {sql_filters.get('sql_item_option', '')}
         {sql_filters.get('sql_item_sub_category', '')}
+        {sql_filters.get('sql_mis_tag', '')}
 
         -- group by b.warehouse
 
         order by i.item_code, i.item_name, b.warehouse
-                          
+
         limit {20 if not search_term else 100000000}
     """, as_dict=True, debug=True)
 
