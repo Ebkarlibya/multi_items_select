@@ -1,6 +1,8 @@
+var handler_list = frappe.ui.form.get_event_handler_list(doctype, fieldname);
 
-frappe.ui.form.on("Purchase Order", {
+frappe.ui.form.on("*", {
     setup: async function (frm) {
+        
         let mis_settings = await frappe.call({
             method: "multi_items_select.api.get_settings",
         });

@@ -12,7 +12,7 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/multi_items_select/css/multi_items_select.css"
-app_include_js = ["scanner.bundle.js"]
+app_include_js = ["scanner.bundle.js", "mis.bundle.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/multi_items_select/css/multi_items_select.css"
@@ -31,11 +31,11 @@ app_include_js = ["scanner.bundle.js"]
 # include js in doctype views
 doctype_js = {
     "Item": "scripts/item.js",
-    "Purchase Order": "scripts/purchase_order.js",
-    "Purchase Invoice": "scripts/purchase_invoice.js",
-    "Sales Order": "scripts/sales_order.js",
-    "Sales Invoice": "scripts/sales_invoice.js",
-    "Stock Entry": "scripts/stock_entry.js",
+    # "Purchase Order": "scripts/purchase_order.js",
+    # "Purchase Invoice": "scripts/purchase_invoice.js",
+    # "Sales Order": "scripts/sales_order.js",
+    # "Sales Invoice": "scripts/sales_invoice.js",
+    # "Stock Entry": "scripts/stock_entry.js",
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
