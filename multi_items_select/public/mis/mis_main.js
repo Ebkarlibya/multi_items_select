@@ -1,5 +1,5 @@
 import DOCTYPES from "./utils/mis_enums.js"
-import { getSettings, getCanBypass, misSleep, highlightField, misSetSelectedItem } from "./utils/helpers.js";
+import { getSettings, getCanBypass, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle } from "./utils/helpers.js";
 
 import misDialog from "./dialogs/mis_dialog.js";
 import addItemDialog from "./dialogs/add_item_dialog.js";
@@ -13,14 +13,12 @@ $(document).on('app_ready', function () {
         const DOC = DOCTYPES[k]
         const METHODS = {
             setup: async function (frm) {
+                let settings = await getSettings()
                 if (!settings.enabled) return
 
-                let settings = await getSettings()
-                let canBypass = await getCanBypass()
-
-                // register namespaces
+                // register namespaces & services
                 MISApp.settings = settings
-                MISApp.canBypass = canBypass
+                MISApp.canBypass = await getCanBypass()
                 MISApp.misDialog = misDialog
                 MISApp.misDialogCollapsed = false
                 MISApp.misLastSearchData = null;
@@ -29,23 +27,15 @@ $(document).on('app_ready', function () {
                 MISApp.addPackedItemDialog = addPackedItemDialog
                 MISApp.scannerDialog = scannerDialog
 
-                // listen for update event
-                frappe.realtime.on("mis_settings_update", async () => {
-                    frappe.show_alert("Settings Update, Refreshing...")
-                    if(cur_dialog && cur_dialog.title === __(settings.mis_dialog_title)) {
-                        localStorage.setItem("mis_reopen", true)
-                    }
-                    await misSleep(2000)
-                    location.reload()
-                })
-                if(localStorage.getItem("mis_reopen")) {
-                    misDialog(settings, frm)
-                    highlightField(frm, "items")
-                    localStorage.removeItem("mis_reopen")
-                }
+                setupRealtimeSettingUpdate(settings, frm)
+                setupDialogToggle(settings, frm)
+                // setTimeout(() => {
+                //     MISApp.misDialog(frm)
+                // }, 1000)
+
             },
             refresh: async function (frm) {
-                let settings = await getSettings()
+                let settings = await getSettings() // TODO: using settings from setup ?
 
                 if (!settings.enabled) return;
                 if (frm.doc.docstatus === 1) return;
@@ -64,12 +54,11 @@ $(document).on('app_ready', function () {
                         frappe.show_alert(__("(MIS): Please select customer first"));
                         return
                     }
-                    MISApp.misDialog(settings, frm)
-                
+                    MISApp.misDialog(frm)
                 });
                 cbtn.addClass("btn-primary");
                 // highlightField(frm, "items")
-                setTimeout(() => MISApp.misDialog(settings, frm), 1000)
+                // setTimeout(() => MISApp.misDialog(settings, frm), 1000)
             },
         }
 

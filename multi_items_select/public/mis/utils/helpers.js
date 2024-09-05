@@ -1,3 +1,4 @@
+// import misDialog from "../dialogs/mis_dialog"
 
 export const misSetSelectedItem = async (item_code) => {
     window.MISApp.misSelectedItem = item
@@ -38,15 +39,51 @@ export const highlightField = (frm, fieldname) => {
 
     frappe.utils.scroll_to($el, true, 15);
 
-    let control_element = $el.closest(".frappe-control");
+    // let control_element = $el.closest(".frappe-control");
 
     // control_element.addClass("highlight");
-    control_element.css("background-color", "#FFB0B6"); // Lighter red color
-    setTimeout(() => {
+    // control_element.css("background-color", "#FFB0B6"); // Lighter red color
+    // setTimeout(() => {
         // control_element.removeClass("highlight");
-        control_element.css("background-color", "");
-    }, 7000);
+        // control_element.css("background-color", "");
+    // }, 2000);
     return true;
+}
+
+export const setupRealtimeSettingUpdate = (settings, frm) => {
+    frappe.realtime.on("mis_settings_update", async () => {
+        frappe.show_alert("Settings Update, Refreshing...")
+        if (cur_dialog && cur_dialog.title === __(settings.mis_dialog_title)) {
+            localStorage.setItem("mis_reopen", true)
+        }
+        await misSleep(2000)
+        location.reload()
+    })
+    if (localStorage.getItem("mis_reopen")) {
+        misDialog(settings, frm)
+        highlightField(frm, "items")
+        localStorage.removeItem("mis_reopen")
+    }
+}
+
+export const setupDialogToggle = (settings, frm) => {    
+    if(!settings.dialog_open_keyboard_shortcut_key) return;
+    $(document).keypress(settings.dialog_open_keyboard_shortcut_key, async function (e) {
+        
+        if (e.shiftKey && e.target == document.body && !cur_dialog && e.originalEvent.key === settings.dialog_open_keyboard_shortcut_key) {
+            console.log(e);
+            if (!cur_dialog) {
+                frappe.show_alert("Opening MIS Dialog....")
+                highlightField(frm, "items")
+                await misSleep(800);
+                MISApp.misDialog(frm)
+            } else {
+                // TODO: strange issue
+                // cur_dialog.hide()
+                // cur_dialog.get_close_btn().click()                
+            }
+        }
+    });
 }
 
 export const itemsResultCountInfo = (data) => {
@@ -56,16 +93,16 @@ export const itemsResultCountInfo = (data) => {
     let instock = 0
     let outofstock = 0
 
-    for(let item in data) {
+    for (let item in data) {
         total += 1
 
-        if(item.is_stock_item) {
+        if (item.is_stock_item) {
             isStock += 1
         } else {
-            isNonStock +=1
+            isNonStock += 1
         }
 
-        if(item.actual_qty > 0) {
+        if (item.actual_qty > 0) {
             instock += 1
         } else {
             outofstock += 1
@@ -74,3 +111,4 @@ export const itemsResultCountInfo = (data) => {
     }
     return `<b>Total: ${total}</b>, Is Stock: <b>${isStock}</b>, Non Stock: <b>${isNonStock}</b>, In Stock: <b>${instock}</b>, Out of Stock: <b>${outofstock}</b>`;
 }
+

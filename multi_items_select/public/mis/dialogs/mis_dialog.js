@@ -1,6 +1,8 @@
 import { itemsResultCountInfo } from "../utils/helpers";
 
-export default (settings, frm) => {
+export default (frm, openScanner = false) => {
+    const settings = MISApp.settings
+
     var d = new frappe.ui.Dialog({
         title: __(settings.mis_dialog_title),
         type: "large",
@@ -162,6 +164,10 @@ export default (settings, frm) => {
 
     d.show();
 
+    if(openScanner) {
+        MISApp.scannerDialog(d);
+    }
+
     let timeout = null;
 
     d.get_field("search_term").input.oninput = function () {
@@ -175,7 +181,7 @@ export default (settings, frm) => {
                     {
                         method: "multi_items_select.api.get_multiple_items",
                         args: {
-                            source_warehouse: frm.doc.set_warehouse,
+                            // source_warehouse: frm.doc.set_warehouse,
                             search_term: d.get_value("search_term"),
                             include_non_stock: d.get_value("include_non_stock"),
                             exclude_out_of_stock_items: d.get_value("exclude_out_of_stock_items"),
@@ -384,7 +390,10 @@ function triggerSearchInput(dialog) {
 function setupDialogCollapse(dialog) {
     let actions = dialog.$wrapper.find(".modal-actions")
 
-    let el = actions.prepend(`
+
+
+    
+    actions.prepend(`
         <button class="btn btn-arrow dialog-collapse-btn">
             <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
         </button>`

@@ -24,6 +24,7 @@
   "extra_config_section_collapsed",
   "item_price_listing",
   "wide_dialog_enable_on_screen_size",
+  "dialog_open_keyboard_shortcut_key",
   "extra_filters_lablels_section",
   "item_group_label",
   "column_break_dydjy",
@@ -216,12 +217,18 @@
    "fieldname": "tag_label",
    "fieldtype": "Data",
    "label": "Tag Label"
+  },
+  {
+   "description": "Choose key for example: (D) and press (Shift+D) to open keyboard ",
+   "fieldname": "dialog_open_keyboard_shortcut_key",
+   "fieldtype": "Data",
+   "label": "Dialog Open Keyboard Shortcut Key"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-05 09:04:09.684639",
+ "modified": "2024-09-05 11:47:39.321269",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

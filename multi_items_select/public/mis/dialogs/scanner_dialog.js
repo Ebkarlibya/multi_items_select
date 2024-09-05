@@ -53,16 +53,17 @@ export default async (searchDialog) => {
         scanner = new Html5QrcodeScanner(areaID, config, false);
         scanner.render(async (barcode) => {
             console.log('success', barcode);
-            searchDialog.set_value("search_term", barcode)
-            searchDialog.get_field("search_term").wrapper.querySelector("input").dispatchEvent(new Event('input'))
             await scanner.clear()
             scanner = undefined
             d.hide();
+            searchDialog.set_value("search_term", barcode)
+            searchDialog.get_field("search_term").wrapper.querySelector("input").dispatchEvent(new Event('input'))
             frappe.utils.play_sound("submit")
             // beep.volume = 1
             // beep.play()
         }
-            , (d1, d2) => {// console.log('error', d1, d2);
+            , (d1, d2) => {
+                // console.log('error', d1, d2);
             }
         );
     }

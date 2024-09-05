@@ -39,12 +39,38 @@
       field.section.collapse(false);
     }
     frappe.utils.scroll_to($el, true, 15);
-    let control_element = $el.closest(".frappe-control");
-    control_element.css("background-color", "#FFB0B6");
-    setTimeout(() => {
-      control_element.css("background-color", "");
-    }, 7e3);
     return true;
+  };
+  var setupRealtimeSettingUpdate = (settings2, frm2) => {
+    frappe.realtime.on("mis_settings_update", async () => {
+      frappe.show_alert("Settings Update, Refreshing...");
+      if (cur_dialog && cur_dialog.title === __(settings2.mis_dialog_title)) {
+        localStorage.setItem("mis_reopen", true);
+      }
+      await misSleep(2e3);
+      location.reload();
+    });
+    if (localStorage.getItem("mis_reopen")) {
+      misDialog(settings2, frm2);
+      highlightField(frm2, "items");
+      localStorage.removeItem("mis_reopen");
+    }
+  };
+  var setupDialogToggle = (settings2, frm2) => {
+    if (!settings2.dialog_open_keyboard_shortcut_key)
+      return;
+    $(document).keypress(settings2.dialog_open_keyboard_shortcut_key, async function(e) {
+      if (e.shiftKey && e.target == document.body && !cur_dialog && e.originalEvent.key === settings2.dialog_open_keyboard_shortcut_key) {
+        console.log(e);
+        if (!cur_dialog) {
+          frappe.show_alert("Opening MIS Dialog....");
+          highlightField(frm2, "items");
+          await misSleep(800);
+          MISApp.misDialog(frm2);
+        } else {
+        }
+      }
+    });
   };
   var itemsResultCountInfo = (data) => {
     let total = 0;
@@ -69,7 +95,8 @@
   };
 
   // ../multi_items_select/multi_items_select/public/mis/dialogs/mis_dialog.js
-  var mis_dialog_default = (settings2, frm2) => {
+  var mis_dialog_default = (frm2, openScanner = false) => {
+    const settings2 = MISApp.settings;
     var d = new frappe.ui.Dialog({
       title: __(settings2.mis_dialog_title),
       type: "large",
@@ -227,6 +254,9 @@
       }
     });
     d.show();
+    if (openScanner) {
+      MISApp.scannerDialog(d);
+    }
     let timeout = null;
     d.get_field("search_term").input.oninput = function() {
       clearTimeout(timeout);
@@ -238,7 +268,6 @@
           frappe.call({
             method: "multi_items_select.api.get_multiple_items",
             args: {
-              source_warehouse: frm2.doc.set_warehouse,
               search_term: d.get_value("search_term"),
               include_non_stock: d.get_value("include_non_stock"),
               exclude_out_of_stock_items: d.get_value("exclude_out_of_stock_items"),
@@ -426,7 +455,7 @@
   }
   function setupDialogCollapse(dialog) {
     let actions = dialog.$wrapper.find(".modal-actions");
-    let el = actions.prepend(`
+    actions.prepend(`
         <button class="btn btn-arrow dialog-collapse-btn">
             <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
         </button>`);
@@ -848,11 +877,11 @@
       scanner = new Html5QrcodeScanner(areaID, config, false);
       scanner.render(async (barcode) => {
         console.log("success", barcode);
-        searchDialog.set_value("search_term", barcode);
-        searchDialog.get_field("search_term").wrapper.querySelector("input").dispatchEvent(new Event("input"));
         await scanner.clear();
         scanner = void 0;
         d.hide();
+        searchDialog.set_value("search_term", barcode);
+        searchDialog.get_field("search_term").wrapper.querySelector("input").dispatchEvent(new Event("input"));
         frappe.utils.play_sound("submit");
       }, (d1, d2) => {
       });
@@ -866,12 +895,11 @@
       const DOC = mis_enums_default[k];
       const METHODS = {
         setup: async function(frm2) {
+          let settings2 = await getSettings();
           if (!settings2.enabled)
             return;
-          let settings2 = await getSettings();
-          let canBypass = await getCanBypass();
           MISApp.settings = settings2;
-          MISApp.canBypass = canBypass;
+          MISApp.canBypass = await getCanBypass();
           MISApp.misDialog = mis_dialog_default;
           MISApp.misDialogCollapsed = false;
           MISApp.misLastSearchData = null;
@@ -879,19 +907,8 @@
           MISApp.addItemDialog = add_item_dialog_default;
           MISApp.addPackedItemDialog = add_packed_item_dialog_default;
           MISApp.scannerDialog = scanner_dialog_default;
-          frappe.realtime.on("mis_settings_update", async () => {
-            frappe.show_alert("Settings Update, Refreshing...");
-            if (cur_dialog && cur_dialog.title === __(settings2.mis_dialog_title)) {
-              localStorage.setItem("mis_reopen", true);
-            }
-            await misSleep(2e3);
-            location.reload();
-          });
-          if (localStorage.getItem("mis_reopen")) {
-            mis_dialog_default(settings2, frm2);
-            highlightField(frm2, "items");
-            localStorage.removeItem("mis_reopen");
-          }
+          setupRealtimeSettingUpdate(settings2, frm2);
+          setupDialogToggle(settings2, frm2);
         },
         refresh: async function(frm2) {
           let settings2 = await getSettings();
@@ -910,10 +927,9 @@
               frappe.show_alert(__("(MIS): Please select customer first"));
               return;
             }
-            MISApp.misDialog(settings2, frm2);
+            MISApp.misDialog(frm2);
           });
           cbtn.addClass("btn-primary");
-          setTimeout(() => MISApp.misDialog(settings2, frm2), 1e3);
         }
       };
       if (DOC === mis_enums_default.SALES_INVOICE) {
@@ -925,4 +941,4 @@
     }
   });
 })();
-//# sourceMappingURL=mis.bundle.TATN2XR5.js.map
+//# sourceMappingURL=mis.bundle.EPWVJKYM.js.map
