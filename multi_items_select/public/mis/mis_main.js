@@ -1,5 +1,5 @@
 import DOCTYPES from "./utils/mis_enums.js"
-import { getSettings, getCanBypass, misSleep, highlightField } from "./utils/helpers.js";
+import { getSettings, getCanBypass, misSleep, highlightField, misSetSelectedItem } from "./utils/helpers.js";
 
 import misDialog from "./dialogs/mis_dialog.js";
 import addItemDialog from "./dialogs/add_item_dialog.js";
@@ -15,21 +15,25 @@ $(document).on('app_ready', function () {
             setup: async function (frm) {
                 // TODO: optimize backend fetch
                 let settings = await getSettings()
+                let canBypass = await getCanBypass()
 
                 if (!settings.enabled) return
 
-                window.MISApp.settings = settings
-                window.MISApp.misDialog = misDialog
-                window.MISApp.addItemDialog = addItemDialog
-                window.MISApp.addPackedItemDialog = addPackedItemDialog
-                window.MISApp.scannerDialog = scannerDialog
+                MISApp.settings = settings
+                MISApp.canBypass = canBypass
+                MISApp.misDialog = misDialog
+                MISApp.misLastSearchData = null;
+                MISApp.misSetSelectedItem = misSetSelectedItem;
+                MISApp.addItemDialog = addItemDialog
+                MISApp.addPackedItemDialog = addPackedItemDialog
+                MISApp.scannerDialog = scannerDialog
                 // add item row
                 // frm.mis_add_item_row
 
                 // listen for update event
                 frappe.realtime.on("mis_settings_update", async () => {
                     frappe.show_alert("Settings Update, Refreshing...")
-                    if(cur_dialog && cur_dialog.title === '(MIS): Insert') {
+                    if(cur_dialog && cur_dialog.title === __(settings.mis_dialog_title)) {
                         localStorage.setItem("mis_reopen", true)
                     }
                     await misSleep(2000)
@@ -44,10 +48,10 @@ $(document).on('app_ready', function () {
             refresh: async function (frm) {
                 let settings = await getSettings()
 
-                if (settings.enabled == 0 || frm.doc.docstatus === 1) {
-                    return;
-                }
+                if (!settings.enabled) return;
+                if (frm.doc.docstatus === 1) return;
 
+                
                 const itemsGrid = frm.get_field("items").grid;        
         
                 if (settings.disable_original_add_multi) {
@@ -65,8 +69,8 @@ $(document).on('app_ready', function () {
                 
                 });
                 cbtn.addClass("btn-primary");
-                highlightField(frm, "items")
-
+                // highlightField(frm, "items")
+                setTimeout(() => MISApp.misDialog(settings, frm), 1000)
             },
         }
 

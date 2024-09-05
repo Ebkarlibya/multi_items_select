@@ -1,4 +1,7 @@
 
+export const misSetSelectedItem = async (item_code) => {
+    window.MISApp.misSelectedItem = item
+}
 
 export const getSettings = async () => {
     let mis_settings = await frappe.call({
@@ -44,4 +47,30 @@ export const highlightField = (frm, fieldname) => {
         control_element.css("background-color", "");
     }, 7000);
     return true;
+}
+
+export const itemsResultCountInfo = (data) => {
+    let total = 0
+    let isStock = 0
+    let isNonStock = 0
+    let instock = 0
+    let outofstock = 0
+
+    for(let item in data) {
+        total += 1
+
+        if(item.is_stock_item) {
+            isStock += 1
+        } else {
+            isNonStock +=1
+        }
+
+        if(item.actual_qty > 0) {
+            instock += 1
+        } else {
+            outofstock += 1
+        }
+
+    }
+    return `<b>Total: ${total}</b>, Is Stock: <b>${isStock}</b>, Non Stock: <b>${isNonStock}</b>, In Stock: <b>${instock}</b>, Out of Stock: <b>${outofstock}</b>`;
 }

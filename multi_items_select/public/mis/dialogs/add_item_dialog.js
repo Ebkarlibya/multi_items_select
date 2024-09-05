@@ -1,16 +1,18 @@
 export default (item_code, warehouse) => {
-    const selected_item = cur_frm.mis_last_search_data.find(el => el.item_code === item_code)
+    const selected_item = MISApp.misLastSearchData.find(el => el.item_code === item_code)
     const { item_name, actual_qty, reserved_qty, mis_has_packed_item } = selected_item
 
+    console.log("selected_item: ", MISApp.misSelectedItem);
+
     if (mis_has_packed_item) {
-        frm.mis_add_packed_items(item_code)
+        window.MISApp.addPackedItemDialog(item_code)
         return
     }
 
     const sellable_qty = actual_qty - reserved_qty;
-    let qd = new frappe.ui.Dialog(
+    
+    let d = new frappe.ui.Dialog(
         {
-
             title: __("Select Insert Quantity"),
             fields: [
                 {
@@ -21,9 +23,7 @@ export default (item_code, warehouse) => {
                     reqd: 1,
 
                 },
-                {
-                    fieldtype: "Section Break",
-                },
+                { fieldtype: "Section Break", },
                 {
                     fieldname: "item_code",
                     fieldtype: "Link",
@@ -31,18 +31,14 @@ export default (item_code, warehouse) => {
                     options: "Item",
                     read_only: 1,
                 },
-                {
-                    fieldtype: "Column Break",
-                },
+                { fieldtype: "Column Break" },
                 {
                     fieldname: "item_name",
                     fieldtype: "Data",
                     label: "Item Name",
                     read_only: 1,
                 },
-                {
-                    fieldtype: "Section Break",
-                },
+                { fieldtype: "Section Break" },
                 {
                     fieldname: "warehouse",
                     fieldtype: "Link",
@@ -57,6 +53,7 @@ export default (item_code, warehouse) => {
                     fieldname: "actual_qty",
                     fieldtype: "Float",
                     label: "Actual Qty",
+                    default: 0,
                     read_only: 1,
                 },
                 {
@@ -66,6 +63,7 @@ export default (item_code, warehouse) => {
                     fieldname: "reserved_qty",
                     fieldtype: "Float",
                     label: "Reserved Qty",
+                    default: 0,
                     read_only: 1,
                 },
                 {
@@ -75,34 +73,36 @@ export default (item_code, warehouse) => {
                     fieldname: "sellable_qty",
                     fieldtype: "Float",
                     label: "Sellable Qty",
+                    default: 0,
                     read_only: 1,
                 }
             ],
             primary_action_label: __("Insert Item"),
             primary_action: async function (values) {
                 const itemsGrid = frm.get_field("items").grid;
+
                 let d = null;
 
                 // validate sellable qty
-                let settings = await frappe.call({
-                    method: "multi_items_select.api.get_settings",
-                });
-                settings = settings.message;
+                // let settings = await frappe.call({
+                //     method: "multi_items_select.api.get_settings",
+                // });
+                // settings = settings.message;
 
-                let can_bypass = await frappe.call({
-                    method: "multi_items_select.api.get_can_bypass",
-                });
-                can_bypass = can_bypass.message;
+                // let can_bypass = await frappe.call({
+                //     method: "multi_items_select.api.get_can_bypass",
+                // });
+                // can_bypass = can_bypass.message;
 
                 if (values.qty > sellable_qty) {
-                    switch (settings.sellable_qty_action) {
+                    switch (MISApp.settings.sellable_qty_action) {
                         case "Nothing":
                             break;
                         case "Warn":
                             frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                             break;
                         case "Stop":
-                            if (can_bypass) {
+                            if (MISApp.canBypass) {
                                 frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                                 break;
                             } else {
@@ -133,15 +133,22 @@ export default (item_code, warehouse) => {
                 frappe.show_alert(__("(MIS): Item Added!"));
                 qd.hide();
             }
-
-
         },
     );
-    qd.show();
-    qd.set_value("item_code", item_code);
-    qd.set_value("item_name", item_name);
-    qd.set_value("warehouse", warehouse);
-    qd.set_value("actual_qty", actual_qty);
-    qd.set_value("reserved_qty", reserved_qty);
-    qd.set_value("sellable_qty", actual_qty - reserved_qty);
+    d.show();
+    d.set_value("item_code", item_code);
+    d.set_value("item_name", item_name);
+    d.set_value("warehouse", warehouse);
+    d.set_value("actual_qty", actual_qty);
+    d.set_value("reserved_qty", reserved_qty);    
+    d.set_value("sellable_qty", 55);
+
+    if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
+        d.$wrapper.find('.modal-content').css({
+            'width': '200%',
+            'margin': '0 auto',     
+            'left': '49%',
+            'transform': 'translateX(-51%)'
+        });
+    }
 }

@@ -9,6 +9,9 @@
   };
 
   // ../multi_items_select/multi_items_select/public/mis/utils/helpers.js
+  var misSetSelectedItem = async (item_code) => {
+    window.MISApp.misSelectedItem = item;
+  };
   var getSettings = async () => {
     let mis_settings = await frappe.call({
       method: "multi_items_select.api.get_settings"
@@ -43,18 +46,39 @@
     }, 7e3);
     return true;
   };
+  var itemsResultCountInfo = (data) => {
+    let total = 0;
+    let isStock = 0;
+    let isNonStock = 0;
+    let instock = 0;
+    let outofstock = 0;
+    for (let item2 in data) {
+      total += 1;
+      if (item2.is_stock_item) {
+        isStock += 1;
+      } else {
+        isNonStock += 1;
+      }
+      if (item2.actual_qty > 0) {
+        instock += 1;
+      } else {
+        outofstock += 1;
+      }
+    }
+    return `<b>Total: ${total}</b>, Is Stock: <b>${isStock}</b>, Non Stock: <b>${isNonStock}</b>, In Stock: <b>${instock}</b>, Out of Stock: <b>${outofstock}</b>`;
+  };
 
   // ../multi_items_select/multi_items_select/public/mis/dialogs/mis_dialog.js
   var mis_dialog_default = (settings2, frm2) => {
-    console.log("misDialog: ", frm2);
     var d = new frappe.ui.Dialog({
-      title: __("(MIS): Insert"),
+      title: __(settings2.mis_dialog_title),
       type: "large",
       fields: [
         {
           fieldtype: "Data",
           fieldname: "search_term",
-          label: __("Search Items")
+          label: __("Search Items"),
+          placeholder: __("Search by Item Code, Name or Barcode")
         },
         {
           label: __("Extra Filters"),
@@ -67,10 +91,7 @@
           fieldname: "item_group",
           fieldtype: "Link",
           options: "Item Group",
-          change: function() {
-            let searchTerm2 = this.layout.get_field("search_term");
-            searchTerm2.input.dispatchEvent(new Event("input"));
-          }
+          change: triggerSearchInput
         },
         { fieldtype: "Column Break" },
         {
@@ -78,10 +99,7 @@
           fieldname: "brand",
           fieldtype: "Link",
           options: "Brand",
-          change: function() {
-            let searchTerm2 = this.layout.get_field("search_term");
-            searchTerm2.input.dispatchEvent(new Event("input"));
-          }
+          change: triggerSearchInput
         },
         { fieldtype: "Column Break" },
         {
@@ -89,10 +107,7 @@
           fieldname: "warehouse",
           fieldtype: "Link",
           options: "Warehouse",
-          change: function() {
-            let searchTerm2 = this.layout.get_field("search_term");
-            searchTerm2.input.dispatchEvent(new Event("input"));
-          }
+          change: triggerSearchInput
         },
         { fieldtype: "Column Break" },
         {
@@ -100,10 +115,7 @@
           fieldname: "item_option",
           fieldtype: "Link",
           options: "Item Option",
-          change: function() {
-            let searchTerm2 = this.layout.get_field("search_term");
-            searchTerm2.input.dispatchEvent(new Event("input"));
-          }
+          change: triggerSearchInput
         },
         { fieldtype: "Column Break" },
         {
@@ -111,33 +123,26 @@
           fieldname: "item_sub_category",
           fieldtype: "Link",
           options: "Item Sub-Category",
-          change: function() {
-            let searchTerm2 = this.layout.get_field("search_term");
-            searchTerm2.input.dispatchEvent(new Event("input"));
-          }
+          change: triggerSearchInput
         },
         ...settings2.enable_tag_filter ? [
           { fieldtype: "Column Break" },
           {
-            label: __("Multi Select Tag"),
+            label: __(settings2.tag_label ? settings2.tag_label : "Tag"),
             fieldname: "tag",
             fieldtype: "Link",
             options: "Multi Select Tag",
-            change: function() {
-              let searchTerm2 = this.layout.get_field("search_term");
-              searchTerm2.input.dispatchEvent(new Event("input"));
-            }
+            change: triggerSearchInput
           }
         ] : [],
         { fieldtype: "Section Break" },
         {
-          label: __("Search Results"),
-          fieldname: "search_results",
-          fieldtype: "Section Break"
+          label: __("Extra Config"),
+          fieldname: "extra_config",
+          fieldtype: "Section Break",
+          collapsible: settings2.extra_config_section_collapsed
         },
-        {
-          fieldtype: "Column Break"
-        },
+        { fieldtype: "Column Break" },
         {
           fieldname: "include_non_stock",
           fieldtype: "Check",
@@ -148,9 +153,7 @@
             searchTerm2.input.dispatchEvent(new Event("input"));
           }
         },
-        {
-          fieldtype: "Column Break"
-        },
+        { fieldtype: "Column Break" },
         {
           fieldname: "exclude_out_of_stock_items",
           fieldtype: "Check",
@@ -162,11 +165,6 @@
           }
         },
         {
-          label: "",
-          hide_border: 1,
-          fieldtype: "Section Break"
-        },
-        {
           fieldname: "only_mis_packed_items",
           fieldtype: "Check",
           label: __("Only (MIS) Packed Items"),
@@ -176,10 +174,7 @@
             searchTerm2.input.dispatchEvent(new Event("input"));
           }
         },
-        {
-          label: "Search Result",
-          fieldtype: "Section Break"
-        },
+        { fieldtype: "Section Break" },
         {
           fieldname: "query_loading",
           fieldtype: "HTML",
@@ -255,35 +250,32 @@
               item_sub_category: d.get_value("item_sub_category"),
               tag: d.get_value("tag")
             },
-            freeze: true,
+            freeze: false,
             callback: function(r) {
               if (r.message) {
                 let data_rows = "";
-                let totalLabel = d.get_field("search_results").section.head[0];
                 if (r.message.length > 0) {
                   d.set_df_property("search_results", "hidden", false);
                   d.set_df_property("query_loading", "hidden", true);
                   d.set_df_property("no_data", "hidden", true);
-                  totalLabel.innerText = `Search Results (${r.message.length})`;
                 } else {
                   d.set_df_property("search_results", "hidden", true);
                   d.set_df_property("query_loading", "hidden", true);
                   d.set_df_property("no_data", "hidden", false);
-                  totalLabel.innerText = `Search Results (0)`;
                 }
-                cur_frm.mis_last_search_data = r.message;
+                MISApp.misLastSearchData = r.message;
                 for (let i = 0; i < r.message.length; i++) {
                   let data = r.message[i];
                   data.warehouse = data.is_stock_item ? data.warehouse ? data.warehouse : "-" : "*Non Stock*";
-                  data.actual_qty = data.actual_qty ? data.actual_qty : "-";
-                  data.reserved_qty = data.reserved_qty ? data.reserved_qty : "-";
-                  data.ordered_qty = data.ordered_qty ? data.ordered_qty : "-";
+                  data.actual_qty = data.is_stock_item ? data.actual_qty : "-";
+                  data.reserved_qty = data.is_stock_item ? data.reserved_qty : "-";
+                  data.ordered_qty = data.is_stock_item ? data.ordered_qty : "-";
                   data.brand = data.brand ? data.brand : "-";
                   data.stock_uom = data.stock_uom ? data.stock_uom : "-";
                   data_rows += repl(`<tr 
                                             class="etms-add-multi__tb_tr"
                                             onclick="MISApp.addItemDialog(\`%(item_code)s\`, \`%(warehouse)s\`)">
-                                                    ${settings2.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 20%">
+                                                    ${settings2.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 15%">
                                                         <div class="img-hover">
                                                             <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : "/assets/multi_items_select/img/image-placeholder.jpg"}" />
                                                         </div>
@@ -297,49 +289,39 @@
                                                                 </svg>` : ""}
                                                             </div> 
                                                             <p class="etms-multi__subtitle1">${data.item_name}</p>
-                                                            
+                                                            <span class="etms-multi__subtitle1">${__("Brand")}: &nbsp; </span><span >${data.brand}</span><br>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="etms-add-multi__row">
-                                                            <p style="white-space: nowrap; color: ${data.is_stock_item ? "" : "brown"};">${data.warehouse}</p>
-                                                            ${settings2.item_price_listing ? `<div>
-                                                                <p class="etms-multi__subtitle1">${format_currency(data.price_list_rate, data.currency)}</p>
-                                                                <p class="etms-multi__subtitle1">(${data.price_list})</p>
-                                                            </div>` : ""}
+                                                            ${data.is_stock_item ? ` 
+                                                                    <span class="etms-multi__subtitle1">${__("Rate")}: &nbsp; </span><span >${format_currency(data.price_list_rate, data.currency)} (${data.price_list})</span><br>
+                                                                    <hr style="margin-top: 3px; margin-bottom: 3px">  
+                                                                    <span class="etms-multi__subtitle1">${__("Warehouse")}: &nbsp; </span><span >${data.warehouse}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Actual Qty")}: &nbsp; </span><span >${data.actual_qty}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Reserved Qty")}: &nbsp; </span><span >${data.reserved_qty}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Ordered")}: &nbsp; </span><span>${data.ordered_qty}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Sellable Qty")}: &nbsp; </span><span >${data.actual_qty - data.reserved_qty}</span><br>
+                                                                    <hr style="margin: 3px">
+                                                                ` : `
+                                                                    <p style="white-space: nowrap; color: brown;">${data.warehouse}</p\u0628\u0633\u064A\u0628\u0633\u064A\u0628\u0633\u064A\u0628
+                                                                `}
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <div class="etms-add-multi__row">
-                                                            <p>${data.actual_qty}</p>
-                                                        <div>
-                                                        <p class="etms-multi__subtitle1">${data.stock_uom}</p>
-                                                    </td>
-                                                    <td>
-                                                        <div class="etms-add-multi__row">
-                                                            <p>${data.reserved_qty}</p>
-                                                        <div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="etms-add-multi__row">
-                                                            <p>${data.ordered_qty}</p>
-                                                        <div>
-                                                    </td>
+
                                                 </tr>`, {
                     item_code: data.item_code,
                     warehouse: data.warehouse
                   });
                 }
                 let html = `
+                                        <p class="etms-multi__subtitle1">${itemsResultCountInfo(r.message)}</p>
                                         <table class="table table-striped" style="margin: 0px;">
                                             <thead>
                                                 <tr class="etms-add-multi__th_tr">
                                                     ${settings2.show_item_image ? `<th scope="col">Image</th>` : ""}
-                                                    <th scope="col">Item Code</th>
-                                                    <th scope="col">Warehouse</th>
-                                                    <th scope="col">Actual Qty</th>
-                                                    <th scope="col">Reserved Qty</th>
-                                                    <th scope="col">Ordered Qty</th>
+                                                    <th scope="col">Item</th>
+                                                    <th scope="col">Extra Details</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -348,7 +330,6 @@
                                             </table>
                                             <style>
                                                 .modal-content {
-                                                    width: fit-content
                                                 }
                                                 .etms-add-multi__row {
                                                     cursor: pointer;
@@ -426,12 +407,9 @@
       }, 400);
     };
     let searchTerm = d.get_field("search_term");
-    let searchTermControlInput = searchTerm.wrapper.querySelector(".control-input");
-    let searchTermInput = searchTermControlInput.querySelector(`input[data-fieldname="search_term"]`);
     searchTerm.wrapper.insertAdjacentHTML("beforeEnd", `
-        <div onclick="cur_frm.misOpenScanner(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`);
-    searchTerm.input.dispatchEvent(new Event("input"));
-    searchTerm.input.placeholder = "Search by Item Code, Name or Barcode";
+        <div onclick="MISApp.scannerDialog(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`);
+    triggerSearchInput(d);
     if ($(document).width() > (settings2.wide_dialog_enable_on_screen_size ? settings2.wide_dialog_enable_on_screen_size : 1500)) {
       d.$wrapper.find(".modal-content").css({
         "width": "200%",
@@ -441,17 +419,22 @@
       });
     }
   };
+  function triggerSearchInput(dialog) {
+    let searchTerm = dialog ? dialog.get_field("search_term") : cur_dialog.get_field("search_term");
+    searchTerm.input.dispatchEvent(new Event("input"));
+  }
 
   // ../multi_items_select/multi_items_select/public/mis/dialogs/add_item_dialog.js
   var add_item_dialog_default = (item_code, warehouse2) => {
-    const selected_item = cur_frm.mis_last_search_data.find((el) => el.item_code === item_code);
+    const selected_item = MISApp.misLastSearchData.find((el) => el.item_code === item_code);
     const { item_name, actual_qty, reserved_qty, mis_has_packed_item } = selected_item;
+    console.log("selected_item: ", MISApp.misSelectedItem);
     if (mis_has_packed_item) {
-      frm.mis_add_packed_items(item_code);
+      window.MISApp.addPackedItemDialog(item_code);
       return;
     }
     const sellable_qty = actual_qty - reserved_qty;
-    let qd = new frappe.ui.Dialog({
+    let d = new frappe.ui.Dialog({
       title: __("Select Insert Quantity"),
       fields: [
         {
@@ -461,9 +444,7 @@
           default: 1,
           reqd: 1
         },
-        {
-          fieldtype: "Section Break"
-        },
+        { fieldtype: "Section Break" },
         {
           fieldname: "item_code",
           fieldtype: "Link",
@@ -471,18 +452,14 @@
           options: "Item",
           read_only: 1
         },
-        {
-          fieldtype: "Column Break"
-        },
+        { fieldtype: "Column Break" },
         {
           fieldname: "item_name",
           fieldtype: "Data",
           label: "Item Name",
           read_only: 1
         },
-        {
-          fieldtype: "Section Break"
-        },
+        { fieldtype: "Section Break" },
         {
           fieldname: "warehouse",
           fieldtype: "Link",
@@ -497,6 +474,7 @@
           fieldname: "actual_qty",
           fieldtype: "Float",
           label: "Actual Qty",
+          default: 0,
           read_only: 1
         },
         {
@@ -506,6 +484,7 @@
           fieldname: "reserved_qty",
           fieldtype: "Float",
           label: "Reserved Qty",
+          default: 0,
           read_only: 1
         },
         {
@@ -515,30 +494,23 @@
           fieldname: "sellable_qty",
           fieldtype: "Float",
           label: "Sellable Qty",
+          default: 0,
           read_only: 1
         }
       ],
       primary_action_label: __("Insert Item"),
       primary_action: async function(values) {
         const itemsGrid = frm.get_field("items").grid;
-        let d = null;
-        let settings2 = await frappe.call({
-          method: "multi_items_select.api.get_settings"
-        });
-        settings2 = settings2.message;
-        let can_bypass = await frappe.call({
-          method: "multi_items_select.api.get_can_bypass"
-        });
-        can_bypass = can_bypass.message;
+        let d2 = null;
         if (values.qty > sellable_qty) {
-          switch (settings2.sellable_qty_action) {
+          switch (MISApp.settings.sellable_qty_action) {
             case "Nothing":
               break;
             case "Warn":
               frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
               break;
             case "Stop":
-              if (can_bypass) {
+              if (MISApp.canBypass) {
                 frappe.msgprint(__(`Warning: Item <strong>${item_code}</strong> with Qty (${values.qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                 break;
               } else {
@@ -548,17 +520,17 @@
           }
         }
         frappe.run_serially([
-          () => d = itemsGrid.add_new_row(),
+          () => d2 = itemsGrid.add_new_row(),
           () => frappe.timeout(1),
           async () => {
             let args = {};
             args["item_code"] = item_code;
             args["qty"] = values.qty;
             args["warehouse"] = values.warehouse;
-            let model = frappe.model.set_value(d.doctype, d.name, args);
+            let model = frappe.model.set_value(d2.doctype, d2.name, args);
             setTimeout(() => {
-              d.warehouse = warehouse2;
-              frm.trigger("warehouse", d.doctype, d.name);
+              d2.warehouse = warehouse2;
+              frm.trigger("warehouse", d2.doctype, d2.name);
             }, 1e3);
             return model;
           }
@@ -567,19 +539,27 @@
         qd.hide();
       }
     });
-    qd.show();
-    qd.set_value("item_code", item_code);
-    qd.set_value("item_name", item_name);
-    qd.set_value("warehouse", warehouse2);
-    qd.set_value("actual_qty", actual_qty);
-    qd.set_value("reserved_qty", reserved_qty);
-    qd.set_value("sellable_qty", actual_qty - reserved_qty);
+    d.show();
+    d.set_value("item_code", item_code);
+    d.set_value("item_name", item_name);
+    d.set_value("warehouse", warehouse2);
+    d.set_value("actual_qty", actual_qty);
+    d.set_value("reserved_qty", reserved_qty);
+    d.set_value("sellable_qty", 55);
+    if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
+      d.$wrapper.find(".modal-content").css({
+        "width": "200%",
+        "margin": "0 auto",
+        "left": "49%",
+        "transform": "translateX(-51%)"
+      });
+    }
   };
 
   // ../multi_items_select/multi_items_select/public/mis/dialogs/add_packed_item_dialog.js
   var add_packed_item_dialog_default = async (packed_item_code) => {
     let can_bypass = await getCanBypass();
-    let qd = new frappe.ui.Dialog({
+    let qd2 = new frappe.ui.Dialog({
       title: __("Packed Item Details"),
       fields: [
         {
@@ -662,10 +642,10 @@
         }
         frappe.dom.unfreeze();
         frappe.show_alert(__("(MIS): Packed Items Added!"));
-        qd.hide();
+        qd2.hide();
       }
     });
-    qd.show();
+    qd2.show();
     await wsleep(1e3);
     frappe.call({
       method: "multi_items_select.api.get_packed_items",
@@ -800,7 +780,6 @@
 
   // ../multi_items_select/multi_items_select/public/mis/dialogs/scanner_dialog.js
   var scanner_dialog_default = async (searchDialog) => {
-    let can_bypass = await getCanBypass();
     let areaID = `qr-code-full-region-${Math.round(Math.random() * 1e3)}`;
     let scanner = void 0;
     let d = new frappe.ui.Dialog({
@@ -826,6 +805,14 @@
       }
     });
     d.show();
+    if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
+      d.$wrapper.find(".modal-content").css({
+        "width": "200%",
+        "margin": "0 auto",
+        "left": "49%",
+        "transform": "translateX(-51%)"
+      });
+    }
     var config = {
       fps: 60,
       qrbox: {
@@ -857,16 +844,20 @@
       const METHODS = {
         setup: async function(frm2) {
           let settings2 = await getSettings();
+          let canBypass = await getCanBypass();
           if (!settings2.enabled)
             return;
-          window.MISApp.settings = settings2;
-          window.MISApp.misDialog = mis_dialog_default;
-          window.MISApp.addItemDialog = add_item_dialog_default;
-          window.MISApp.addPackedItemDialog = add_packed_item_dialog_default;
-          window.MISApp.scannerDialog = scanner_dialog_default;
+          MISApp.settings = settings2;
+          MISApp.canBypass = canBypass;
+          MISApp.misDialog = mis_dialog_default;
+          MISApp.misLastSearchData = null;
+          MISApp.misSetSelectedItem = misSetSelectedItem;
+          MISApp.addItemDialog = add_item_dialog_default;
+          MISApp.addPackedItemDialog = add_packed_item_dialog_default;
+          MISApp.scannerDialog = scanner_dialog_default;
           frappe.realtime.on("mis_settings_update", async () => {
             frappe.show_alert("Settings Update, Refreshing...");
-            if (cur_dialog && cur_dialog.title === "(MIS): Insert") {
+            if (cur_dialog && cur_dialog.title === __(settings2.mis_dialog_title)) {
               localStorage.setItem("mis_reopen", true);
             }
             await misSleep(2e3);
@@ -880,9 +871,10 @@
         },
         refresh: async function(frm2) {
           let settings2 = await getSettings();
-          if (settings2.enabled == 0 || frm2.doc.docstatus === 1) {
+          if (!settings2.enabled)
             return;
-          }
+          if (frm2.doc.docstatus === 1)
+            return;
           const itemsGrid = frm2.get_field("items").grid;
           if (settings2.disable_original_add_multi) {
             if (itemsGrid.grid_buttons.find(".grid-add-multiple-rows")) {
@@ -897,7 +889,7 @@
             MISApp.misDialog(settings2, frm2);
           });
           cbtn.addClass("btn-primary");
-          highlightField(frm2, "items");
+          setTimeout(() => MISApp.misDialog(settings2, frm2), 1e3);
         }
       };
       if (DOC === mis_enums_default.SALES_INVOICE) {
@@ -909,4 +901,4 @@
     }
   });
 })();
-//# sourceMappingURL=mis.bundle.SGYX5SYB.js.map
+//# sourceMappingURL=mis.bundle.D6AO436B.js.map

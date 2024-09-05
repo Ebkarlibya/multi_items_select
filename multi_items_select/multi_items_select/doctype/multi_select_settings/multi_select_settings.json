@@ -18,9 +18,10 @@
   "only_mis_packed_items",
   "exclude_out_of_stock_items",
   "enable_tag_filter",
+  "show_item_image",
   "column_break_s69rr",
   "extra_filters_section_collapsed",
-  "show_item_image",
+  "extra_config_section_collapsed",
   "item_price_listing",
   "wide_dialog_enable_on_screen_size",
   "extra_filters_lablels_section",
@@ -29,6 +30,8 @@
   "brand_label",
   "column_break_hpkoo",
   "warehouse_label",
+  "column_break_jzd1h",
+  "tag_label",
   "column_break_h0sxf",
   "item_option_label",
   "column_break_scwyl",
@@ -85,7 +88,7 @@
   {
    "fieldname": "extra_filters_lablels_section",
    "fieldtype": "Section Break",
-   "label": "Extra filters Lablels"
+   "label": "Extra filters Labels Renaming"
   },
   {
    "fieldname": "item_group_label",
@@ -139,13 +142,13 @@
    "default": "1",
    "fieldname": "include_non_maintain_stock",
    "fieldtype": "Check",
-   "label": "(Default) Include Non Maintain Stock"
+   "label": "(Default Checked) Include Non Maintain Stock"
   },
   {
    "default": "0",
    "fieldname": "only_mis_packed_items",
    "fieldtype": "Check",
-   "label": "(Default) Only (MIS) Packed Items"
+   "label": "(Default Checked) Only (MIS) Packed Items"
   },
   {
    "fieldname": "column_break_hpkoo",
@@ -177,7 +180,7 @@
    "default": "0",
    "fieldname": "exclude_out_of_stock_items",
    "fieldtype": "Check",
-   "label": "(Default) Exclude Out of Stock Items"
+   "label": "(Default Checked) Exclude Out of Stock Items"
   },
   {
    "description": "If Empty Item Price listing is disabled",
@@ -198,12 +201,27 @@
    "fieldname": "enable_tag_filter",
    "fieldtype": "Check",
    "label": "Enable Tag Filter"
+  },
+  {
+   "default": "1",
+   "fieldname": "extra_config_section_collapsed",
+   "fieldtype": "Check",
+   "label": "Extra Config Section Collapsed"
+  },
+  {
+   "fieldname": "column_break_jzd1h",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tag_label",
+   "fieldtype": "Data",
+   "label": "Tag Label"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-02 10:04:47.361177",
+ "modified": "2024-09-05 09:04:09.684639",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

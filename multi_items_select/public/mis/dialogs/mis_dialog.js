@@ -1,14 +1,15 @@
+import { itemsResultCountInfo } from "../utils/helpers";
+
 export default (settings, frm) => {
-    console.log("misDialog: ", frm);
-    
     var d = new frappe.ui.Dialog({
-        title: __("(MIS): Insert"),
+        title: __(settings.mis_dialog_title),
         type: "large",
         fields: [
             {
                 fieldtype: "Data",
                 fieldname: "search_term",
-                label: __("Search Items")
+                label: __("Search Items"),
+                placeholder: __("Search by Item Code, Name or Barcode")
             },
             {
                 label: __("Extra Filters"),
@@ -21,10 +22,7 @@ export default (settings, frm) => {
                 fieldname: "item_group",
                 fieldtype: "Link",
                 options: "Item Group",
-                change: function () {
-                    let searchTerm = this.layout.get_field("search_term")
-                    searchTerm.input.dispatchEvent(new Event('input'));
-                }
+                change: triggerSearchInput
             },
             { fieldtype: "Column Break" },
             {
@@ -32,10 +30,7 @@ export default (settings, frm) => {
                 fieldname: "brand",
                 fieldtype: "Link",
                 options: "Brand",
-                change: function () {
-                    let searchTerm = this.layout.get_field("search_term")
-                    searchTerm.input.dispatchEvent(new Event('input'));
-                }
+                change: triggerSearchInput
             },
             { fieldtype: "Column Break" },
             {
@@ -43,10 +38,7 @@ export default (settings, frm) => {
                 fieldname: "warehouse",
                 fieldtype: "Link",
                 options: "Warehouse",
-                change: function () {
-                    let searchTerm = this.layout.get_field("search_term")
-                    searchTerm.input.dispatchEvent(new Event('input'));
-                }
+                change: triggerSearchInput
             },
             { fieldtype: "Column Break" },
             {
@@ -54,10 +46,7 @@ export default (settings, frm) => {
                 fieldname: "item_option",
                 fieldtype: "Link",
                 options: "Item Option",
-                change: function () {
-                    let searchTerm = this.layout.get_field("search_term")
-                    searchTerm.input.dispatchEvent(new Event('input'));
-                }
+                change: triggerSearchInput
             },
             { fieldtype: "Column Break" },
             {
@@ -65,35 +54,28 @@ export default (settings, frm) => {
                 fieldname: "item_sub_category",
                 fieldtype: "Link",
                 options: "Item Sub-Category",
-                change: function () {
-                    let searchTerm = this.layout.get_field("search_term")
-                    searchTerm.input.dispatchEvent(new Event('input'));
-                }
+                change: triggerSearchInput
             },
             ...(
-                settings.enable_tag_filter ?[
+                settings.enable_tag_filter ? [
                     { fieldtype: "Column Break" },
                     {
-                        label: __("Multi Select Tag"),
+                        label: __(settings.tag_label ? settings.tag_label : "Tag"),
                         fieldname: "tag",
                         fieldtype: "Link",
                         options: "Multi Select Tag",
-                        change: function () {
-                            let searchTerm = this.layout.get_field("search_term")
-                            searchTerm.input.dispatchEvent(new Event('input'));
-                        }
+                        change: triggerSearchInput
                     },
-                ]:[]
+                ] : []
             ),
             { fieldtype: "Section Break" },
             {
-                label: __("Search Results"),
-                fieldname: "search_results",
-                fieldtype: "Section Break"
+                label: __("Extra Config"),
+                fieldname: "extra_config",
+                fieldtype: "Section Break",
+                collapsible: settings.extra_config_section_collapsed
             },
-            {
-                fieldtype: "Column Break"
-            },
+            { fieldtype: "Column Break" },
             {
                 fieldname: "include_non_stock",
                 fieldtype: "Check",
@@ -104,9 +86,7 @@ export default (settings, frm) => {
                     searchTerm.input.dispatchEvent(new Event('input'));
                 }
             },
-            {
-                fieldtype: "Column Break"
-            },
+            { fieldtype: "Column Break" },
             {
                 fieldname: "exclude_out_of_stock_items",
                 fieldtype: "Check",
@@ -118,11 +98,6 @@ export default (settings, frm) => {
                 }
             },
             {
-                label: "",
-                hide_border: 1,
-                fieldtype: "Section Break"
-            },
-            {
                 fieldname: "only_mis_packed_items",
                 fieldtype: "Check",
                 label: __("Only (MIS) Packed Items"),
@@ -132,10 +107,7 @@ export default (settings, frm) => {
                     searchTerm.input.dispatchEvent(new Event('input'));
                 }
             },
-            {
-                label: "Search Result",
-                fieldtype: "Section Break"
-            },
+            { fieldtype: "Section Break" },
             {
                 fieldname: "query_loading",
                 fieldtype: "HTML",
@@ -215,33 +187,29 @@ export default (settings, frm) => {
                             item_sub_category: d.get_value("item_sub_category"),
                             tag: d.get_value("tag")
                         },
-                        freeze: true,
+                        freeze: false,
                         callback: function (r) {
                             if (r.message) {
                                 let data_rows = "";
-                                // d.mis_search_data = r.message;
-                                let totalLabel = d.get_field("search_results").section.head[0]
 
                                 if (r.message.length > 0) {
                                     d.set_df_property("search_results", "hidden", false);
                                     d.set_df_property("query_loading", "hidden", true);
                                     d.set_df_property("no_data", "hidden", true);
-                                    totalLabel.innerText = `Search Results (${r.message.length})`
                                 } else {
                                     d.set_df_property("search_results", "hidden", true);
                                     d.set_df_property("query_loading", "hidden", true);
                                     d.set_df_property("no_data", "hidden", false);
-                                    totalLabel.innerText = `Search Results (0)`
                                 }
 
-                                cur_frm.mis_last_search_data = r.message
+                                MISApp.misLastSearchData = r.message
 
                                 for (let i = 0; i < r.message.length; i++) {
                                     let data = r.message[i];
                                     data.warehouse = data.is_stock_item ? data.warehouse ? data.warehouse : "-" : "*Non Stock*"
-                                    data.actual_qty = data.actual_qty ? data.actual_qty : "-"
-                                    data.reserved_qty = data.reserved_qty ? data.reserved_qty : "-"
-                                    data.ordered_qty = data.ordered_qty ? data.ordered_qty : "-"
+                                    data.actual_qty = data.is_stock_item ? data.actual_qty : "-"
+                                    data.reserved_qty = data.is_stock_item ? data.reserved_qty : "-"
+                                    data.ordered_qty = data.is_stock_item ? data.ordered_qty : "-"
                                     data.brand = data.brand ? data.brand : "-"
                                     data.stock_uom = data.stock_uom ? data.stock_uom : "-"
 
@@ -250,7 +218,7 @@ export default (settings, frm) => {
                                         `<tr 
                                             class="etms-add-multi__tb_tr"
                                             onclick="MISApp.addItemDialog(\`%(item_code)s\`, \`%(warehouse)s\`)">
-                                                    ${settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 20%">
+                                                    ${settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 15%">
                                                         <div class="img-hover">
                                                             <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" />
                                                         </div>
@@ -264,34 +232,27 @@ export default (settings, frm) => {
                                                                 </svg>`: ""}
                                                             </div> 
                                                             <p class="etms-multi__subtitle1">${data.item_name}</p>
-                                                            
+                                                            <span class="etms-multi__subtitle1">${__("Brand")}: &nbsp; </span><span >${data.brand}</span><br>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="etms-add-multi__row">
-                                                            <p style="white-space: nowrap; color: ${data.is_stock_item ? '' : 'brown'};">${data.warehouse}</p>
-                                                            ${settings.item_price_listing ? `<div>
-                                                                <p class="etms-multi__subtitle1">${format_currency(data.price_list_rate, data.currency)}</p>
-                                                                <p class="etms-multi__subtitle1">(${data.price_list})</p>
-                                                            </div>` : ''}
+                                                            ${data.is_stock_item ? ` 
+                                                                    <span class="etms-multi__subtitle1">${__("Rate")}: &nbsp; </span><span >${format_currency(data.price_list_rate, data.currency)} (${data.price_list})</span><br>
+                                                                    <hr style="margin-top: 3px; margin-bottom: 3px">  
+                                                                    <span class="etms-multi__subtitle1">${__("Warehouse")}: &nbsp; </span><span >${data.warehouse}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Actual Qty")}: &nbsp; </span><span >${data.actual_qty}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Reserved Qty")}: &nbsp; </span><span >${data.reserved_qty}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Ordered")}: &nbsp; </span><span>${data.ordered_qty}</span><br>
+                                                                    <span class="etms-multi__subtitle1">${__("Sellable Qty")}: &nbsp; </span><span >${data.actual_qty - data.reserved_qty}</span><br>
+                                                                    <hr style="margin: 3px">
+                                                                ` : `
+                                                                    <p style="white-space: nowrap; color: brown;">${data.warehouse}</pبسيبسيبسيب
+                                                                `
+                                        }
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <div class="etms-add-multi__row">
-                                                            <p>${data.actual_qty}</p>
-                                                        <div>
-                                                        <p class="etms-multi__subtitle1">${data.stock_uom}</p>
-                                                    </td>
-                                                    <td>
-                                                        <div class="etms-add-multi__row">
-                                                            <p>${data.reserved_qty}</p>
-                                                        <div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="etms-add-multi__row">
-                                                            <p>${data.ordered_qty}</p>
-                                                        <div>
-                                                    </td>
+
                                                 </tr>`,
                                         {
                                             item_code: data.item_code,
@@ -300,15 +261,13 @@ export default (settings, frm) => {
                                     );
                                 }
                                 let html = `
+                                        <p class="etms-multi__subtitle1">${itemsResultCountInfo(r.message)}</p>
                                         <table class="table table-striped" style="margin: 0px;">
                                             <thead>
                                                 <tr class="etms-add-multi__th_tr">
                                                     ${settings.show_item_image ? `<th scope="col">Image</th>` : ''}
-                                                    <th scope="col">Item Code</th>
-                                                    <th scope="col">Warehouse</th>
-                                                    <th scope="col">Actual Qty</th>
-                                                    <th scope="col">Reserved Qty</th>
-                                                    <th scope="col">Ordered Qty</th>
+                                                    <th scope="col">Item</th>
+                                                    <th scope="col">Extra Details</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -317,7 +276,6 @@ export default (settings, frm) => {
                                             </table>
                                             <style>
                                                 .modal-content {
-                                                    width: fit-content
                                                 }
                                                 .etms-add-multi__row {
                                                     cursor: pointer;
@@ -396,22 +354,26 @@ export default (settings, frm) => {
         }, 400);
     }
     let searchTerm = d.get_field("search_term")
-    let searchTermControlInput = searchTerm.wrapper.querySelector(".control-input")
-    let searchTermInput = searchTermControlInput.querySelector(`input[data-fieldname="search_term"]`)
+    // let searchTermControlInput = searchTerm.wrapper.querySelector(".control-input")
+    // let searchTermInput = searchTermControlInput.querySelector(`input[data-fieldname="search_term"]`)
 
     searchTerm.wrapper.insertAdjacentHTML("beforeEnd", `
-        <div onclick="cur_frm.misOpenScanner(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`
+        <div onclick="MISApp.scannerDialog(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`
     )
 
-    searchTerm.input.dispatchEvent(new Event('input'));
-    searchTerm.input.placeholder = "Search by Item Code, Name or Barcode";
+    triggerSearchInput(d)
 
     if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
         d.$wrapper.find('.modal-content').css({
             'width': '200%',
-            'margin': '0 auto',     
+            'margin': '0 auto',
             'left': '50%',
             'transform': 'translateX(-50%)'
         });
     }
+}
+
+function triggerSearchInput(dialog) {
+    let searchTerm = dialog ? dialog.get_field("search_term") : cur_dialog.get_field("search_term")
+    searchTerm.input.dispatchEvent(new Event('input'));
 }

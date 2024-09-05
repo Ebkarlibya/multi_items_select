@@ -1,7 +1,7 @@
-import { getCanBypass } from "../utils/helpers";
+// import { getCanBypass } from "../utils/helpers";
 
 export default async (searchDialog) => {
-    let can_bypass = await getCanBypass()
+    // let can_bypass = await getCanBypass()
 
     let areaID = `qr-code-full-region-${Math.round(Math.random() * 1000)}`
     let scanner = undefined
@@ -30,6 +30,15 @@ export default async (searchDialog) => {
 
     d.show();
 
+    if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
+        d.$wrapper.find('.modal-content').css({
+            'width': '200%',
+            'margin': '0 auto',     
+            'left': '49%',
+            'transform': 'translateX(-51%)'
+        });
+    }
+    
     var config = {
         fps: 60,
 

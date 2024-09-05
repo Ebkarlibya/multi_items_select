@@ -1,12 +1,15 @@
 import json
 import frappe
 from erpnext.accounts.utils import get_balance_on
-
+from multi_items_select.__init__ import __version__
 
 @frappe.whitelist(allow_guest=False)
 def get_settings():
-    data = frappe.get_single("Multi Select Settings")
-    return data
+    settings = frappe.get_cached_doc("Multi Select Settings")
+    settings = settings.as_dict()
+    settings["mis_dialog_title"] = f"Multi Item Select: v{__version__}"
+    
+    return settings
 
 
 @frappe.whitelist(allow_guest=False)
@@ -156,8 +159,8 @@ def get_multiple_items():
 
         order by i.item_code, i.item_name, b.warehouse
 
-        limit {20 if not search_term else 100000000}
-    """, as_dict=True, debug=True)
+        limit {20 if not search_term else 10000}
+    """, as_dict=True, debug=False)
 
     return data
 
