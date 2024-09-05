@@ -1,13 +1,13 @@
 import json
 import frappe
 from erpnext.accounts.utils import get_balance_on
-from multi_items_select.__init__ import __version__
+from multi_items_select.__init__ import __version__ as version
 
 @frappe.whitelist(allow_guest=False)
 def get_settings():
     settings = frappe.get_cached_doc("Multi Select Settings")
     settings = settings.as_dict()
-    settings["mis_dialog_title"] = f"Multi Item Select: v{__version__}"
+    settings["mis_dialog_title"] = f"Multi Item Select: v{version}"
     
     return settings
 

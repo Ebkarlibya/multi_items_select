@@ -26022,10 +26022,10 @@
     return Html5QrcodeScanner2;
   }();
 
-  // ../multi_items_select/multi_items_select/public/scanner.bundle.js
+  // ../multi_items_select/multi_items_select/public/mis/scanner.bundle.js
   frappe.provide("Html5QrcodeScanner");
   frappe.provide("Html5QrcodeScanType");
   window.Html5QrcodeScanner = Html5QrcodeScanner;
   window.Html5QrcodeScanType = Html5QrcodeScanType;
 })();
-//# sourceMappingURL=scanner.bundle.5TOWEV7L.js.map
+//# sourceMappingURL=scanner.bundle.KZNGAPRH.js.map

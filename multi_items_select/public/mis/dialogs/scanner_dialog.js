@@ -25,10 +25,13 @@ export default async (searchDialog) => {
             await scanner.clear()
             scanner = undefined
             d.hide();
+            MISApp.misToggleDialogCollapse()
+
         },
     });
 
-    d.show();
+    await d.show();
+    MISApp.misToggleDialogCollapse()
 
     if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
         d.$wrapper.find('.modal-content').css({
@@ -40,7 +43,7 @@ export default async (searchDialog) => {
     }
     
     var config = {
-        fps: 60,
+        fps: 30,
 
         qrbox: {
             width: 500,
@@ -59,6 +62,8 @@ export default async (searchDialog) => {
             searchDialog.set_value("search_term", barcode)
             searchDialog.get_field("search_term").wrapper.querySelector("input").dispatchEvent(new Event('input'))
             frappe.utils.play_sound("submit")
+            MISApp.misToggleDialogCollapse()
+
             // beep.volume = 1
             // beep.play()
         }

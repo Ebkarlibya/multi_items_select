@@ -389,20 +389,13 @@ function triggerSearchInput(dialog) {
 
 function setupDialogCollapse(dialog) {
     let actions = dialog.$wrapper.find(".modal-actions")
-
-
-
-    
-    actions.prepend(`
-        <button class="btn btn-arrow dialog-collapse-btn">
-            <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
-        </button>`
-    )
-
     let dialogCollapse = actions.find(".dialog-collapse-btn")
-    dialogCollapse.click(() => {
-        
-        let icon = dialogCollapse.find(".dialog-collapse-btn-icon")
+    let icon = dialogCollapse.find(".dialog-collapse-btn-icon")
+
+    MISApp.misToggleDialogCollapse = function () {
+        dialogCollapse = actions.find(".dialog-collapse-btn")
+        icon = dialogCollapse.find(".dialog-collapse-btn-icon")
+                
         if(!MISApp.misDialogCollapsed) {
             dialog.$wrapper.find(".modal-body").css("display", "none")   
             icon.removeClass("fa-arrow-up")
@@ -414,6 +407,11 @@ function setupDialogCollapse(dialog) {
         }
         MISApp.misDialogCollapsed = !MISApp.misDialogCollapsed
         console.log(MISApp.misDialogCollapsed, dialogCollapse);
-    })
+    }
     
+    actions.prepend(`
+        <button class="btn btn-arrow dialog-collapse-btn" onclick="MISApp.misToggleDialogCollapse()">
+            <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
+        </button>`
+    )
 }

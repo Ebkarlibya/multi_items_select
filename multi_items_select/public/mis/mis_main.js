@@ -1,12 +1,12 @@
 import DOCTYPES from "./utils/mis_enums.js"
 import { getSettings, getCanBypass, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle, highlightField } from "./utils/helpers.js";
-
 import misDialog from "./dialogs/mis_dialog.js";
 import addItemDialog from "./dialogs/add_item_dialog.js";
 import addPackedItemDialog from "./dialogs/add_packed_item_dialog.js";
 import scannerDialog from "./dialogs/scanner_dialog.js";
 
 frappe.provide("MISApp")
+// console.log(show);
 
 $(document).on('app_ready', function () {
     for (let k in DOCTYPES) {
@@ -21,6 +21,7 @@ $(document).on('app_ready', function () {
                 MISApp.canBypass = await getCanBypass()
                 MISApp.misDialog = misDialog
                 MISApp.misDialogCollapsed = false
+                MISApp.misToggleDialogCollapse = null;
                 MISApp.misLastSearchData = null;
                 MISApp.misSetSelectedItem = misSetSelectedItem;
                 MISApp.addItemDialog = addItemDialog
@@ -56,7 +57,7 @@ $(document).on('app_ready', function () {
                     }
                     misDialog(frm)
                 });
-
+                setupScannerButton(frm)
                 if (localStorage.getItem("mis_reopen")) {
                     misDialog(frm)
                     highlightField(frm, "items")
@@ -81,7 +82,37 @@ $(document).on('app_ready', function () {
 });
 
 
+function setupScannerButton(frm) {
+    let scannerBtn = frm.add_custom_button("MIS Scanner", () => {
+        misDialog(frm, true)
+    })
+    console.log(scannerBtn);
+    
+    // let actions = dialog.$wrapper.find(".modal-actions")
+    
+    scannerBtn.html(`
+            <i class="qrcode-icon-custom-btn fa fa-qrcode" style="font-size: 24px" ></i>
+        `
+    )
 
+    // let dialogCollapse = actions.find(".dialog-collapse-btn")
+    // dialogCollapse.click(() => {
+        
+    //     let icon = dialogCollapse.find(".dialog-collapse-btn-icon")
+    //     if(!MISApp.misDialogCollapsed) {
+    //         dialog.$wrapper.find(".modal-body").css("display", "none")   
+    //         icon.removeClass("fa-arrow-up")
+    //         icon.addClass("fa-arrow-down")      
+    //     } else {
+    //         dialog.$wrapper.find(".modal-body").css("display", "")
+    //         icon.removeClass("fa-arrow-down")
+    //         icon.addClass("fa-arrow-up")  
+    //     }
+    //     MISApp.misDialogCollapsed = !MISApp.misDialogCollapsed
+    //     console.log(MISApp.misDialogCollapsed, dialogCollapse);
+    // })
+    
+}
 
 // cur_frm.misOpenScanner = async function (searchDialog) {
 //     let areaID = `qr-code-full-region-${Math.round(Math.random() * 1000)}`
