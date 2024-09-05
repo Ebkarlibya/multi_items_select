@@ -43,18 +43,13 @@
   };
   var setupRealtimeSettingUpdate = (settings2, frm2) => {
     frappe.realtime.on("mis_settings_update", async () => {
-      frappe.show_alert("Settings Update, Refreshing...");
       if (cur_dialog && cur_dialog.title === __(settings2.mis_dialog_title)) {
+        frappe.show_alert("Settings Update, Refreshing...");
         localStorage.setItem("mis_reopen", true);
+        await misSleep(2e3);
+        location.reload();
       }
-      await misSleep(2e3);
-      location.reload();
     });
-    if (localStorage.getItem("mis_reopen")) {
-      misDialog(settings2, frm2);
-      highlightField(frm2, "items");
-      localStorage.removeItem("mis_reopen");
-    }
   };
   var setupDialogToggle = (settings2, frm2) => {
     if (!settings2.dialog_open_keyboard_shortcut_key)
@@ -927,8 +922,13 @@
               frappe.show_alert(__("(MIS): Please select customer first"));
               return;
             }
-            MISApp.misDialog(frm2);
+            mis_dialog_default(frm2);
           });
+          if (localStorage.getItem("mis_reopen")) {
+            mis_dialog_default(frm2);
+            highlightField(frm2, "items");
+            localStorage.removeItem("mis_reopen");
+          }
           cbtn.addClass("btn-primary");
         }
       };
@@ -941,4 +941,4 @@
     }
   });
 })();
-//# sourceMappingURL=mis.bundle.EPWVJKYM.js.map
+//# sourceMappingURL=mis.bundle.4LU76YGF.js.map

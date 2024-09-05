@@ -1,5 +1,5 @@
 import DOCTYPES from "./utils/mis_enums.js"
-import { getSettings, getCanBypass, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle } from "./utils/helpers.js";
+import { getSettings, getCanBypass, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle, highlightField } from "./utils/helpers.js";
 
 import misDialog from "./dialogs/mis_dialog.js";
 import addItemDialog from "./dialogs/add_item_dialog.js";
@@ -54,8 +54,15 @@ $(document).on('app_ready', function () {
                         frappe.show_alert(__("(MIS): Please select customer first"));
                         return
                     }
-                    MISApp.misDialog(frm)
+                    misDialog(frm)
                 });
+
+                if (localStorage.getItem("mis_reopen")) {
+                    misDialog(frm)
+                    highlightField(frm, "items")
+                    localStorage.removeItem("mis_reopen")
+                }
+
                 cbtn.addClass("btn-primary");
                 // highlightField(frm, "items")
                 // setTimeout(() => MISApp.misDialog(settings, frm), 1000)

@@ -52,18 +52,14 @@ export const highlightField = (frm, fieldname) => {
 
 export const setupRealtimeSettingUpdate = (settings, frm) => {
     frappe.realtime.on("mis_settings_update", async () => {
-        frappe.show_alert("Settings Update, Refreshing...")
         if (cur_dialog && cur_dialog.title === __(settings.mis_dialog_title)) {
+        frappe.show_alert("Settings Update, Refreshing...")
             localStorage.setItem("mis_reopen", true)
+            await misSleep(2000)
+            location.reload()
         }
-        await misSleep(2000)
-        location.reload()
     })
-    if (localStorage.getItem("mis_reopen")) {
-        misDialog(settings, frm)
-        highlightField(frm, "items")
-        localStorage.removeItem("mis_reopen")
-    }
+    
 }
 
 export const setupDialogToggle = (settings, frm) => {    

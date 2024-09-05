@@ -8,7 +8,6 @@
  "field_order": [
   "enabled",
   "column_break_2",
-  "disable_original_add_multi",
   "section_break_2",
   "sellable_qty_action",
   "column_break_6",
@@ -17,6 +16,7 @@
   "include_non_maintain_stock",
   "only_mis_packed_items",
   "exclude_out_of_stock_items",
+  "disable_original_add_multi",
   "enable_tag_filter",
   "show_item_image",
   "column_break_s69rr",
@@ -47,7 +47,6 @@
   },
   {
    "default": "0",
-   "description": "if checked the original \"add multi\" button will be removed forms tables",
    "fieldname": "disable_original_add_multi",
    "fieldtype": "Check",
    "label": "Disable Original Add Multi"
@@ -219,6 +218,7 @@
    "label": "Tag Label"
   },
   {
+   "default": "D",
    "description": "Choose key for example: (D) and press (Shift+D) to open keyboard ",
    "fieldname": "dialog_open_keyboard_shortcut_key",
    "fieldtype": "Data",
@@ -228,7 +228,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-05 11:47:39.321269",
+ "modified": "2024-09-05 12:00:34.145067",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",
