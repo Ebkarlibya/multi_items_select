@@ -410,6 +410,7 @@
     searchTerm.wrapper.insertAdjacentHTML("beforeEnd", `
         <div onclick="MISApp.scannerDialog(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`);
     triggerSearchInput(d);
+    setupDialogCollapse(d);
     if ($(document).width() > (settings2.wide_dialog_enable_on_screen_size ? settings2.wide_dialog_enable_on_screen_size : 1500)) {
       d.$wrapper.find(".modal-content").css({
         "width": "200%",
@@ -422,6 +423,28 @@
   function triggerSearchInput(dialog) {
     let searchTerm = dialog ? dialog.get_field("search_term") : cur_dialog.get_field("search_term");
     searchTerm.input.dispatchEvent(new Event("input"));
+  }
+  function setupDialogCollapse(dialog) {
+    let actions = dialog.$wrapper.find(".modal-actions");
+    let el = actions.prepend(`
+        <button class="btn btn-arrow dialog-collapse-btn">
+            <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
+        </button>`);
+    let dialogCollapse = actions.find(".dialog-collapse-btn");
+    dialogCollapse.click(() => {
+      let icon = dialogCollapse.find(".dialog-collapse-btn-icon");
+      if (!MISApp.misDialogCollapsed) {
+        dialog.$wrapper.find(".modal-body").css("display", "none");
+        icon.removeClass("fa-arrow-up");
+        icon.addClass("fa-arrow-down");
+      } else {
+        dialog.$wrapper.find(".modal-body").css("display", "");
+        icon.removeClass("fa-arrow-down");
+        icon.addClass("fa-arrow-up");
+      }
+      MISApp.misDialogCollapsed = !MISApp.misDialogCollapsed;
+      console.log(MISApp.misDialogCollapsed, dialogCollapse);
+    });
   }
 
   // ../multi_items_select/multi_items_select/public/mis/dialogs/add_item_dialog.js
@@ -843,13 +866,14 @@
       const DOC = mis_enums_default[k];
       const METHODS = {
         setup: async function(frm2) {
-          let settings2 = await getSettings();
-          let canBypass = await getCanBypass();
           if (!settings2.enabled)
             return;
+          let settings2 = await getSettings();
+          let canBypass = await getCanBypass();
           MISApp.settings = settings2;
           MISApp.canBypass = canBypass;
           MISApp.misDialog = mis_dialog_default;
+          MISApp.misDialogCollapsed = false;
           MISApp.misLastSearchData = null;
           MISApp.misSetSelectedItem = misSetSelectedItem;
           MISApp.addItemDialog = add_item_dialog_default;
@@ -901,4 +925,4 @@
     }
   });
 })();
-//# sourceMappingURL=mis.bundle.D6AO436B.js.map
+//# sourceMappingURL=mis.bundle.TATN2XR5.js.map

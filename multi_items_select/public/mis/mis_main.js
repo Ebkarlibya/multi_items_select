@@ -13,22 +13,21 @@ $(document).on('app_ready', function () {
         const DOC = DOCTYPES[k]
         const METHODS = {
             setup: async function (frm) {
-                // TODO: optimize backend fetch
+                if (!settings.enabled) return
+
                 let settings = await getSettings()
                 let canBypass = await getCanBypass()
 
-                if (!settings.enabled) return
-
+                // register namespaces
                 MISApp.settings = settings
                 MISApp.canBypass = canBypass
                 MISApp.misDialog = misDialog
+                MISApp.misDialogCollapsed = false
                 MISApp.misLastSearchData = null;
                 MISApp.misSetSelectedItem = misSetSelectedItem;
                 MISApp.addItemDialog = addItemDialog
                 MISApp.addPackedItemDialog = addPackedItemDialog
                 MISApp.scannerDialog = scannerDialog
-                // add item row
-                // frm.mis_add_item_row
 
                 // listen for update event
                 frappe.realtime.on("mis_settings_update", async () => {
@@ -80,7 +79,6 @@ $(document).on('app_ready', function () {
                 console.log(`custom field is on sales invoice`, frm);
             }
         }
-
 
         frappe.ui.form.on(DOC, METHODS);
     }

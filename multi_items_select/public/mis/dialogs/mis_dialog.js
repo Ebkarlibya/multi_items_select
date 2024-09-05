@@ -362,6 +362,7 @@ export default (settings, frm) => {
     )
 
     triggerSearchInput(d)
+    setupDialogCollapse(d)
 
     if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
         d.$wrapper.find('.modal-content').css({
@@ -371,9 +372,39 @@ export default (settings, frm) => {
             'transform': 'translateX(-50%)'
         });
     }
+
+
 }
 
 function triggerSearchInput(dialog) {
     let searchTerm = dialog ? dialog.get_field("search_term") : cur_dialog.get_field("search_term")
     searchTerm.input.dispatchEvent(new Event('input'));
+}
+
+function setupDialogCollapse(dialog) {
+    let actions = dialog.$wrapper.find(".modal-actions")
+
+    let el = actions.prepend(`
+        <button class="btn btn-arrow dialog-collapse-btn">
+            <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
+        </button>`
+    )
+
+    let dialogCollapse = actions.find(".dialog-collapse-btn")
+    dialogCollapse.click(() => {
+        
+        let icon = dialogCollapse.find(".dialog-collapse-btn-icon")
+        if(!MISApp.misDialogCollapsed) {
+            dialog.$wrapper.find(".modal-body").css("display", "none")   
+            icon.removeClass("fa-arrow-up")
+            icon.addClass("fa-arrow-down")      
+        } else {
+            dialog.$wrapper.find(".modal-body").css("display", "")
+            icon.removeClass("fa-arrow-down")
+            icon.addClass("fa-arrow-up")  
+        }
+        MISApp.misDialogCollapsed = !MISApp.misDialogCollapsed
+        console.log(MISApp.misDialogCollapsed, dialogCollapse);
+    })
+    
 }
