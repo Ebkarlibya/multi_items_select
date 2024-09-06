@@ -37,8 +37,8 @@ export default async (searchDialog) => {
         d.$wrapper.find('.modal-content').css({
             'width': '200%',
             'margin': '0 auto',     
-            'left': '49%',
-            'transform': 'translateX(-51%)'
+            'left': '50%',
+            'transform': 'translateX(-50%)'
         });
     }
     

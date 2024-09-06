@@ -63,17 +63,19 @@ export const setupRealtimeSettingUpdate = (settings, frm) => {
 }
 
 export const setupDialogToggle = (settings, frm) => {    
-    if(!settings.dialog_open_keyboard_shortcut_key) return;
-    $(document).keypress(settings.dialog_open_keyboard_shortcut_key, async function (e) {
+    if(!settings.dialog_open_and_collapse_keyboard_shortcut_key) return;
+    $(document).keypress(settings.dialog_open_and_collapse_keyboard_shortcut_key, async function (e) {
         
-        if (e.shiftKey && e.target == document.body && !cur_dialog && e.originalEvent.key === settings.dialog_open_keyboard_shortcut_key) {
+        if (e.shiftKey && e.originalEvent.key === settings.dialog_open_and_collapse_keyboard_shortcut_key) {
             console.log(e);
+            
             if (!cur_dialog) {
                 frappe.show_alert("Opening MIS Dialog....")
                 highlightField(frm, "items")
                 await misSleep(800);
                 MISApp.misDialog(frm)
             } else {
+                MISApp.misToggleDialogCollapse()
                 // TODO: strange issue
                 // cur_dialog.hide()
                 // cur_dialog.get_close_btn().click()                

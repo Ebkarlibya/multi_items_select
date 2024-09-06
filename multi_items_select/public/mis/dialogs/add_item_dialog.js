@@ -1,8 +1,10 @@
+import { DOCTYPES } from "../utils/mis_enums"
+
 export default (item_code, warehouse) => {
     const selected_item = MISApp.misLastSearchData.find(el => el.item_code === item_code)
     const { item_name, actual_qty, reserved_qty, mis_has_packed_item } = selected_item
 
-    console.log("selected_item: ", MISApp.misSelectedItem);
+    console.log("selected_item: ", selected_item, MISApp.misSelectedItem);
 
     if (mis_has_packed_item) {
         window.MISApp.addPackedItemDialog(item_code)
@@ -79,9 +81,9 @@ export default (item_code, warehouse) => {
             ],
             primary_action_label: __("Insert Item"),
             primary_action: async function (values) {
-                const itemsGrid = frm.get_field("items").grid;
+                const itemsGrid = cur_frm.get_field("items").grid;
 
-                let d = null;
+                // let d = null;
 
                 // validate sellable qty
                 // let settings = await frappe.call({
@@ -113,25 +115,35 @@ export default (item_code, warehouse) => {
                 }
 
                 frappe.run_serially([
-                    () => d = itemsGrid.add_new_row(),
+                    () => row = itemsGrid.add_new_row(),
                     () => frappe.timeout(1.0),
                     async () => {
                         let args = {};
                         args["item_code"] = item_code;
                         args["qty"] = values.qty;
-                        args["warehouse"] = values.warehouse;
 
-                        let model = frappe.model.set_value(d.doctype, d.name, args);
+                        let warehouseFieldName = ""
 
+                        if(cur_frm.doctype === DOCTYPES.STOCK_ENTRY) {
+                            warehouseFieldName = "s_warehouse"
+                        } else {
+                            warehouseFieldName = "warehouse"
+                        }
+
+                        args[warehouseFieldName] = values.warehouse;
+
+                        frappe.model.set_value(row.doctype, row.name, args);
+                        
+                        // TODO: check this workaround
                         setTimeout(() => {
-                            d.warehouse = warehouse;
-                            frm.trigger("warehouse", d.doctype, d.name)
+                            row[warehouseFieldName] = warehouse;
+                            frappe.model.set_value(row.doctype, row.name, args);
+                            cur_frm.trigger(warehouseFieldName, row.doctype, row.name)
                         }, 1000)
-                        return model;
                     }
                 ]);
                 frappe.show_alert(__("(MIS): Item Added!"));
-                qd.hide();
+                d.hide();
             }
         },
     );
@@ -141,14 +153,14 @@ export default (item_code, warehouse) => {
     d.set_value("warehouse", warehouse);
     d.set_value("actual_qty", actual_qty);
     d.set_value("reserved_qty", reserved_qty);    
-    d.set_value("sellable_qty", 55);
+    d.set_value("sellable_qty", sellable_qty);
 
     if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
         d.$wrapper.find('.modal-content').css({
             'width': '200%',
             'margin': '0 auto',     
-            'left': '49%',
-            'transform': 'translateX(-51%)'
+            'left': '50%',
+            'transform': 'translateX(-50%)'
         });
     }
 }

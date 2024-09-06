@@ -12,31 +12,33 @@
   "sellable_qty_action",
   "column_break_6",
   "sellable_bypass_role",
+  "mis_config_section",
+  "disable_original_add_multi",
+  "enable_qrcodebarcode_direct_scanner_button",
+  "column_break_xmf9i",
+  "dialog_open_and_collapse_keyboard_shortcut_key",
+  "wide_dialog_enable_on_screen_size",
+  "extra_filters_lablels_section",
+  "item_group_label",
+  "brand_label",
+  "item_option_label",
+  "column_break_dydjy",
+  "tag_label",
+  "warehouse_label",
+  "item_sub_category_label",
+  "column_break_hpkoo",
   "general_config_section",
   "include_non_maintain_stock",
   "only_mis_packed_items",
   "exclude_out_of_stock_items",
-  "disable_original_add_multi",
+  "column_break_s69rr",
   "enable_tag_filter",
   "show_item_image",
-  "column_break_s69rr",
   "extra_filters_section_collapsed",
   "extra_config_section_collapsed",
+  "section_break_tsi6j",
   "item_price_listing",
-  "wide_dialog_enable_on_screen_size",
-  "dialog_open_keyboard_shortcut_key",
-  "extra_filters_lablels_section",
-  "item_group_label",
-  "column_break_dydjy",
-  "brand_label",
-  "column_break_hpkoo",
-  "warehouse_label",
-  "column_break_jzd1h",
-  "tag_label",
-  "column_break_h0sxf",
-  "item_option_label",
-  "column_break_scwyl",
-  "item_sub_category_label",
+  "column_break_m6nub",
   "extra_settings_section",
   "max_allowed_customer_total_outstanding"
  ],
@@ -86,8 +88,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "extra_filters_lablels_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Extra filters Labels Renaming"
   },
   {
@@ -102,14 +106,6 @@
   },
   {
    "fieldname": "column_break_dydjy",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_h0sxf",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_scwyl",
    "fieldtype": "Column Break"
   },
   {
@@ -171,7 +167,6 @@
   },
   {
    "default": "1",
-   "description": "If Item has no image, it will display placeholder image",
    "fieldname": "show_item_image",
    "fieldtype": "Check",
    "label": "Show Item Image"
@@ -209,26 +204,45 @@
    "label": "Extra Config Section Collapsed"
   },
   {
-   "fieldname": "column_break_jzd1h",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "tag_label",
    "fieldtype": "Data",
    "label": "Tag Label"
   },
   {
+   "fieldname": "mis_config_section",
+   "fieldtype": "Section Break",
+   "label": "MIS Config"
+  },
+  {
+   "fieldname": "section_break_tsi6j",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_m6nub",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xmf9i",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_qrcodebarcode_direct_scanner_button",
+   "fieldtype": "Check",
+   "label": "Enable QRCode/Barcode Direct Scanner Button"
+  },
+  {
    "default": "D",
-   "description": "Choose key for example: (D) and press (Shift+D) to open keyboard ",
-   "fieldname": "dialog_open_keyboard_shortcut_key",
+   "fieldname": "dialog_open_and_collapse_keyboard_shortcut_key",
    "fieldtype": "Data",
-   "label": "Dialog Open Keyboard Shortcut Key"
+   "label": "Dialog Open/Collapse Shortcut Key"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-05 12:00:34.145067",
+ "modified": "2024-09-06 09:58:58.685365",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",

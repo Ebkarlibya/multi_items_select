@@ -11,7 +11,7 @@ setup(
 	version=version,
 	description="custom multi items insert for Sales Order items table",
 	author="Ebkar",
-	author_email="admin@ebkar.ly",
+	author_email="igentle.appletec@gmail.com",
 	packages=find_packages(),
 	zip_safe=False,
 	include_package_data=True,

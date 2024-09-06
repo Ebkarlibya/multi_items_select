@@ -1,7 +1,13 @@
 import { itemsResultCountInfo } from "../utils/helpers";
+import { DOCTYPES } from "../utils/mis_enums"
 
 export default (frm, openScanner = false) => {
     const settings = MISApp.settings
+
+    if (!frm.doc.customer && frm.doctype !== DOCTYPES.STOCK_ENTRY) {
+        frappe.show_alert(__("(MIS): Please select customer first"));
+        return
+    }
 
     var d = new frappe.ui.Dialog({
         title: __(settings.mis_dialog_title),
@@ -410,7 +416,10 @@ function setupDialogCollapse(dialog) {
     }
     
     actions.prepend(`
-        <button class="btn btn-arrow dialog-collapse-btn" onclick="MISApp.misToggleDialogCollapse()">
+        <button class="btn btn-arrow dialog-collapse-btn" onclick="MISApp.misToggleDialogCollapse()" 
+            data-toggle="tooltip" data-placement="bottom" title="(Shift+${MISApp.settings.dialog_open_and_collapse_keyboard_shortcut_key})"
+            data-delay='50'
+            >
             <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
         </button>`
     )

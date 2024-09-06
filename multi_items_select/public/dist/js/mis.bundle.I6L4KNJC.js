@@ -569,7 +569,7 @@
   var import_spotlight_bundle = __toESM(require_spotlight_bundle());
 
   // ../multi_items_select/multi_items_select/public/mis/utils/mis_enums.js
-  var mis_enums_default = DOCTYPES = {
+  var DOCTYPES = {
     "PURCHASE_INVOICE": "Purchase Invoice",
     "PURCHASE_ORDER": "Purchase Order",
     "SALES_INVOICE": "Sales Invoice",
@@ -621,10 +621,10 @@
     });
   };
   var setupDialogToggle = (settings2, frm2) => {
-    if (!settings2.dialog_open_keyboard_shortcut_key)
+    if (!settings2.dialog_open_and_collapse_keyboard_shortcut_key)
       return;
-    $(document).keypress(settings2.dialog_open_keyboard_shortcut_key, async function(e) {
-      if (e.shiftKey && e.target == document.body && !cur_dialog && e.originalEvent.key === settings2.dialog_open_keyboard_shortcut_key) {
+    $(document).keypress(settings2.dialog_open_and_collapse_keyboard_shortcut_key, async function(e) {
+      if (e.shiftKey && e.originalEvent.key === settings2.dialog_open_and_collapse_keyboard_shortcut_key) {
         console.log(e);
         if (!cur_dialog) {
           frappe.show_alert("Opening MIS Dialog....");
@@ -632,6 +632,7 @@
           await misSleep(800);
           MISApp.misDialog(frm2);
         } else {
+          MISApp.misToggleDialogCollapse();
         }
       }
     });
@@ -661,6 +662,10 @@
   // ../multi_items_select/multi_items_select/public/mis/dialogs/mis_dialog.js
   var mis_dialog_default = (frm2, openScanner = false) => {
     const settings2 = MISApp.settings;
+    if (!frm2.doc.customer && frm2.doctype !== DOCTYPES.STOCK_ENTRY) {
+      frappe.show_alert(__("(MIS): Please select customer first"));
+      return;
+    }
     var d = new frappe.ui.Dialog({
       title: __(settings2.mis_dialog_title),
       type: "large",
@@ -1037,7 +1042,10 @@
       console.log(MISApp.misDialogCollapsed, dialogCollapse);
     };
     actions.prepend(`
-        <button class="btn btn-arrow dialog-collapse-btn" onclick="MISApp.misToggleDialogCollapse()">
+        <button class="btn btn-arrow dialog-collapse-btn" onclick="MISApp.misToggleDialogCollapse()" 
+            data-toggle="tooltip" data-placement="bottom" title="(Shift+${MISApp.settings.dialog_open_and_collapse_keyboard_shortcut_key})"
+            data-delay='50'
+            >
             <i class="fa fa-arrow-up dialog-collapse-btn-icon" aria-hidden="true"></i>
         </button>`);
   }
@@ -1046,7 +1054,7 @@
   var add_item_dialog_default = (item_code, warehouse2) => {
     const selected_item = MISApp.misLastSearchData.find((el) => el.item_code === item_code);
     const { item_name, actual_qty, reserved_qty, mis_has_packed_item } = selected_item;
-    console.log("selected_item: ", MISApp.misSelectedItem);
+    console.log("selected_item: ", selected_item, MISApp.misSelectedItem);
     if (mis_has_packed_item) {
       window.MISApp.addPackedItemDialog(item_code);
       return;
@@ -1118,8 +1126,7 @@
       ],
       primary_action_label: __("Insert Item"),
       primary_action: async function(values) {
-        const itemsGrid = frm.get_field("items").grid;
-        let d2 = null;
+        const itemsGrid = cur_frm.get_field("items").grid;
         if (values.qty > sellable_qty) {
           switch (MISApp.settings.sellable_qty_action) {
             case "Nothing":
@@ -1138,23 +1145,29 @@
           }
         }
         frappe.run_serially([
-          () => d2 = itemsGrid.add_new_row(),
+          () => row = itemsGrid.add_new_row(),
           () => frappe.timeout(1),
           async () => {
             let args = {};
             args["item_code"] = item_code;
             args["qty"] = values.qty;
-            args["warehouse"] = values.warehouse;
-            let model = frappe.model.set_value(d2.doctype, d2.name, args);
+            let warehouseFieldName = "";
+            if (cur_frm.doctype === DOCTYPES.STOCK_ENTRY) {
+              warehouseFieldName = "s_warehouse";
+            } else {
+              warehouseFieldName = "warehouse";
+            }
+            args[warehouseFieldName] = values.warehouse;
+            frappe.model.set_value(row.doctype, row.name, args);
             setTimeout(() => {
-              d2.warehouse = warehouse2;
-              frm.trigger("warehouse", d2.doctype, d2.name);
+              row[warehouseFieldName] = warehouse2;
+              frappe.model.set_value(row.doctype, row.name, args);
+              cur_frm.trigger(warehouseFieldName, row.doctype, row.name);
             }, 1e3);
-            return model;
           }
         ]);
         frappe.show_alert(__("(MIS): Item Added!"));
-        qd.hide();
+        d.hide();
       }
     });
     d.show();
@@ -1163,13 +1176,13 @@
     d.set_value("warehouse", warehouse2);
     d.set_value("actual_qty", actual_qty);
     d.set_value("reserved_qty", reserved_qty);
-    d.set_value("sellable_qty", 55);
+    d.set_value("sellable_qty", sellable_qty);
     if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
       d.$wrapper.find(".modal-content").css({
         "width": "200%",
         "margin": "0 auto",
-        "left": "49%",
-        "transform": "translateX(-51%)"
+        "left": "50%",
+        "transform": "translateX(-50%)"
       });
     }
   };
@@ -1177,7 +1190,7 @@
   // ../multi_items_select/multi_items_select/public/mis/dialogs/add_packed_item_dialog.js
   var add_packed_item_dialog_default = async (packed_item_code) => {
     let can_bypass = await getCanBypass();
-    let qd2 = new frappe.ui.Dialog({
+    let qd = new frappe.ui.Dialog({
       title: __("Packed Item Details"),
       fields: [
         {
@@ -1221,21 +1234,21 @@
         frappe.dom.freeze();
         const itemsGrid = frm.get_field("items").grid;
         for (let i = 0; i < cur_frm.mis_last_packed_items_search_data.length; i++) {
-          const row = cur_frm.mis_last_packed_items_search_data[i];
-          const sellable_qty = row.actual_qty - row.reserved_qty;
-          if (row.actual_qty > sellable_qty) {
+          const row2 = cur_frm.mis_last_packed_items_search_data[i];
+          const sellable_qty = row2.actual_qty - row2.reserved_qty;
+          if (row2.actual_qty > sellable_qty) {
             switch (settings.sellable_qty_action) {
               case "Nothing":
                 break;
               case "Warn":
-                frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
+                frappe.msgprint(__(`Warning: Item <strong>${row2.item_code}</strong> with Qty (${row2.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                 break;
               case "Stop":
                 if (can_bypass) {
-                  frappe.msgprint(__(`Warning: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
+                  frappe.msgprint(__(`Warning: Item <strong>${row2.item_code}</strong> with Qty (${row2.actual_qty}) is higher than the Sellable Qty (${sellable_qty}) however your item got inserted successfully`), "MIS");
                   break;
                 } else {
-                  frappe.msgprint(__(`Cannot Insert: Item <strong>${row.item_code}</strong> with Qty (${row.actual_qty}) is higher than the Sellable Qty (${sellable_qty})`), "MIS");
+                  frappe.msgprint(__(`Cannot Insert: Item <strong>${row2.item_code}</strong> with Qty (${row2.actual_qty}) is higher than the Sellable Qty (${sellable_qty})`), "MIS");
                   return;
                 }
             }
@@ -1246,8 +1259,8 @@
             () => frappe.timeout(0.2),
             () => {
               let args = {};
-              args["item_code"] = row.item_code;
-              args["qty"] = row.qty * values.qty;
+              args["item_code"] = row2.item_code;
+              args["qty"] = row2.qty * values.qty;
               args["warehouse"] = values.warehouse;
               let model = frappe.model.set_value(d.doctype, d.name, args);
               setTimeout(() => {
@@ -1260,10 +1273,10 @@
         }
         frappe.dom.unfreeze();
         frappe.show_alert(__("(MIS): Packed Items Added!"));
-        qd2.hide();
+        qd.hide();
       }
     });
-    qd2.show();
+    qd.show();
     await wsleep(1e3);
     frappe.call({
       method: "multi_items_select.api.get_packed_items",
@@ -1429,8 +1442,8 @@
       d.$wrapper.find(".modal-content").css({
         "width": "200%",
         "margin": "0 auto",
-        "left": "49%",
-        "transform": "translateX(-51%)"
+        "left": "50%",
+        "transform": "translateX(-50%)"
       });
     }
     var config = {
@@ -1460,8 +1473,8 @@
   // ../multi_items_select/multi_items_select/public/mis/mis_main.js
   frappe.provide("MISApp");
   $(document).on("app_ready", function() {
-    for (let k in mis_enums_default) {
-      const DOC = mis_enums_default[k];
+    for (let k in DOCTYPES) {
+      const DOC = DOCTYPES[k];
       const METHODS = {
         setup: async function(frm2) {
           let settings2 = await getSettings();
@@ -1492,23 +1505,20 @@
               itemsGrid.grid_buttons.find(".grid-add-multiple-rows").remove();
             }
           }
+          if (settings2.enable_qrcodebarcode_direct_scanner_button) {
+            setupScannerButton(frm2);
+          }
           const cbtn = frm2.fields_dict["items"].grid.add_custom_button(__("MIS Insert"), function() {
-            if (!frm2.doc.customer) {
-              frappe.show_alert(__("(MIS): Please select customer first"));
-              return;
-            }
             mis_dialog_default(frm2);
-          });
-          setupScannerButton(frm2);
+          }).addClass("btn-primary");
           if (localStorage.getItem("mis_reopen")) {
             mis_dialog_default(frm2);
             highlightField(frm2, "items");
             localStorage.removeItem("mis_reopen");
           }
-          cbtn.addClass("btn-primary");
         }
       };
-      if (DOC === mis_enums_default.SALES_INVOICE) {
+      if (DOC === DOCTYPES.SALES_INVOICE) {
         METHODS["custom_sales_type"] = function(frm2) {
           console.log(`custom field is on sales invoice`, frm2);
         };
@@ -1520,10 +1530,9 @@
     let scannerBtn = frm2.add_custom_button("MIS Scanner", () => {
       mis_dialog_default(frm2, true);
     });
-    console.log(scannerBtn);
     scannerBtn.html(`
             <i class="qrcode-icon-custom-btn fa fa-qrcode" style="font-size: 24px" ></i>
         `);
   }
 })();
-//# sourceMappingURL=mis.bundle.5G3ZZJOI.js.map
+//# sourceMappingURL=mis.bundle.I6L4KNJC.js.map
