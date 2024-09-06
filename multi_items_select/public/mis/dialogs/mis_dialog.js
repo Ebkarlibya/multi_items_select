@@ -231,7 +231,7 @@ export default (frm, openScanner = false) => {
                                             class="etms-add-multi__tb_tr"
                                             onclick="MISApp.addItemDialog(\`%(item_code)s\`, \`%(warehouse)s\`)">
                                                     ${settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 15%">
-                                                        <div class="img-hover">
+                                                        <div class="img-hover" onclick="event.stopPropagation(); MISApp.showImagePreview('${data.image}')" style="cursor: zoom-in">
                                                             <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" />
                                                         </div>
                                                     </td>`: ''}

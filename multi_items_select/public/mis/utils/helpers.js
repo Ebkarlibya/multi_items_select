@@ -22,6 +22,10 @@ export const misSleep = (time) => {
     return new Promise(resolve => setTimeout(() => resolve(), time))
 }
 
+export const showImagePreview = (src) => {
+    Spotlight.show([{src: src}])
+}
+
 export const highlightField = (frm, fieldname) => {
     let field = frm.get_field(fieldname);
     if (!field) return;

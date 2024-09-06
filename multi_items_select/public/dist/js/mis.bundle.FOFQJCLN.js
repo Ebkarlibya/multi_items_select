@@ -596,6 +596,9 @@
   var misSleep = (time) => {
     return new Promise((resolve) => setTimeout(() => resolve(), time));
   };
+  var showImagePreview = (src) => {
+    Spotlight.show([{ src }]);
+  };
   var highlightField = (frm2, fieldname) => {
     let field = frm2.get_field(fieldname);
     if (!field)
@@ -874,7 +877,7 @@
                                             class="etms-add-multi__tb_tr"
                                             onclick="MISApp.addItemDialog(\`%(item_code)s\`, \`%(warehouse)s\`)">
                                                     ${settings2.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 15%">
-                                                        <div class="img-hover">
+                                                        <div class="img-hover" onclick="event.stopPropagation(); MISApp.showImagePreview('${data.image}')" style="cursor: zoom-in">
                                                             <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : "/assets/multi_items_select/img/image-placeholder.jpg"}" />
                                                         </div>
                                                     </td>` : ""}
@@ -1490,6 +1493,7 @@
           MISApp.addItemDialog = add_item_dialog_default;
           MISApp.addPackedItemDialog = add_packed_item_dialog_default;
           MISApp.scannerDialog = scanner_dialog_default;
+          MISApp.showImagePreview = showImagePreview;
           setupRealtimeSettingUpdate(settings2, frm2);
           setupDialogToggle(settings2, frm2);
         },
@@ -1535,4 +1539,4 @@
         `);
   }
 })();
-//# sourceMappingURL=mis.bundle.I6L4KNJC.js.map
+//# sourceMappingURL=mis.bundle.FOFQJCLN.js.map

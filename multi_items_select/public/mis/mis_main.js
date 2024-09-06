@@ -1,5 +1,5 @@
 import { DOCTYPES } from "./utils/mis_enums.js"
-import { getSettings, getCanBypass, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle, highlightField } from "./utils/helpers.js";
+import { getSettings, getCanBypass, showImagePreview, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle, highlightField } from "./utils/helpers.js";
 import misDialog from "./dialogs/mis_dialog.js";
 import addItemDialog from "./dialogs/add_item_dialog.js";
 import addPackedItemDialog from "./dialogs/add_packed_item_dialog.js";
@@ -27,6 +27,7 @@ $(document).on('app_ready', function () {
                 MISApp.addItemDialog = addItemDialog
                 MISApp.addPackedItemDialog = addPackedItemDialog
                 MISApp.scannerDialog = scannerDialog
+                MISApp.showImagePreview = showImagePreview;
 
                 setupRealtimeSettingUpdate(settings, frm)
                 setupDialogToggle(settings, frm)
