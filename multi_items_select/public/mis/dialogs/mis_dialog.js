@@ -227,13 +227,16 @@ export default (frm, openScanner = false) => {
 
 
                                     data_rows += repl(
-                                        `<tr 
+                                        `
+                                        <tr 
+                                        
+
                                             class="etms-add-multi__tb_tr"
                                             onclick="MISApp.addItemDialog(\`%(item_code)s\`, \`%(warehouse)s\`)">
                                                     ${settings.show_item_image ? `<td style="vertical-align: middle; padding: 2px; width: 15%">
-                                                        <div class="img-hover" onclick="event.stopPropagation(); MISApp.showImagePreview('${data.image}')" style="cursor: zoom-in">
+                                                        <a id="${data.item_code}" class="venobox" href="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" data-gall="myGallery" onclick="event.stopPropagation(); " style="cursor: zoom-in">
                                                             <img class="mis-img img-fluid img-thumbnail round" src="${data.image ? data.image : '/assets/multi_items_select/img/image-placeholder.jpg'}" />
-                                                        </div>
+                                                        </a>
                                                     </td>`: ''}
                                                     <td>
                                                         <div class="etms-add-multi__row" ${data.mis_has_packed_item ? 'data-toggle="tooltip" title="Packed Item"' : ''}>
@@ -304,42 +307,6 @@ export default (frm, openScanner = false) => {
                                                     padding-bottom: 0px;
                                                
                                                 }
-                                                .img-hover img {
-                                                    -webkit-transition: all .3s ease; /* Safari and Chrome */
-                                                    -moz-transition: all .3s ease; /* Firefox */
-                                                    -o-transition: all .3s ease; /* IE 9 */
-                                                    -ms-transition: all .3s ease; /* Opera */
-                                                    transition: all .3s ease;
-                                                    position:relative;
-                                                }
-                                                .img-hover img:hover {
-                                                    cursor: zoom-in;
-                                                    z-index: 20;
-                                                    -webkit-backface-visibility: hidden;
-                                                    backface-visibility: hidden;
-                                                    -webkit-transform:translateZ(0) scale(2.20); /* Safari and Chrome */
-                                                    -moz-transform:scale(2.20); /* Firefox */
-                                                    -ms-transform:scale(2.20); /* IE 9 */
-                                                    -o-transform:translatZ(0) scale(2.20); /* Opera */
-                                                    transform:translatZ(0) scale(2.20);
-                                                }
-                                                  
-                                                .img-hover:hover:after {
-                                                    content:"";
-                                                    position:absolute;
-                                                    top:0;
-                                                    left:0;
-                                                    z-index:2;
-                                                    width:30px;
-                                                    height:30px;
-                                                    border:1px solid #000;
-                                                }
-                                                  
-                                                .grayscale {
-                                                  -webkit-filter: brightness(1.10) grayscale(100%) contrast(90%);
-                                                  -moz-filter: brightness(1.10) grayscale(100%) contrast(90%);
-                                                  filter: brightness(1.10) grayscale(100%); 
-                                                }
                                                 input[data-fieldname="search_term"] {
                                                     height: 50px
                                                 }
@@ -357,7 +324,19 @@ export default (frm, openScanner = false) => {
                                                 }
                                             </style>
                                         `;
+                                        
                                 d.set_df_property("search_results", "options", html);
+                                var vb = new VenoBox(
+                                    {
+                                        infinigall: false,
+                                        navigation: false,
+                                        numeration: false,
+                                        navTouch: false,
+                                        spinner: "flow"
+                                    }
+                                );
+                                console.log(vb);
+                                
                             }
                         }
                     }
@@ -376,6 +355,7 @@ export default (frm, openScanner = false) => {
     triggerSearchInput(d)
     setupDialogCollapse(d)
 
+    
     if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
         d.$wrapper.find('.modal-content').css({
             'width': '200%',

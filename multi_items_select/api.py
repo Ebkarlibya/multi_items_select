@@ -7,7 +7,7 @@ from multi_items_select.__init__ import __version__ as version
 def get_settings():
     settings = frappe.get_cached_doc("Multi Select Settings")
     settings = settings.as_dict()
-    settings["mis_dialog_title"] = f"Multi Item Select: v{version}"
+    settings["mis_dialog_title"] = f"Multi Item Select"
     
     return settings
 

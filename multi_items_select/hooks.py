@@ -11,8 +11,8 @@ app_license = "MIT"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/multi_items_select/css/multi_items_select.css"
-app_include_js = ["scanner.bundle.js", "mis.bundle.js"]
+app_include_css = ["assets/multi_items_select/css/venobox.min.css"]
+app_include_js = ["scanner.bundle.js", "mis.bundle.js", "assets/multi_items_select/js/venobox.min.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/multi_items_select/css/multi_items_select.css"

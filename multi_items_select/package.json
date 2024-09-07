@@ -9,7 +9,6 @@
   "author": "Imad Abdou (igentle.appletec@gmail.com)",
   "license": "ISC",
   "dependencies": {
-    "html5-qrcode": "^2.3.8",
-    "spotlight.js": "^0.7.8"
+    "html5-qrcode": "^2.3.8"
   }
 }

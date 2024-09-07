@@ -1,12 +1,11 @@
 import { DOCTYPES } from "./utils/mis_enums.js"
-import { getSettings, getCanBypass, showImagePreview, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle, highlightField } from "./utils/helpers.js";
+import { getSettings, getCanBypass, misSetSelectedItem, setupRealtimeSettingUpdate, setupDialogToggle, highlightField } from "./utils/helpers.js";
 import misDialog from "./dialogs/mis_dialog.js";
 import addItemDialog from "./dialogs/add_item_dialog.js";
 import addPackedItemDialog from "./dialogs/add_packed_item_dialog.js";
 import scannerDialog from "./dialogs/scanner_dialog.js";
 
 frappe.provide("MISApp")
-// console.log(show);
 
 $(document).on('app_ready', function () {
     for (let k in DOCTYPES) {
@@ -27,7 +26,6 @@ $(document).on('app_ready', function () {
                 MISApp.addItemDialog = addItemDialog
                 MISApp.addPackedItemDialog = addPackedItemDialog
                 MISApp.scannerDialog = scannerDialog
-                MISApp.showImagePreview = showImagePreview;
 
                 setupRealtimeSettingUpdate(settings, frm)
                 setupDialogToggle(settings, frm)
@@ -67,7 +65,6 @@ $(document).on('app_ready', function () {
                     highlightField(frm, "items")
                     localStorage.removeItem("mis_reopen")
                 }
-
             },
         }
 
