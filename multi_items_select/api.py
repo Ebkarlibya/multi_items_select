@@ -277,6 +277,9 @@ def get_item_compat_details(item_code: str):
     compat_list = frappe.get_all(
         "Tors Part Compatibility Table",
         fields=["make", "model", "year", "notes"],
+        filters={
+            "parent": item_code
+        },
         order_by="make, model, year asc"
     )
 
