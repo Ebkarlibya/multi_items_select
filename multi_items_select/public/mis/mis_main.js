@@ -4,6 +4,7 @@ import misDialog from "./dialogs/mis_dialog.js";
 import addItemDialog from "./dialogs/add_item_dialog.js";
 import addPackedItemDialog from "./dialogs/add_packed_item_dialog.js";
 import scannerDialog from "./dialogs/scanner_dialog.js";
+import compatDialog from "./dialogs/compat_dialog.js"
 
 frappe.provide("MISApp")
 
@@ -26,6 +27,7 @@ $(document).on('app_ready', function () {
                 MISApp.addItemDialog = addItemDialog
                 MISApp.addPackedItemDialog = addPackedItemDialog
                 MISApp.scannerDialog = scannerDialog
+                MISApp.compatDialog = compatDialog
 
                 setupRealtimeSettingUpdate(settings, frm)
                 setupDialogToggle(settings, frm)
@@ -65,6 +67,9 @@ $(document).on('app_ready', function () {
                     highlightField(frm, "items")
                     localStorage.removeItem("mis_reopen")
                 }
+                misDialog(frm)
+                // compatDialog("000002", "wh1")
+
             },
         }
 

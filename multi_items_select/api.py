@@ -75,7 +75,14 @@ def get_items_reserved_qty():
 def get_multiple_items():
     mis_settings = frappe.get_single("Multi Select Settings")
 
-    search_term = frappe.form_dict.get("search_term")
+    search_term  = frappe.form_dict.get("search_term")
+    compat_make  = frappe.form_dict.get("compat_make")
+    compat_model = frappe.form_dict.get("compat_model")
+    compat_year  = frappe.form_dict.get("compat_year")
+    compat_notes = frappe.form_dict.get("compat_notes")
+
+    has_compat_filters = any([compat_make, compat_model, compat_year, compat_notes])
+    
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
     exclude_out_of_stock_items = json.loads(
         frappe.form_dict.get("exclude_out_of_stock_items"))
@@ -96,6 +103,18 @@ def get_multiple_items():
 
     if search_term:
         sql_filters["sql_term"] = f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term} or ibc.barcode like {escaped_search_term})"
+
+    if compat_make:
+        sql_filters["sql_compat_make"] = f"and vehCompat.make = {frappe.db.escape(compat_make)}"
+
+    if compat_model:
+        sql_filters["sql_compat_model"] = f"and vehCompat.model = {frappe.db.escape(compat_model)}"
+
+    if compat_year:
+        sql_filters["sql_compat_year"] = f"and vehCompat.year = {frappe.db.escape(compat_year)}"
+
+    if compat_notes:
+        sql_filters["sql_compat_notes"] = f"and vehCompat.notes like concat('%%', {frappe.db.escape(compat_notes)},'%%')"
 
     if warehouse:
         sql_filters["sql_warehouse"] = f"and b.warehouse = {frappe.db.escape(warehouse)}"
@@ -120,7 +139,7 @@ def get_multiple_items():
 
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
-        i.image, i.mia_item_option, i.mia_item_sub_category,
+        i.image, i.mia_item_option, i.mia_item_sub_category, i.tors_has_part_compatibility,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
         {', ipc.price_list, ipc.price_list_rate, ipc.currency' if mis_settings.item_price_listing else '' }
         {', misTag.tag' if mis_settings.enable_tag_filter else '' }
@@ -137,9 +156,13 @@ def get_multiple_items():
             left join `tabMulti Select Tag Item Table` misTag
                 on i.item_code = misTag.parent
             ''' if mis_settings.enable_tag_filter else ''}
+            
+            {'''
+                left join `tabTors Part Compatibility Table` vehCompat
+                    on i.item_code = vehCompat.parent
+            ''' if has_compat_filters else ''}
 
         where i.disabled = 0
-
 
         {sql_filters.get('sql_term', '')}
 
@@ -147,6 +170,12 @@ def get_multiple_items():
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
         {'and i.mis_has_packed_item = 1' if only_mis_packed_items else '' }
         {'and ipc.price_list = "' + mis_settings.item_price_listing + '"' if mis_settings.item_price_listing else '' }
+
+
+        {sql_filters.get('sql_compat_make', '')}
+        {sql_filters.get('sql_compat_model', '')}
+        {sql_filters.get('sql_compat_year', '')}
+        {sql_filters.get('sql_compat_notes', '')}
 
         {sql_filters.get('sql_warehouse', '')}
         {sql_filters.get('sql_item_group', '')}
@@ -160,7 +189,7 @@ def get_multiple_items():
         order by i.item_code, i.item_name, b.warehouse
 
         limit {20 if not search_term else 10000}
-    """, as_dict=True, debug=False)
+    """, {"compat_make": compat_make}, as_dict=True, debug=True)
 
     return data
 
@@ -240,3 +269,15 @@ def get_customer_outstandings(customer: str):
     data["outstanding_amount"] = outstanding_amount
 
     return data
+
+
+@frappe.whitelist(allow_guest=False)
+def get_item_compat_details(item_code: str):
+
+    compat_list = frappe.get_all(
+        "Tors Part Compatibility Table",
+        fields=["make", "model", "year", "notes"],
+        order_by="make, model, year asc"
+    )
+
+    return compat_list
