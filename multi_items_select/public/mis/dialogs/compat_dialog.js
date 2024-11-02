@@ -6,6 +6,7 @@ export default (item_code) => {
     let d = new frappe.ui.Dialog(
         {
             title: __("Compatibility Details"),
+            size: "extra-large",
             fields: [
                 { fieldtype: "Section Break", },
                 // {
