@@ -67,7 +67,7 @@ $(document).on('app_ready', function () {
                     highlightField(frm, "items")
                     localStorage.removeItem("mis_reopen")
                 }
-                misDialog(frm)
+                // misDialog(frm)
                 // compatDialog("000002", "wh1")
 
             },
