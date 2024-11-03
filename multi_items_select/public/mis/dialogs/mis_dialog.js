@@ -11,7 +11,8 @@ export default (frm, openScanner = false) => {
 
     var d = new frappe.ui.Dialog({
         title: __(settings.mis_dialog_title),
-        type: "large",
+        type: "extra-large",
+        size: "extra-large",
         fields: [
             {
                 fieldtype: "Data",
@@ -430,14 +431,14 @@ export default (frm, openScanner = false) => {
     setupDialogCollapse(d)
 
 
-    if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
-        d.$wrapper.find('.modal-content').css({
-            'width': '200%',
-            'margin': '0 auto',
-            'left': '50%',
-            'transform': 'translateX(-50%)'
-        });
-    }
+    // if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
+    //     d.$wrapper.find('.modal-content').css({
+    //         'width': '200%',
+    //         'margin': '0 auto',
+    //         'left': '50%',
+    //         'transform': 'translateX(-50%)'
+    //     });
+    // }
 
 
 }

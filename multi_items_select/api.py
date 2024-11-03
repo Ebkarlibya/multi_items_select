@@ -96,13 +96,15 @@ def get_multiple_items():
     tag = frappe.form_dict.get("tag")
 
     escaped_search_term = frappe.db.escape(search_term)
-    escaped_search_term = "'%" + \
-        escaped_search_term[1:len(escaped_search_term) - 1] + "%'"
+    # escaped_search_term = "'%" + \
+    #     escaped_search_term[1:len(escaped_search_term) - 1] + "%'"
 
     sql_filters = {}
 
     if search_term:
-        sql_filters["sql_term"] = f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term} or ibc.barcode like {escaped_search_term})"
+        sql_filters["sql_term"] = f"and (i.item_code like concat('%%', {escaped_search_term}, '%%'))"
+        sql_filters["sql_term"] = f"and (i.item_code like concat('%%', {escaped_search_term}, '%%') or i.item_name like concat('%%', {escaped_search_term}, '%%') or ibc.barcode like concat('%%', {escaped_search_term}, '%%'))"
+        
 
     if compat_make:
         sql_filters["sql_compat_make"] = f"and vehCompat.make = {frappe.db.escape(compat_make)}"

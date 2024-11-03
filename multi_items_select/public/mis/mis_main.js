@@ -68,7 +68,7 @@ $(document).on('app_ready', function () {
                     localStorage.removeItem("mis_reopen")
                 }
                 // misDialog(frm)
-                // compatDialog("000002", "wh1")
+                compatDialog("000002", "wh1")
 
             },
         }
