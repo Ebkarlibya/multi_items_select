@@ -103,7 +103,14 @@ def get_multiple_items():
 
     if search_term:
         sql_filters["sql_term"] = f"and (i.item_code like concat('%%', {escaped_search_term}, '%%'))"
-        sql_filters["sql_term"] = f"and (i.item_code like concat('%%', {escaped_search_term}, '%%') or i.item_name like concat('%%', {escaped_search_term}, '%%') or ibc.barcode like concat('%%', {escaped_search_term}, '%%'))"
+        sql_filters["sql_term"] = f"""
+            and (i.item_code like concat('%%', {escaped_search_term}, '%%') 
+            or i.item_name like concat('%%', {escaped_search_term}, '%%') 
+            or ibc.barcode like concat('%%', {escaped_search_term}, '%%')
+            or i.tors_oem_code like concat('%%', {escaped_search_term}, '%%')
+            or i.tors_manufacturer_code like concat('%%', {escaped_search_term}, '%%')
+            or i.tors_original_item_code like concat('%%', {escaped_search_term}, '%%'))
+        """
         
 
     if compat_make:
