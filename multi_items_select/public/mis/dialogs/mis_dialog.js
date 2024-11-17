@@ -290,6 +290,10 @@ export default (frm, openScanner = false) => {
                                     data.reserved_qty = data.is_stock_item ? data.reserved_qty : "-"
                                     data.ordered_qty = data.is_stock_item ? data.ordered_qty : "-"
                                     data.brand = data.brand ? data.brand : "-"
+                                    data.tors_oem_code = data.tors_oem_code ? data.tors_oem_code : "-"
+                                    data.tors_manufacturer_code = data.tors_manufacturer_code ? data.tors_manufacturer_code : "-"
+                                    data.tors_original_item_code = data.tors_original_item_code ? data.tors_original_item_code : "-"
+
                                     data.stock_uom = data.stock_uom ? data.stock_uom : "-"
 
 
@@ -323,6 +327,9 @@ export default (frm, openScanner = false) => {
                                                             </div> 
                                                             <p class="etms-multi__subtitle1">${data.item_name}</p>
                                                             <span class="etms-multi__subtitle1">${__("Brand")}: &nbsp; </span><span >${data.brand}</span><br>
+                                                            <span class="etms-multi__subtitle1">${__("OEM Code")}: &nbsp; </span><span >${data.tors_oem_code}</span><br>
+                                                            <span class="etms-multi__subtitle1">${__("Manufacturer Code")}: &nbsp; </span><span >${data.tors_manufacturer_code}</span><br>
+                                                            <span class="etms-multi__subtitle1">${__("Original Item Code")}: &nbsp; </span><span >${data.tors_original_item_code}</span><br>
                                                         </div>
                                                     </td>
                                                     <td>

@@ -148,6 +148,7 @@ def get_multiple_items():
 
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
+        i.tors_oem_code, i.tors_manufacturer_code, i.tors_original_item_code,
         i.image, i.mia_item_option, i.mia_item_sub_category, i.tors_has_part_compatibility,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
         {', ipc.price_list, ipc.price_list_rate, ipc.currency' if mis_settings.item_price_listing else '' }
