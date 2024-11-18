@@ -86,8 +86,7 @@ def get_multiple_items():
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
     exclude_out_of_stock_items = json.loads(
         frappe.form_dict.get("exclude_out_of_stock_items"))
-    only_mis_packed_items = json.loads(
-        frappe.form_dict.get("only_mis_packed_items"))
+
     warehouse = frappe.form_dict.get('warehouse')
     item_group = frappe.form_dict.get("item_group")
     brand = frappe.form_dict.get("brand")
@@ -181,7 +180,7 @@ def get_multiple_items():
 
         {'and if(i.is_stock_item, (b.warehouse <> "" and b.actual_qty > 0), 1)' if exclude_out_of_stock_items else '' }
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
-        {'and i.mis_has_packed_item = 1' if only_mis_packed_items else '' }
+        
         {'and ipc.price_list = "' + mis_settings.item_price_listing + '"' if mis_settings.item_price_listing else '' }
 
 

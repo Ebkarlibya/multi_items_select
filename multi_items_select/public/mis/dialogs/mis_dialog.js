@@ -43,9 +43,11 @@ export default (frm, openScanner = false) => {
                 fieldtype: "Link",
                 options: "Tors Part Model",
                 change: triggerSearchInput,
-                get_query: function (frm, cdt, cdn) {
-                    return {
-                        filters: { "parent_part_make": d.get_value("compat_make") }
+                get_query: function(frm, cdt, cdn) {
+                    if(d.get_value("compat_make")) {
+                        return {
+                            filters: { "parent_part_make": d.get_value("compat_make") }
+                        }
                     }
                 }
             },
@@ -74,7 +76,7 @@ export default (frm, openScanner = false) => {
                 <button class="btn btn-arrow dialog-collapse-btn"
                     style="margin-top: 21px; cursor: pointer"
                     onclick="cur_dialog.set_value('compat_make', ''); cur_dialog.set_value('compat_model', ''); cur_dialog.set_value('compat_year', ''); cur_dialog.set_value('compat_notes', '')" >
-                    <i class="fa fa-close" aria-hidden="true"></i>
+                    <i class="fa fa-refresh" aria-hidden="true"></i>
                 </button>
                 `,
                 change: triggerSearchInput
@@ -177,16 +179,16 @@ export default (frm, openScanner = false) => {
                     searchTerm.input.dispatchEvent(new Event('input'));
                 }
             },
-            {
-                fieldname: "only_mis_packed_items",
-                fieldtype: "Check",
-                label: __("Only (MIS) Packed Items"),
-                default: settings.only_mis_packed_items,
-                change: function () {
-                    let searchTerm = this.layout.get_field("search_term")
-                    searchTerm.input.dispatchEvent(new Event('input'));
-                }
-            },
+            // {
+            //     fieldname: "only_mis_packed_items",
+            //     fieldtype: "Check",
+            //     label: __("Only (MIS) Packed Items"),
+            //     default: settings.only_mis_packed_items,
+            //     change: function () {
+            //         let searchTerm = this.layout.get_field("search_term")
+            //         searchTerm.input.dispatchEvent(new Event('input'));
+            //     }
+            // },
             { fieldtype: "Section Break" },
             {
                 fieldname: "query_loading",
