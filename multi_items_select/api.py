@@ -80,7 +80,7 @@ def get_multiple_items():
     compat_model = frappe.form_dict.get("compat_model")
     compat_year  = frappe.form_dict.get("compat_year")
     compat_notes = frappe.form_dict.get("compat_notes")
-
+    part_codes = frappe.form_dict.get("part_codes")
     has_compat_filters = any([compat_make, compat_model, compat_year, compat_notes])
     
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
@@ -102,16 +102,12 @@ def get_multiple_items():
     sql_filters = {}
 
     if search_term:
-        sql_filters["sql_term"] = f"and (i.item_code like concat('%%', {escaped_search_term}, '%%'))"
+        # sql_filters["sql_term"] = f"and (i.item_code like concat('%%', {escaped_search_term}, '%%'))"
         sql_filters["sql_term"] = f"""
             and (i.item_code like concat('%%', {escaped_search_term}, '%%') 
             or i.item_name like concat('%%', {escaped_search_term}, '%%') 
-            or ibc.barcode like concat('%%', {escaped_search_term}, '%%')
-            or i.tors_oem_code like concat('%%', {escaped_search_term}, '%%')
-            or i.tors_manufacturer_code like concat('%%', {escaped_search_term}, '%%')
-            or i.tors_original_item_code like concat('%%', {escaped_search_term}, '%%'))
+            or ibc.barcode like concat('%%', {escaped_search_term}, '%%'))
         """
-        
 
     if compat_make:
         sql_filters["sql_compat_make"] = f"and vehCompat.make = {frappe.db.escape(compat_make)}"
@@ -124,6 +120,13 @@ def get_multiple_items():
 
     if compat_notes:
         sql_filters["sql_compat_notes"] = f"and vehCompat.notes like concat('%%', {frappe.db.escape(compat_notes)},'%%')"
+
+    if part_codes:
+        sql_filters["sql_part_codes"] = f"""
+            and i.tors_oem_code like concat('%%', {frappe.db.escape(part_codes)}, '%%')
+            or i.tors_manufacturer_code like concat('%%', {frappe.db.escape(part_codes)}, '%%')
+            or i.tors_original_item_code like concat('%%', {frappe.db.escape(part_codes)}, '%%')
+        """
 
     if warehouse:
         sql_filters["sql_warehouse"] = f"and b.warehouse = {frappe.db.escape(warehouse)}"
@@ -186,7 +189,7 @@ def get_multiple_items():
         {sql_filters.get('sql_compat_model', '')}
         {sql_filters.get('sql_compat_year', '')}
         {sql_filters.get('sql_compat_notes', '')}
-
+        {sql_filters.get('sql_part_codes', '')}
         {sql_filters.get('sql_warehouse', '')}
         {sql_filters.get('sql_item_group', '')}
         {sql_filters.get('sql_brand', '')}
@@ -194,12 +197,11 @@ def get_multiple_items():
         {sql_filters.get('sql_item_sub_category', '')}
         {sql_filters.get('sql_mis_tag', '')}
 
-        -- group by b.warehouse
 
         order by i.item_code, i.item_name, b.warehouse
 
         limit {20 if not search_term else 10000}
-    """, {"compat_make": compat_make}, as_dict=True, debug=True)
+    """, {}, as_dict=True, debug=True)
 
     return data
 

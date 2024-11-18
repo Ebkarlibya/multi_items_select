@@ -63,9 +63,6 @@ export default (frm, openScanner = false) => {
                 fieldname: "compat_notes",
                 fieldtype: "Data",
                 change: () => {
-                    console.log('this run 2?');
-                    
-
                     triggerSearchInput(d)
                 }
             },
@@ -82,6 +79,18 @@ export default (frm, openScanner = false) => {
                 `,
                 change: triggerSearchInput
             },
+            { fieldtype: "Section Break", width: "2", },
+            {
+                label: __("OEM/MFR/ORG Codes"),
+                fieldname: "part_codes",
+                fieldtype: "Data",
+                width: "1",
+                change: () => {
+                    triggerSearchInput(d)
+                }
+            },
+            { fieldtype: "Column Break" },{ fieldtype: "Column Break", },{ fieldtype: "Column Break", },
+
             {
                 label: __("Extra Filters"),
                 fieldname: "extra_filters",
@@ -256,6 +265,7 @@ export default (frm, openScanner = false) => {
                             compat_model: d.get_value("compat_model"),
                             compat_year: d.get_value("compat_year"),
                             compat_notes: d.get_value("compat_notes"),
+                            part_codes: d.get_value("part_codes"),
                             include_non_stock: d.get_value("include_non_stock"),
                             exclude_out_of_stock_items: d.get_value("exclude_out_of_stock_items"),
                             only_mis_packed_items: d.get_value("only_mis_packed_items"),
@@ -328,8 +338,8 @@ export default (frm, openScanner = false) => {
                                                             <p class="etms-multi__subtitle1">${data.item_name}</p>
                                                             <span class="etms-multi__subtitle1">${__("Brand")}: &nbsp; </span><span >${data.brand}</span><br>
                                                             <span class="etms-multi__subtitle1">${__("OEM Code")}: &nbsp; </span><span >${data.tors_oem_code}</span><br>
-                                                            <span class="etms-multi__subtitle1">${__("Manufacturer Code")}: &nbsp; </span><span >${data.tors_manufacturer_code}</span><br>
-                                                            <span class="etms-multi__subtitle1">${__("Original Item Code")}: &nbsp; </span><span >${data.tors_original_item_code}</span><br>
+                                                            <span class="etms-multi__subtitle1">${__("MFR Code")}: &nbsp; </span><span >${data.tors_manufacturer_code}</span><br>
+                                                            <span class="etms-multi__subtitle1">${__("ORG Code")}: &nbsp; </span><span >${data.tors_original_item_code}</span><br>
                                                         </div>
                                                     </td>
                                                     <td>
