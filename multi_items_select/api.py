@@ -93,8 +93,8 @@ def get_multiple_items():
     item_option = frappe.form_dict.get("item_option")
     item_sub_category = frappe.form_dict.get("item_sub_category")
     tag = frappe.form_dict.get("tag")
-
-    escaped_search_term = frappe.db.escape(search_term)
+    
+    escaped_search_term = frappe.db.escape(search_term.strip().replace(" ", "%"))
     # escaped_search_term = "'%" + \
     #     escaped_search_term[1:len(escaped_search_term) - 1] + "%'"
 
@@ -105,6 +105,7 @@ def get_multiple_items():
         sql_filters["sql_term"] = f"""
             and (i.item_code like concat('%%', {escaped_search_term}, '%%') 
             or i.item_name like concat('%%', {escaped_search_term}, '%%') 
+            or trim(i.tors_tors_description) like concat('%%', {escaped_search_term}, '%%')
             or ibc.barcode like concat('%%', {escaped_search_term}, '%%'))
         """
 
@@ -118,7 +119,7 @@ def get_multiple_items():
         sql_filters["sql_compat_year"] = f"and vehCompat.year = {frappe.db.escape(compat_year)}"
 
     if compat_notes:
-        sql_filters["sql_compat_notes"] = f"and vehCompat.notes like concat('%%', {frappe.db.escape(compat_notes)},'%%')"
+        sql_filters["sql_compat_notes"] = f"and trim(vehCompat.notes) like concat('%%', {frappe.db.escape(compat_notes)},'%%')"
 
     if part_codes:
         sql_filters["sql_part_codes"] = f"""
@@ -150,7 +151,7 @@ def get_multiple_items():
 
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
-        i.tors_oem_code, i.tors_manufacturer_code, i.tors_original_item_code,
+        i.tors_oem_code, i.tors_manufacturer_code, i.tors_original_item_code, tors_tors_description,
         i.image, i.mia_item_option, i.mia_item_sub_category, i.tors_has_part_compatibility,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
         {', ipc.price_list, ipc.price_list_rate, ipc.currency' if mis_settings.item_price_listing else '' }
