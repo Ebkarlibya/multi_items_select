@@ -81,18 +81,6 @@ export default (frm, openScanner = false) => {
                 `,
                 change: triggerSearchInput
             },
-            { fieldtype: "Section Break", width: "2", },
-            {
-                label: __("OEM/MFR/ORG Codes"),
-                fieldname: "part_codes",
-                fieldtype: "Data",
-                width: "1",
-                change: () => {
-                    triggerSearchInput(d)
-                }
-            },
-            { fieldtype: "Column Break" },{ fieldtype: "Column Break", },{ fieldtype: "Column Break", },
-
             {
                 label: __("Extra Filters"),
                 fieldname: "extra_filters",
@@ -105,6 +93,17 @@ export default (frm, openScanner = false) => {
                 fieldtype: "Link",
                 options: "Item Group",
                 change: triggerSearchInput
+            },
+            {
+                label: __("Item Condition"),
+                fieldname: "item_condition",
+                fieldtype: "Select",
+                width: "1",
+                default: __("Any"),
+                options: [__("Any"), __("New"), __("Used")],
+                change: () => {
+                    triggerSearchInput(d)
+                }
             },
             { fieldtype: "Column Break" },
             {
@@ -268,6 +267,7 @@ export default (frm, openScanner = false) => {
                             compat_year: d.get_value("compat_year"),
                             compat_notes: d.get_value("compat_notes"),
                             part_codes: d.get_value("part_codes"),
+                            item_condition: d.get_value("item_condition"),
                             include_non_stock: d.get_value("include_non_stock"),
                             exclude_out_of_stock_items: d.get_value("exclude_out_of_stock_items"),
                             only_mis_packed_items: d.get_value("only_mis_packed_items"),

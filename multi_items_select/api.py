@@ -1,5 +1,6 @@
 import json
 import frappe
+from frappe import _
 from erpnext.accounts.utils import get_balance_on
 from multi_items_select.__init__ import __version__ as version
 
@@ -83,6 +84,8 @@ def get_multiple_items():
     part_codes = frappe.form_dict.get("part_codes")
     has_compat_filters = any([compat_make, compat_model, compat_year, compat_notes])
     
+    item_condition = frappe.form_dict.get("item_condition")
+
     include_non_stock = json.loads(frappe.form_dict.get("include_non_stock"))
     exclude_out_of_stock_items = json.loads(
         frappe.form_dict.get("exclude_out_of_stock_items"))
@@ -130,6 +133,9 @@ def get_multiple_items():
 
     if warehouse:
         sql_filters["sql_warehouse"] = f"and b.warehouse = {frappe.db.escape(warehouse)}"
+
+    if item_condition != _("Any"):
+        sql_filters["sql_item_condition"] = f"and i.tors_item_condition = {frappe.db.escape(item_condition)}"
 
     if item_group:
         sql_filters["sql_item_group"] = f"and i.item_group = {frappe.db.escape(item_group)}"
@@ -190,6 +196,7 @@ def get_multiple_items():
         {sql_filters.get('sql_compat_year', '')}
         {sql_filters.get('sql_compat_notes', '')}
         {sql_filters.get('sql_part_codes', '')}
+        {sql_filters.get('sql_item_condition', '')}
         {sql_filters.get('sql_warehouse', '')}
         {sql_filters.get('sql_item_group', '')}
         {sql_filters.get('sql_brand', '')}
