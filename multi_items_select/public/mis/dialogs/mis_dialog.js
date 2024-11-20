@@ -18,7 +18,7 @@ export default (frm, openScanner = false) => {
                 fieldtype: "Data",
                 fieldname: "search_term",
                 label: __("Search Items"),
-                placeholder: __("Search by Item Code, Name, Barcode or Part Codes")
+                placeholder: __("Search by Item Code, Name, Barcode, Description or Part Codes")
             },
             {
                 label: __("Part Compatibility"),
