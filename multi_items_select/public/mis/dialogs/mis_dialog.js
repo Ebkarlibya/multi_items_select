@@ -1,11 +1,11 @@
-import { itemsResultCountInfo } from "../utils/helpers";
+import { itemsResultCountInfo, isCustomerDoc, getDocCustomer } from "../utils/helpers";
 import { DOCTYPES } from "../utils/mis_enums"
 
 export default (frm, openScanner = false) => {
     const settings = MISApp.settings
 
-    if (!frm.doc.customer && frm.doctype !== DOCTYPES.STOCK_ENTRY) {
-        frappe.show_alert(__("(MIS): Please select customer first"));
+    if (isCustomerDoc(frm) && !getDocCustomer(frm)) {
+        frappe.show_alert(__("(MIS): Please set a Customer"));
         return
     }
 
@@ -188,7 +188,7 @@ export default (frm, openScanner = false) => {
                         method: "multi_items_select.api.get_multiple_items",
                         args: {
                             // source_warehouse: frm.doc.set_warehouse,
-                            customer: frm.doc.customer,
+                            customer: getDocCustomer(frm),
                             search_term: d.get_value("search_term"),
                             include_non_stock: d.get_value("include_non_stock"),
                             exclude_out_of_stock_items: d.get_value("exclude_out_of_stock_items"),
