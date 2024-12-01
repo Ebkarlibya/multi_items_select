@@ -3,10 +3,11 @@ import frappe
 from frappe import _
 from erpnext.accounts.utils import get_balance_on
 from multi_items_select.__init__ import __version__ as version
+from multi_items_select.utils import get_mis_settings, get_search_price_list
 
 @frappe.whitelist(allow_guest=False)
 def get_settings():
-    settings = frappe.get_cached_doc("Multi Select Settings")
+    settings = get_mis_settings()
     settings = settings.as_dict()
     settings["mis_dialog_title"] = f"Multi Item Select"
     
@@ -15,8 +16,8 @@ def get_settings():
 
 @frappe.whitelist(allow_guest=False)
 def get_items_reserved_qty():
-    # mis_settings = frappe.db.get_single("Multi Select Settings")
-    # if mis_settings.sellable_qty_action == "Stop" and mis_settings.sellable_bypass_role not in frappe.get_roles():
+    # settings = frappe.db.get_single("Multi Select Settings")
+    # if settings.sellable_qty_action == "Stop" and settings.sellable_bypass_role not in frappe.get_roles():
 
     #     return False
 
@@ -74,7 +75,7 @@ def get_items_reserved_qty():
 
 @frappe.whitelist(allow_guest=False)
 def get_multiple_items():
-    mis_settings = frappe.get_single("Multi Select Settings")
+    settings = get_mis_settings()
 
     search_term  = frappe.form_dict.get("search_term")
     compat_make  = frappe.form_dict.get("compat_make")
@@ -155,13 +156,16 @@ def get_multiple_items():
         sql_filters[
             "sql_mis_tag"] = f"and misTag.tag = {frappe.db.escape(tag)}"
 
+    customer = frappe.form_dict.get("customer")
+    search_price_list = get_search_price_list(settings, customer)
+
     data = frappe.db.sql(f"""
         select i.item_code, i.item_name, i.mis_has_packed_item, i.item_group, i.brand, i.is_stock_item,
         i.tors_oem_code, i.tors_manufacturer_code, i.tors_original_item_code, tors_tors_description,
         i.image, i.mia_item_option, i.mia_item_sub_category, i.tors_has_part_compatibility,
         b.warehouse, b.reserved_qty, b.actual_qty, b.projected_qty, b.ordered_qty, b.stock_uom
-        {', ipc.price_list, ipc.price_list_rate, ipc.currency' if mis_settings.item_price_listing else '' }
-        {', misTag.tag' if mis_settings.enable_tag_filter else '' }
+        {', ipc.price_list, ipc.price_list_rate, ipc.currency' if search_price_list else '' }
+        {', misTag.tag' if settings.enable_tag_filter else '' }
         from `tabItem` i 
             { 'left' if include_non_stock else 'inner' } join `tabBin` b   
                 on i.item_code = b.item_code
@@ -170,11 +174,11 @@ def get_multiple_items():
             {'''
             left join `tabItem Price` ipc
                 on i.item_code = ipc.item_code
-            ''' if mis_settings.item_price_listing else ''}
+            ''' if search_price_list else ''}
             {'''
             left join `tabMulti Select Tag Item Table` misTag
                 on i.item_code = misTag.parent
-            ''' if mis_settings.enable_tag_filter else ''}
+            ''' if settings.enable_tag_filter else ''}
             
             {'''
                 left join `tabTors Part Compatibility Table` vehCompat
@@ -188,7 +192,7 @@ def get_multiple_items():
         {'and if(i.is_stock_item, (b.warehouse <> "" and b.actual_qty > 0), 1)' if exclude_out_of_stock_items else '' }
         {'and i.is_stock_item = 1' if not include_non_stock else '' }
         
-        {'and ipc.price_list = "' + mis_settings.item_price_listing + '"' if mis_settings.item_price_listing else '' }
+        {'and ipc.price_list = "' + search_price_list + '"' if search_price_list else '' }
 
 
         {sql_filters.get('sql_compat_make', '')}
@@ -265,9 +269,9 @@ def get_packed_items():
 
 @frappe.whitelist(allow_guest=False)
 def get_can_bypass():
-    mis_settings = frappe.get_single("Multi Select Settings")
+    settings = get_mis_settings()
     roles = frappe.get_roles(username=frappe.session.user)
-    if mis_settings.sellable_bypass_role not in roles:
+    if settings.sellable_bypass_role not in roles:
         return False
     return True
 

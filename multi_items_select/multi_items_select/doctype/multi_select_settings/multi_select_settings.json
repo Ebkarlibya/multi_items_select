@@ -39,6 +39,7 @@
   "section_break_tsi6j",
   "item_price_listing",
   "column_break_m6nub",
+  "price_list_from_customer",
   "extra_settings_section",
   "max_allowed_customer_total_outstanding"
  ],
@@ -178,7 +179,7 @@
    "label": "(Default Checked) Exclude Out of Stock Items"
   },
   {
-   "description": "If Empty Item Price listing is disabled",
+   "depends_on": "eval:!doc.price_list_from_customer",
    "fieldname": "item_price_listing",
    "fieldtype": "Link",
    "label": "Item Price Listing",
@@ -237,12 +238,19 @@
    "fieldname": "dialog_open_and_collapse_keyboard_shortcut_key",
    "fieldtype": "Data",
    "label": "Dialog Open/Collapse Shortcut Key"
+  },
+  {
+   "default": "0",
+   "description": " ",
+   "fieldname": "price_list_from_customer",
+   "fieldtype": "Check",
+   "label": "Price List from Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-06 09:58:58.685365",
+ "modified": "2024-12-01 08:50:06.480236",
  "modified_by": "Administrator",
  "module": "Multi Items Select",
  "name": "Multi Select Settings",
