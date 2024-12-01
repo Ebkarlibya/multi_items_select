@@ -188,6 +188,7 @@ export default (frm, openScanner = false) => {
                         method: "multi_items_select.api.get_multiple_items",
                         args: {
                             // source_warehouse: frm.doc.set_warehouse,
+                            customer: frm.doc.customer,
                             search_term: d.get_value("search_term"),
                             include_non_stock: d.get_value("include_non_stock"),
                             exclude_out_of_stock_items: d.get_value("exclude_out_of_stock_items"),
