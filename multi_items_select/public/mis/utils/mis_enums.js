@@ -4,5 +4,6 @@ export const DOCTYPES = {
     "SALES_INVOICE": "Sales Invoice",
     "SALES_ORDER": "Sales Order",
     "STOCK_ENTRY": "Stock Entry",
-    "QUOTATION": "Quotation"
+    "QUOTATION": "Quotation",
+    "TORS_PART_REQUEST": "Tors Part Request",
 }

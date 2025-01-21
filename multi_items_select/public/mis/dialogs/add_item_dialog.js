@@ -119,8 +119,11 @@ export default (item_code, warehouse) => {
                     () => frappe.timeout(1.0),
                     async () => {
                         let args = {};
+                        console.log(values);
+                        
                         args["item_code"] = item_code;
                         args["qty"] = values.qty;
+                        args["rate"] = selected_item.price_list_rate;
 
                         let warehouseFieldName = ""
 

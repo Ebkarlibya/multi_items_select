@@ -84,7 +84,7 @@ export const setupDialogToggle = (settings, frm) => {
     });
 }
 
-export const isCustomerDoc = (frm) => ["Sales Invoice", "Sales Order", "Quotation"].includes(frm.doctype) ? true : false
+export const isCustomerDoc = (frm) => ["Sales Invoice", "Sales Order", "Quotation", "Tors Part Request"].includes(frm.doctype) ? true : false
 
 
 export const getDocCustomer = (frm) => {
