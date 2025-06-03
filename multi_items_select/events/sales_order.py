@@ -28,6 +28,11 @@ def before_save(doc, method):
 def before_submit(doc, method):
     mis_settings = frappe.get_single("Multi Select Settings")
     if not mis_settings.enabled: return
+
+    if "mis_skip_sellable_check" in frappe.flags:
+        del frappe.flags["mis_skip_sellable_check"]
+        return
+
     can_bypass = get_can_bypass()
 
     # so items

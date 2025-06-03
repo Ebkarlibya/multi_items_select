@@ -4,6 +4,11 @@ import frappe
 def on_update(doc, method):
     mis_settings = frappe.get_single("Multi Select Settings")
     if not mis_settings.enabled: return
+
+    if "mis_skip_sellable_check" in frappe.flags:
+        del frappe.flags["mis_skip_sellable_check"]
+        return
+
     if doc.stock_entry_type == "Material Transfer":
         for item in doc.items:
             item_stock_data = frappe.get_all(
