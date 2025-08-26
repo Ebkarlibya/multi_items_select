@@ -2,7 +2,7 @@ import json
 import frappe
 from erpnext.accounts.utils import get_balance_on
 from multi_items_select.__init__ import __version__ as version
-from multi_items_select.utils import get_mis_settings, get_search_price_list
+from multi_items_select.utils import create_sql_array, get_docs_access_perms, get_mis_settings, get_search_price_list
 
 @frappe.whitelist(allow_guest=False)
 def get_settings():
@@ -99,13 +99,25 @@ def get_multiple_items():
         sql_filters["sql_term"] = f"and (i.item_code like {escaped_search_term} or i.item_name like {escaped_search_term} or ibc.barcode like {escaped_search_term})"
 
     if warehouse:
-        sql_filters["sql_warehouse"] = f"and b.warehouse = {frappe.db.escape(warehouse)}"
+        allowed_entry = get_docs_access_perms("Warehouse", warehouse)
+        sql_filters["sql_warehouse"] = f"and b.warehouse = {frappe.db.escape(allowed_entry)}"
+    else:
+        allowed_entries = get_docs_access_perms("Warehouse")
+        sql_filters["sql_warehouse"] = f"and b.warehouse in {create_sql_array(allowed_entries)}"
 
     if item_group:
-        sql_filters["sql_item_group"] = f"and i.item_group = {frappe.db.escape(item_group)}"
+        allowed_entry = get_docs_access_perms("Item Group", item_group)
+        sql_filters["sql_item_group"] = f"and i.item_group = {frappe.db.escape(allowed_entry)}"
+    else:
+        allowed_entries = get_docs_access_perms("Item Group")
+        sql_filters["sql_item_group"] = f"and i.item_group in {create_sql_array(allowed_entries)}"
 
     if brand:
-        sql_filters["sql_brand"] = f"and i.brand = {frappe.db.escape(brand)}"
+        allowed_entry = get_docs_access_perms("Brand", brand)
+        sql_filters["sql_brand"] = f"and i.brand = {frappe.db.escape(allowed_entry)}"
+    else:
+        allowed_entries = get_docs_access_perms("Brand")
+        sql_filters["sql_brand"] = f"and i.brand in {create_sql_array(allowed_entries)}"
 
     if item_option:
         sql_filters[
