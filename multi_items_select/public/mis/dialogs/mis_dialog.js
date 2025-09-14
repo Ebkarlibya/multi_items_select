@@ -443,9 +443,12 @@ export default (frm, openScanner = false) => {
     // let searchTermControlInput = searchTerm.wrapper.querySelector(".control-input")
     // let searchTermInput = searchTermControlInput.querySelector(`input[data-fieldname="search_term"]`)
 
-    searchTerm.wrapper.insertAdjacentHTML("beforeEnd", `
-        <div onclick="MISApp.scannerDialog(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`
+    searchTerm.wrapper.insertAdjacentHTML("afterEnd", `
+        <div style="position: absolute; cursor: pointer; top: 3px; ${frappe.utils.is_rtl() ? 'left: 55px;' :  'right: 0px;'}"
+             onclick="MISApp.scannerDialog(cur_dialog)" style="cursor: pointer"><i class="qrcode-icon fa fa-qrcode"></i></div`
     )
+    console.log(searchTerm.wrapper);
+    
 
     triggerSearchInput(d)
     setupDialogCollapse(d)
