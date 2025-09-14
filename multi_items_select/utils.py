@@ -31,6 +31,10 @@ def get_docs_access_perms(doctype: str, name: str = "") -> list[str] | str:
 
 
 def create_sql_array(l: list):
+
+    if not l:
+        return "('')"
+
     list_string = "("
 
     for idx, itm in enumerate(l):
