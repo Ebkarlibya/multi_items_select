@@ -362,7 +362,7 @@ export default (frm, openScanner = false) => {
     
     if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
         d.$wrapper.find('.modal-content').css({
-            'width': '200%',
+            'width': '150%',
             'margin': '0 auto',
             'left': '50%',
             'transform': 'translateX(-50%)'

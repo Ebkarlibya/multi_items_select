@@ -1,4 +1,5 @@
-import { DOCTYPES } from "../utils/mis_enums"
+import { isCustomerDoc } from "../utils/helpers";
+import { DOCTYPES, } from "../utils/mis_enums"
 
 export default (item_code, warehouse) => {
     const selected_item = MISApp.misLastSearchData.find(el => el.item_code === item_code)
@@ -12,7 +13,7 @@ export default (item_code, warehouse) => {
     }
 
     const sellable_qty = actual_qty - reserved_qty;
-    
+
     let d = new frappe.ui.Dialog(
         {
             title: __("Select Insert Quantity"),
@@ -77,7 +78,31 @@ export default (item_code, warehouse) => {
                     label: "Sellable Qty",
                     default: 0,
                     read_only: 1,
-                }
+                },
+                {
+                    fieldtype: "Section Break",
+                },
+                {
+                    fieldname: "price_list",
+                    fieldtype: "Link",
+                    label: "Price List",
+                    default: selected_item.price_list,
+                    read_only: 1,
+                },
+                ...(isCustomerDoc(cur_frm)
+                    ? [
+                        {
+                            fieldtype: "Column Break",
+                        },
+                        {
+                            fieldname: "custom_insert_rate",
+                            fieldtype: "Int",
+                            label: "Custom Insert Rate",
+                            default: selected_item.price_list_rate,
+                        },
+                    ]
+                    : []),
+
             ],
             primary_action_label: __("Insert Item"),
             primary_action: async function (values) {
@@ -120,14 +145,14 @@ export default (item_code, warehouse) => {
                     async () => {
                         let args = {};
                         console.log(values);
-                        
+
                         args["item_code"] = item_code;
                         args["qty"] = values.qty;
                         args["rate"] = selected_item.price_list_rate;
 
                         let warehouseFieldName = ""
 
-                        if(cur_frm.doctype === DOCTYPES.STOCK_ENTRY) {
+                        if (cur_frm.doctype === DOCTYPES.STOCK_ENTRY) {
                             warehouseFieldName = "s_warehouse"
                         } else {
                             warehouseFieldName = "warehouse"
@@ -136,12 +161,13 @@ export default (item_code, warehouse) => {
                         args[warehouseFieldName] = values.warehouse;
 
                         frappe.model.set_value(row.doctype, row.name, args);
-                        
+
                         // TODO: check this workaround
-                        setTimeout(() => {
+                        setTimeout(async () => {
                             row[warehouseFieldName] = warehouse;
                             frappe.model.set_value(row.doctype, row.name, args);
-                            cur_frm.trigger(warehouseFieldName, row.doctype, row.name)
+                            await cur_frm.trigger(warehouseFieldName, row.doctype, row.name)
+                            frappe.model.set_value(row.doctype, row.name, { rate: values.custom_insert_rate });
                         }, 1000)
                     }
                 ]);
@@ -155,13 +181,13 @@ export default (item_code, warehouse) => {
     d.set_value("item_name", item_name);
     d.set_value("warehouse", warehouse);
     d.set_value("actual_qty", actual_qty);
-    d.set_value("reserved_qty", reserved_qty);    
+    d.set_value("reserved_qty", reserved_qty);
     d.set_value("sellable_qty", sellable_qty);
 
     if ($(document).width() > (MISApp.settings.wide_dialog_enable_on_screen_size ? MISApp.settings.wide_dialog_enable_on_screen_size : 1500)) {
         d.$wrapper.find('.modal-content').css({
             'width': '200%',
-            'margin': '0 auto',     
+            'margin': '0 auto',
             'left': '50%',
             'transform': 'translateX(-50%)'
         });
