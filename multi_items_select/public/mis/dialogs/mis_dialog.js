@@ -453,15 +453,15 @@ export default (frm, openScanner = false) => {
     triggerSearchInput(d)
     setupDialogCollapse(d)
 
-
-    // if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
-    //     d.$wrapper.find('.modal-content').css({
-    //         'width': '200%',
-    //         'margin': '0 auto',
-    //         'left': '50%',
-    //         'transform': 'translateX(-50%)'
-    //     });
-    // }
+    
+    if ($(document).width() > (settings.wide_dialog_enable_on_screen_size ? settings.wide_dialog_enable_on_screen_size : 1500)) {
+        d.$wrapper.find('.modal-content').css({
+            'width': '150%',
+            'margin': '0 auto',
+            'left': '50%',
+            'transform': 'translateX(-50%)'
+        });
+    }
 
 
 }
