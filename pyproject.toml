@@ -1,7 +1,7 @@
 [project]
 name = "multi_items_select"
 authors = [
-    { name = "Ebkar Technologies", email = "admin@ebkar.ly"}
+    { name = ".", email = "admin@ebkar.ly"}
 ]
 description = "."
 requires-python = ">=3.10"
@@ -14,6 +14,9 @@ dependencies = [
 [build-system]
 requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
+
+[tool.bench.frappe-dependencies]
+frappe = ">=14.0.0, <=17.0.0"
 
 # These dependencies are only installed when developer mode is enabled
 [tool.bench.dev-dependencies]
