@@ -90,7 +90,7 @@ export const isCustomerDoc = (frm) => ["Sales Invoice", "Sales Order", "Quotatio
 export const getDocCustomer = (frm) => {
     if(isCustomerDoc(frm)) {
         if(frm.doc.doctype == "Quotation"){
-            if(frm.doc.quotation_to === __("Customer")) {
+            if(frm.doc.quotation_to === "Customer") {
                 return frm.doc.party_name
             } else {
                 return null

@@ -431,10 +431,6 @@ frappe.ui.form.on("Purchase Invoice", {
         }
 
         const cbtn = frm.fields_dict["items"].grid.add_custom_button(__("MIS Insert"), function () {
-            // if (!frm.doc.customer) {
-            //     frappe.show_alert(__("(MIS): Please select customer first"));
-            //     return
-            // }
             var d = new frappe.ui.Dialog({
                 title: __("(MIS): Insert"),
                 type: "large",
